@@ -2,7 +2,7 @@
 name: backend issue template
 about: 백 기능 구현 이슈 템블릿
 title: "[BE] "
-labels: back, feature
+labels: back, feature, front
 assignees: ''
 
 ---
