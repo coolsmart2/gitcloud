@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import githubRouter from './routes/github.route';
+import githubRouter from './routes/githubAPI.route';
 import dotonv from 'dotenv';
 
 dotonv.config();

@@ -1,14 +1,7 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { Octokit } from '@octokit/rest';
-import dotenv from 'dotenv';
 
-dotenv.config();
-const router = Router();
-
-/**
- * 유저 전체 레포지토리 가져오기
- */
-router.get('/repos', async (req: Request, res: Response) => {
+export const getRepos = async (req: Request, res: Response) => {
   const octokit = new Octokit({
     auth: process.env.MY_GITHUB_PERSONAL_ACCESS_TOKEN,
   });
@@ -20,13 +13,11 @@ router.get('/repos', async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).send(error);
   }
-});
+};
 
-/**
- * 유저 특정 레포지토리 최상위 레이어 가져오기
- */
-router.get('/repos/:repo', async (req: Request, res: Response) => {
+export const getRepo = async (req: Request, res: Response) => {
   const repo = req.params.repo;
+  const path = req.params.path;
   console.log(repo);
   const octokit = new Octokit({
     auth: process.env.MY_GITHUB_PERSONAL_ACCESS_TOKEN,
@@ -34,8 +25,8 @@ router.get('/repos/:repo', async (req: Request, res: Response) => {
   try {
     const response = await octokit.repos.getContent({
       owner: process.env.MY_GITHUB_USERNAME!,
-      repo: repo,
-      path: '',
+      repo,
+      path,
     });
 
     if (!Array.isArray(response.data)) {
@@ -48,12 +39,9 @@ router.get('/repos/:repo', async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).send(error);
   }
-});
+};
 
-/**
- * 레포지토리 생성
- */
-router.post('/repos', async (req: Request, res: Response) => {
+export const createRepo = async (req: Request, res: Response) => {
   const { repoName, isPrivate } = req.body as {
     repoName: string;
     isPrivate: boolean;
@@ -71,12 +59,9 @@ router.post('/repos', async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).send('fail');
   }
-});
+};
 
-/**
- * 레포지토리 삭제 (github token에서 delete_repo 체크해줘야함)
- */
-router.delete('/repos', async (req: Request, res: Response) => {
+export const deleteRepo = async (req: Request, res: Response) => {
   const { repoName } = req.body as { repoName: string };
 
   const octokit = new Octokit({
@@ -92,6 +77,4 @@ router.delete('/repos', async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).send(error);
   }
-});
-
-export default router;
+};
