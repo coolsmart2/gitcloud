@@ -1,64 +1,68 @@
+import { RequestError } from '@octokit/request-error';
 import { Octokit } from '@octokit/rest';
+import {
+  BadCredentialsError,
+  NotFoundError,
+  RequiresAuthenticationError,
+} from '../constant/error/octokit.error';
+import {
+  BAD_CREDENTIALS,
+  REQUIRES_AUTHENTICATION,
+  NOT_FOUND,
+} from '../constant/error/octokit.message';
 
 export const insertFileContents = async ({
   octokit,
   owner,
-  repo,
+  repoName,
   path,
-  message = new Date().toISOString(),
   content,
+  message = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' }),
+  branchName,
 }: {
   octokit: Octokit;
   owner: string;
-  repo: string;
+  repoName: string;
   path: string;
-  message?: string;
   content: string;
+  message?: string;
+  branchName?: string;
 }) => {
-  try {
-    await octokit.repos.createOrUpdateFileContents({
-      owner,
-      repo,
-      path,
-      message,
-      content: Buffer.from(content).toString('base64'),
-    });
-    return true;
-  } catch (error) {
-    return false;
-  }
+  await octokit.repos.createOrUpdateFileContents({
+    owner,
+    repo: repoName,
+    path,
+    message,
+    content: Buffer.from(content).toString('base64'),
+    branch: branchName,
+  });
 };
 
 export const updateFileContents = async ({
   octokit,
   owner,
-  repo,
+  repoName,
   path,
-  message = new Date().toISOString(),
   content,
   sha,
+  message = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' }),
 }: {
   octokit: Octokit;
   owner: string;
-  repo: string;
+  repoName: string;
   path: string;
-  message?: string;
   content: string;
   sha: string;
+  message?: string;
 }) => {
-  try {
-    await octokit.repos.createOrUpdateFileContents({
-      owner,
-      repo,
-      path,
-      message,
-      content: Buffer.from(content).toString('base64'),
-      sha,
-    });
-    return true;
-  } catch (error) {
-    return false;
-  }
+  await octokit.repos.createOrUpdateFileContents({
+    owner,
+    repo: repoName,
+    path,
+    message,
+    content: Buffer.from(content).toString('base64'),
+    sha,
+  });
 };
 
 export const selectListCommits = async ({
@@ -74,6 +78,29 @@ export const selectListCommits = async ({
     const { data } = await octokit.repos.listCommits({
       owner,
       repo,
+    });
+    return data;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+export const selectCommit = async ({
+  octokit,
+  owner,
+  repo,
+  ref,
+}: {
+  octokit: Octokit;
+  owner: string;
+  repo: string;
+  ref: string;
+}) => {
+  try {
+    const { data } = await octokit.repos.getCommit({
+      owner,
+      repo,
+      ref,
     });
     return data;
   } catch (error) {

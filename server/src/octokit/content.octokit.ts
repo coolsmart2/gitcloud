@@ -7,23 +7,22 @@ import { Octokit } from '@octokit/rest';
 export const selectContent = async ({
   octokit,
   owner,
-  repo,
+  repoName,
   path,
+  ref,
 }: {
   octokit: Octokit;
   owner: string;
-  repo: string;
+  repoName: string;
   path: string;
+  ref?: string;
 }) => {
-  try {
-    const { data: content } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path,
-    });
+  const { data: content } = await octokit.repos.getContent({
+    owner,
+    repo: repoName,
+    path,
+    ref,
+  });
 
-    return content;
-  } catch (error) {
-    return undefined;
-  }
+  return content;
 };

@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import logger from 'morgan';
-import githubRouter from './routes/github.route';
+import githubRouter from './route/github.route';
 import dotonv from 'dotenv';
 
 dotonv.config();
