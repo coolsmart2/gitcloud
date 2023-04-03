@@ -1,11 +1,13 @@
 import express, { Request, Response } from 'express';
-import githubRouter from './routes/githubAPI.route';
+import logger from 'morgan';
+import githubRouter from './routes/github.route';
 import dotonv from 'dotenv';
 
 dotonv.config();
 
 const app = express();
 
+app.use(logger('dev'));
 app.use(express.json()); /* post시 body json으로 parse */
 
 app.get('/', (req: Request, res: Response) => {
