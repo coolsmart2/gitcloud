@@ -1,4 +1,3 @@
-import { RequestError } from '@octokit/request-error';
 import { Octokit } from '@octokit/rest';
 
 export const insertBranch = async ({

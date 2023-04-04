@@ -12,6 +12,7 @@ import {
   findRepo,
   modifyContent,
 } from '../service/github.service';
+import { GithubError } from '../constants/errors';
 
 /**
  * completed
@@ -25,12 +26,16 @@ export const githubRepoList = async (req: Request, res: Response) => {
     const repos = await findAllRepo(token);
     return res.send(repos);
   } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
     return res.status(500).send([]);
   }
 };
 
 export const githubRepo = async (req: Request, res: Response) => {
   const { repo: repoName } = req.params;
+  const { ref } = req.query as { ref: string };
   const { username, token } = findById(1);
 
   if (!username || !token) return res.status(404).send([]);
@@ -40,9 +45,13 @@ export const githubRepo = async (req: Request, res: Response) => {
       token,
       owner: username,
       repoName,
+      ref,
     });
     return res.send(repoStructure);
   } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
     return res.status(500).send([]);
   }
 };
@@ -71,7 +80,10 @@ export const githubRepoContent = async (req: Request, res: Response) => {
 
     return res.send(content);
   } catch (error) {
-    return res.status(500).send('fail'); /* todo: error 응답 형태 */
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
   }
 };
 
@@ -89,7 +101,10 @@ export const githubRepoCreate = async (req: Request, res: Response) => {
     await addRepo({ token, repoName, isPrivate });
     return res.send('success');
   } catch (error) {
-    return res.status(500).send('fail');
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
   }
 };
 
@@ -106,7 +121,10 @@ export const githubRepoDelete = async (req: Request, res: Response) => {
     await deleteRepo({ token, repoName });
     return res.send('success');
   } catch (error) {
-    return res.status(500).send('fail');
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
   }
 };
 
@@ -155,7 +173,10 @@ export const githubFileContentCommit = async (req: Request, res: Response) => {
 
     return res.send('success');
   } catch (error) {
-    return res.status(500).send('fail');
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
   }
 };
 
@@ -177,7 +198,10 @@ export const githubCommitList = async (req: Request, res: Response) => {
     }));
     return res.send(commits);
   } catch (error) {
-    return res.status(500).send('fail');
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
   }
 };
 
@@ -198,7 +222,10 @@ export const githubBranchCreate = async (req: Request, res: Response) => {
     });
     return res.send('success');
   } catch (error) {
-    return res.status(500).send('fail');
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
   }
 };
 
@@ -217,6 +244,9 @@ export const githubBranchDelete = async (req: Request, res: Response) => {
     });
     return res.send('success');
   } catch (error) {
-    return res.status(500).send('fail');
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
   }
 };

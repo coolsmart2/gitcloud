@@ -1,34 +1,18 @@
 import { RequestError } from '@octokit/request-error';
 import { Octokit } from '@octokit/rest';
-import {
-  BadCredentialsError,
-  NotFoundError,
-  ReferenceAlreadyExistsError,
-  ReferenceDoesNotExistError,
-  RepositoryCreationFailedError,
-  RequiresAuthenticationError,
-} from '../constant/error/octokit.error';
-import {
-  BAD_CREDENTIALS,
-  REQUIRES_AUTHENTICATION,
-  REPOSITORY_CREATION_FAILED,
-  NOT_FOUND,
-  REFERENCE_ALREADY_EXISTS,
-  REFERENCE_DOES_NOT_EXIST,
-  REPOSITORY_IS_EMPTY,
-} from '../constant/error/octokit.message';
-import { insertBranch, removeBranch } from '../octokit/branch.octokit';
+import { GithubError, ServerError } from '../constants/errors';
+import { insertBranch, removeBranch } from '../octokits/branch.octokit';
 import {
   insertFileContents,
   updateFileContents,
-} from '../octokit/commit.octokit';
-import { selectContent } from '../octokit/content.octokit';
+} from '../octokits/commit.octokit';
+import { selectContent } from '../octokits/content.octokit';
 import {
   insertRepo,
   removeRepo,
   selectRepo,
   selectRepos,
-} from '../octokit/repo.octokit';
+} from '../octokits/repo.octokit';
 
 export const findAllRepo = async (token: string) => {
   const octokit = new Octokit({
@@ -39,14 +23,9 @@ export const findAllRepo = async (token: string) => {
     return repos;
   } catch (error) {
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-      }
+      throw new GithubError();
     }
-    throw new Error();
+    throw new ServerError();
   }
 };
 
@@ -70,16 +49,11 @@ export const findRepo = async ({
     });
     return repoStructure;
   } catch (error) {
-    // console.log('findRepo: ' + error);
+    console.log('findRepo: ' + error);
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-      }
+      throw new GithubError();
     }
-    throw new Error();
+    throw new ServerError();
   }
 };
 
@@ -100,16 +74,9 @@ export const addRepo = async ({
     });
   } catch (error) {
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-        case REPOSITORY_CREATION_FAILED:
-          throw new RepositoryCreationFailedError();
-      }
+      throw new GithubError();
     }
-    throw new Error();
+    throw new ServerError();
   }
 };
 
@@ -124,16 +91,9 @@ export const deleteRepo = async ({
     await removeRepo({ octokit: new Octokit({ auth: token }), repoName });
   } catch (error) {
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-        case NOT_FOUND:
-          throw new NotFoundError();
-      }
+      throw new GithubError();
     }
-    throw new Error();
+    throw new ServerError();
   }
 };
 
@@ -162,18 +122,9 @@ export const findContent = async ({
     return content;
   } catch (error) {
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-        case NOT_FOUND:
-        case REPOSITORY_IS_EMPTY:
-          return;
-      }
+      throw new GithubError();
     }
-
-    throw new Error();
+    throw new ServerError();
   }
 };
 
@@ -206,16 +157,9 @@ export const addContent = async ({
     });
   } catch (error) {
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-        case NOT_FOUND:
-          throw new NotFoundError();
-      }
+      throw new GithubError();
     }
-    throw new Error();
+    throw new ServerError();
   }
 };
 
@@ -248,16 +192,9 @@ export const modifyContent = async ({
     });
   } catch (error) {
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-        case NOT_FOUND:
-          throw new NotFoundError();
-      }
+      throw new GithubError();
     }
-    throw new Error();
+    throw new ServerError();
   }
 };
 
@@ -286,16 +223,9 @@ export const addBranch = async ({
     return lastCommitSha;
   } catch (error) {
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-        case REFERENCE_ALREADY_EXISTS:
-          throw new ReferenceAlreadyExistsError();
-      }
+      throw new GithubError();
     }
-    throw new Error();
+    throw new ServerError();
   }
 };
 
@@ -318,17 +248,9 @@ export const deleteBranch = async ({
       branchName,
     });
   } catch (error) {
-    console.log(error);
     if (error instanceof RequestError) {
-      switch (error.message) {
-        case BAD_CREDENTIALS:
-          throw new BadCredentialsError();
-        case REQUIRES_AUTHENTICATION:
-          throw new RequiresAuthenticationError();
-        case REFERENCE_DOES_NOT_EXIST:
-          throw new ReferenceDoesNotExistError();
-      }
+      throw new GithubError();
     }
-    throw new Error();
+    throw new ServerError();
   }
 };

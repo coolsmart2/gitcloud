@@ -1,15 +1,4 @@
-import { RequestError } from '@octokit/request-error';
 import { Octokit } from '@octokit/rest';
-import {
-  BadCredentialsError,
-  NotFoundError,
-  RequiresAuthenticationError,
-} from '../constant/error/octokit.error';
-import {
-  BAD_CREDENTIALS,
-  REQUIRES_AUTHENTICATION,
-  NOT_FOUND,
-} from '../constant/error/octokit.message';
 
 export const insertFileContents = async ({
   octokit,

@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest';
+import { Directory, File } from '../types/directory.type';
 
 /**
  * 새로운 레포지토리 생성
@@ -66,32 +67,39 @@ export const selectRepo = async ({
     ref,
   });
 
-  if (Array.isArray(data)) {
-    const files: any = await Promise.all(
-      data.map(async sub => {
-        if (sub.type === 'file') {
-          return sub.name;
-        } else if (sub.type === 'dir') {
-          const subPath = `${path}/${sub.name}`;
-          const subContents = await selectRepo({
-            octokit,
-            owner,
-            repoName,
-            path: subPath,
-            ref,
-          });
-          return {
-            [sub.name]: subContents,
-          };
-        } else {
-          return sub.name;
-        }
-      })
-    );
+  const root = !Array.isArray(data) ? [data] : data;
 
-    console.log(files);
-    return files.filter(Boolean);
-  }
+  const structure: (Directory | File)[] = await Promise.all(
+    root.map(async sub => {
+      if (sub.type === 'dir') {
+        const subPath = `${path}/${sub.name}`;
+        const subContents = await selectRepo({
+          octokit,
+          owner,
+          repoName,
+          path: subPath,
+          ref,
+        });
+        return {
+          name: sub.name,
+          type: sub.type,
+          path: sub.path.replace(
+            sub.name,
+            ''
+          ) /* 경로에 포한되어 있는 파일 이름 삭제 */,
+          sha: sub.sha,
+          sub: subContents,
+        };
+      } else {
+        return {
+          name: sub.name,
+          type: sub.type,
+          path: sub.path.replace(sub.name, ''),
+          sha: sub.sha,
+        };
+      }
+    })
+  );
 
-  return data.name;
+  return structure;
 };

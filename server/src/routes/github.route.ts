@@ -11,7 +11,7 @@ import {
   githubBranchDelete,
   githubRepo,
   // githubRepo,
-} from '../controller/github.controller';
+} from '../controllers/github.controller';
 
 dotenv.config();
 const router = Router();
