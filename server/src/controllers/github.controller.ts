@@ -6,13 +6,15 @@ import {
   addContent,
   addRepo,
   deleteBranch,
+  deleteContent,
   deleteRepo,
-  findAllRepo,
+  findRepos,
   findContent,
   findRepo,
   modifyContent,
 } from '../service/github.service';
 import { GithubError } from '../constants/errors';
+import { insertTree } from '../octokits/git.octokit';
 
 /**
  * completed
@@ -23,7 +25,7 @@ export const githubRepoList = async (req: Request, res: Response) => {
   if (!token) return res.status(404).send([]);
 
   try {
-    const repos = await findAllRepo(token);
+    const repos = await findRepos(token);
     return res.send(repos);
   } catch (error) {
     if (error instanceof GithubError) {
@@ -59,7 +61,7 @@ export const githubRepo = async (req: Request, res: Response) => {
 /**
  * completed
  */
-export const githubRepoContent = async (req: Request, res: Response) => {
+export const githubFileContent = async (req: Request, res: Response) => {
   const { repo: repoName } = req.params;
   const path = req.params[0];
   const { ref } = req.query as { ref: string };
@@ -167,10 +169,37 @@ export const githubFileContentCommit = async (req: Request, res: Response) => {
         repoName,
         path,
         content,
-        blobSha: oldContent.sha,
+        blobSHA: oldContent.sha,
       });
     }
 
+    return res.send('success');
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
+  }
+};
+
+export const githubFileContentDelete = async (req: Request, res: Response) => {
+  const { repo: repoName } = req.params;
+  const path = req.params[0];
+  const { ref } = req.query as { ref: string };
+  const { message } = req.body as { message: string };
+  const { username, token } = findById(1);
+
+  if (!username || !token) return res.status(404).send([]);
+
+  try {
+    await deleteContent({
+      token,
+      owner: username,
+      repoName,
+      path,
+      message,
+      blobSHA: ref,
+    });
     return res.send('success');
   } catch (error) {
     if (error instanceof GithubError) {
@@ -207,7 +236,7 @@ export const githubCommitList = async (req: Request, res: Response) => {
 
 export const githubBranchCreate = async (req: Request, res: Response) => {
   const { repo: repoName, branch: branchName } = req.params;
-  const { ref: commitSha } = req.query as { ref: string };
+  const { ref: commitSHA } = req.query as { ref: string };
   const { username, token } = findById(1);
 
   if (!username || !token) return res.status(404).send([]);
@@ -218,7 +247,7 @@ export const githubBranchCreate = async (req: Request, res: Response) => {
       owner: username,
       repoName,
       branchName,
-      commitSha,
+      commitSHA,
     });
     return res.send('success');
   } catch (error) {
@@ -244,6 +273,66 @@ export const githubBranchDelete = async (req: Request, res: Response) => {
     });
     return res.send('success');
   } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send(error.message);
+    }
+    return res.status(500).send([]);
+  }
+};
+
+export const githubTest = async (req: Request, res: Response) => {
+  let { repo, branch, files } = req.body;
+  const { username, token } = findById(1);
+
+  console.log(files);
+
+  if (!username || !token) return res.status(404).send([]);
+  console.log(repo, branch, files[0].path);
+
+  const octokit = new Octokit({ auth: token });
+  try {
+    const {
+      data: {
+        object: { sha: parentSHA },
+      },
+    } = await octokit.git.getRef({
+      owner: username,
+      repo: repo,
+      ref: `heads/${branch}`,
+    });
+
+    const newTreeSHA = await insertTree({
+      octokit,
+      owner: username,
+      repoName: repo,
+      files,
+    });
+
+    const {
+      data: { sha: commitSHA },
+    } = await octokit.git.createCommit({
+      owner: username,
+      repo: repo,
+      message: new Date().toUTCString(),
+      parents: [parentSHA],
+      tree: newTreeSHA,
+    });
+
+    const {
+      data: {
+        object: { sha: newSHA },
+      },
+    } = await octokit.git.updateRef({
+      owner: username,
+      repo: repo,
+      ref: `heads/${branch}`,
+      sha: commitSHA,
+    });
+
+    // return res.send('success');
+    return res.send(newSHA);
+  } catch (error) {
+    console.log(error);
     if (error instanceof GithubError) {
       return res.status(422).send(error.message);
     }

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import dotenv from 'dotenv';
 import {
-  githubRepoContent,
+  githubFileContent,
   githubFileContentCommit,
   githubCommitList,
   githubRepoCreate,
@@ -10,6 +10,7 @@ import {
   githubBranchCreate,
   githubBranchDelete,
   githubRepo,
+  githubTest,
   // githubRepo,
 } from '../controllers/github.controller';
 
@@ -44,7 +45,7 @@ router.get('/repos/:repo', githubRepo);
 /**
  * 특정 커밋 시점의 레포지토리, 파일 조회
  */
-router.get('/repos/:repo/contents/*', githubRepoContent);
+router.get('/repos/:repo/contents/*', githubFileContent);
 
 /**
  * 파일 커밋
@@ -52,6 +53,11 @@ router.get('/repos/:repo/contents/*', githubRepoContent);
  * 어떤 브랜치의 중간 커밋에서 커밋할 경우 새로운 브랜치 생성 후 새로운 브랜치에 커밋
  */
 router.post('/repos/:repo/contents/*', githubFileContentCommit);
+
+/**
+ * 파일 삭제
+ */
+// router.delete('/repos/:repo/contents/*', githubFileContentDelete);
 
 /**
  * 브랜치 생성
@@ -62,5 +68,10 @@ router.post('/repos/:repo/branchs/:branch', githubBranchCreate);
  * 브랜치 삭제
  */
 router.delete('/repos/:repo/branchs/:branch', githubBranchDelete);
+
+/**
+ * 테스트
+ */
+router.post('/test', githubTest);
 
 export default router;

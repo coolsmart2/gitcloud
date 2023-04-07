@@ -1,25 +1,22 @@
 import { RequestError } from '@octokit/request-error';
 import { Octokit } from '@octokit/rest';
 import { GithubError, ServerError } from '../constants/errors';
-import { insertBranch, removeBranch } from '../octokits/branch.octokit';
-import {
-  insertFileContents,
-  updateFileContents,
-} from '../octokits/commit.octokit';
-import { selectContent } from '../octokits/content.octokit';
+import { insertBranch, removeBranch } from '../octokits/git.octokit';
 import {
   insertRepo,
   removeRepo,
   selectRepo,
   selectRepos,
-} from '../octokits/repo.octokit';
+  selectFileContent,
+  insertFileContent,
+  updateFileContent,
+  deleteFileContent,
+} from '../octokits/repos.octokit';
 
-export const findAllRepo = async (token: string) => {
-  const octokit = new Octokit({
-    auth: token,
-  });
+export const findRepos = async (token: string) => {
   try {
-    const repos = await selectRepos({ octokit });
+    const repos = await selectRepos({ octokit: new Octokit({ auth: token }) });
+
     return repos;
   } catch (error) {
     if (error instanceof RequestError) {
@@ -111,7 +108,7 @@ export const findContent = async ({
   ref?: string;
 }) => {
   try {
-    const content = await selectContent({
+    const content = await selectFileContent({
       octokit: new Octokit({ auth: token }),
       owner,
       repoName,
@@ -146,7 +143,7 @@ export const addContent = async ({
   message?: string;
 }) => {
   try {
-    await insertFileContents({
+    await insertFileContent({
       octokit: new Octokit({ auth: token }),
       owner,
       repoName,
@@ -169,7 +166,7 @@ export const modifyContent = async ({
   repoName,
   path,
   content,
-  blobSha,
+  blobSHA,
   message,
 }: {
   token: string;
@@ -177,17 +174,49 @@ export const modifyContent = async ({
   repoName: string;
   path: string;
   content: string;
-  blobSha: string;
+  blobSHA: string;
   message?: string;
 }) => {
   try {
-    await updateFileContents({
+    await updateFileContent({
       octokit: new Octokit({ auth: token }),
       owner,
       repoName,
       path,
       content,
-      sha: blobSha,
+      sha: blobSHA,
+      message,
+    });
+  } catch (error) {
+    if (error instanceof RequestError) {
+      throw new GithubError();
+    }
+    throw new ServerError();
+  }
+};
+
+export const deleteContent = async ({
+  token,
+  owner,
+  repoName,
+  path,
+  blobSHA,
+  message,
+}: {
+  token: string;
+  owner: string;
+  repoName: string;
+  path: string;
+  blobSHA: string;
+  message?: string;
+}) => {
+  try {
+    await deleteFileContent({
+      octokit: new Octokit({ auth: token }),
+      owner,
+      repoName,
+      path,
+      sha: blobSHA,
       message,
     });
   } catch (error) {
@@ -203,24 +232,24 @@ export const addBranch = async ({
   owner,
   repoName,
   branchName,
-  commitSha,
+  commitSHA,
 }: {
   token: string;
   owner: string;
   repoName: string;
   branchName: string;
-  commitSha: string;
+  commitSHA: string;
 }) => {
   try {
-    const lastCommitSha = await insertBranch({
+    const lastCommitSHA = await insertBranch({
       octokit: new Octokit({ auth: token }),
       owner,
       repoName,
       branchName,
-      commitSha,
+      commitSHA,
     });
 
-    return lastCommitSha;
+    return lastCommitSHA;
   } catch (error) {
     if (error instanceof RequestError) {
       throw new GithubError();
