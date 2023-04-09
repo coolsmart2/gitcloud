@@ -1,7 +1,14 @@
 import { RequestError } from '@octokit/request-error';
 import { Octokit } from '@octokit/rest';
 import { GithubError, ServerError } from '../constants/errors';
-import { insertBranch, removeBranch } from '../octokits/git.octokit';
+import {
+  insertBranch,
+  insertCommit,
+  insertTree,
+  removeBranch,
+  selectBranch,
+  updateRef,
+} from '../octokits/git.octokit';
 import {
   insertRepo,
   removeRepo,
@@ -10,6 +17,7 @@ import {
   selectFileContent,
   selectListCommits,
 } from '../octokits/repos.octokit';
+import { Directory, File } from '../types/tree.type';
 
 /**
  * 레포지토리 생성
@@ -102,8 +110,10 @@ export const findRepo = async ({
     });
     return repoStructure;
   } catch (error) {
-    console.log('findRepo: ' + error);
     if (error instanceof RequestError) {
+      if (error.message === 'This repository is empty.') {
+        return [];
+      }
       throw new GithubError();
     }
     throw new ServerError();
@@ -151,24 +161,27 @@ export const findListCommits = async ({
   token,
   username,
   reponame,
-  branch,
+  branchname,
 }: {
   token: string;
   username: string;
   reponame: string;
-  branch?: string;
+  branchname?: string;
 }) => {
   try {
     const commits = await selectListCommits({
       octokit: new Octokit({ auth: token }),
       username,
       reponame,
-      branchname: branch,
+      branchname,
     });
 
     return commits;
   } catch (error) {
     if (error instanceof RequestError) {
+      if (error.message === 'Git Repository is empty.') {
+        return [];
+      }
       throw new GithubError();
     }
     throw new ServerError();
@@ -232,6 +245,65 @@ export const deleteBranch = async ({
     });
   } catch (error) {
     if (error instanceof RequestError) {
+      throw new GithubError();
+    }
+    throw new ServerError();
+  }
+};
+
+/**
+ * 트리 커밋
+ */
+export const addCommit = async ({
+  token,
+  username,
+  reponame,
+  branchname,
+  tree,
+  message,
+}: {
+  token: string;
+  username: string;
+  reponame: string;
+  branchname: string;
+  tree: (File | Directory)[];
+  message?: string;
+}) => {
+  const octokit = new Octokit({ auth: token });
+  try {
+    const parentSHA = await selectBranch({
+      octokit,
+      username,
+      reponame,
+      branchname,
+    });
+
+    const treeSHA = await insertTree({
+      octokit,
+      username,
+      reponame,
+      tree,
+    });
+
+    const commitSHA = await insertCommit({
+      octokit,
+      username,
+      reponame,
+      parentSHA,
+      treeSHA,
+      message,
+    });
+
+    await updateRef({
+      octokit,
+      username,
+      reponame,
+      branchname,
+      commitSHA,
+    });
+  } catch (error) {
+    if (error instanceof RequestError) {
+      console.log(error);
       throw new GithubError();
     }
     throw new ServerError();

@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { Directory, File } from '../types/file.type';
+import { Directory, File } from '../types/tree.type';
 
 /**
  * 브랜치 (마지막 커밋) 조회
@@ -17,14 +17,14 @@ export const selectBranch = async ({
 }) => {
   const {
     data: {
-      object: { sha: parentSHA },
+      object: { sha },
     },
   } = await octokit.git.getRef({
     owner: username,
     repo: reponame,
     ref: `heads/${branchname}`,
   });
-  return parentSHA;
+  return sha;
 };
 
 /**
@@ -76,28 +76,28 @@ export const insertTree = async ({
   octokit,
   username,
   reponame,
-  files,
+  tree,
   baseSHA,
 }: {
   octokit: Octokit;
   username: string;
   reponame: string;
-  files: (File | Directory)[];
+  tree: (File | Directory)[];
   baseSHA?: string;
 }) => {
   const {
-    data: { sha: treeSHA },
+    data: { sha },
   } = await octokit.git.createTree({
     owner: username,
     repo: reponame,
     tree: await Promise.all(
-      files.map(async file => {
+      tree.map(async file => {
         if ('tree' in file) {
           const childTreeSHA = (await insertTree({
             octokit,
             username,
             reponame,
-            files: file.tree,
+            tree: file.tree,
           })) as string;
           return {
             path: file.path,
@@ -116,7 +116,7 @@ export const insertTree = async ({
       })
     ),
   });
-  return treeSHA;
+  return sha;
 };
 
 export const insertCommit = async ({
@@ -125,25 +125,25 @@ export const insertCommit = async ({
   reponame,
   parentSHA,
   treeSHA,
-  message = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' }),
+  message = new Date().toString(),
 }: {
   octokit: Octokit;
   username: string;
   reponame: string;
-  parentSHA: string;
   treeSHA: string;
+  parentSHA: string;
   message?: string;
 }) => {
   const {
-    data: { sha: commitSHA },
+    data: { sha },
   } = await octokit.git.createCommit({
     owner: username,
     repo: reponame,
-    parent: [parentSHA],
+    parents: [parentSHA],
     tree: treeSHA,
     message,
   });
-  return commitSHA;
+  return sha;
 };
 
 export const updateRef = async ({
@@ -161,7 +161,7 @@ export const updateRef = async ({
 }) => {
   const {
     data: {
-      object: { sha: parentSHA },
+      object: { sha },
     },
   } = await octokit.git.updateRef({
     owner: username,
@@ -169,5 +169,5 @@ export const updateRef = async ({
     ref: `heads/${branchname}`,
     sha: commitSHA,
   });
-  return parentSHA;
+  return sha;
 };

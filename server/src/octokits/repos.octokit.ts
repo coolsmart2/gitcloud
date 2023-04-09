@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { Directory, File } from '../types/file.type';
+import { Directory, File } from '../types/tree.type';
 
 /**
  * 레포지토리 생성
@@ -16,6 +16,8 @@ export const insertRepo = async ({
   await octokit.repos.createForAuthenticatedUser({
     name: reponame,
     private: isPrivate,
+    auto_init: true,
+    description: new Date().toString(),
   });
 };
 
@@ -157,16 +159,13 @@ export const selectListCommits = async ({
   reponame: string;
   branchname?: string;
 }) => {
-  try {
-    const { data } = await octokit.repos.listCommits({
-      owner: username,
-      repo: reponame,
-      sha: branchname,
-    });
-    return data;
-  } catch (error) {
-    return undefined;
-  }
+  const { data } = await octokit.repos.listCommits({
+    owner: username,
+    repo: reponame,
+    sha: branchname,
+  });
+
+  return data;
 };
 
 // export const selectCommit = async ({
