@@ -2,7 +2,6 @@ import { Router } from 'express';
 import dotenv from 'dotenv';
 import {
   githubFileContent,
-  githubFileContentCommit,
   githubCommitList,
   githubRepoCreate,
   githubRepoDelete,
@@ -46,13 +45,6 @@ router.get('/repos/:repo', githubRepo);
  * 특정 커밋 시점의 레포지토리, 파일 조회
  */
 router.get('/repos/:repo/contents/*', githubFileContent);
-
-/**
- * 파일 커밋
- * 어떤 브랜치의 마지막 커밋에서 커밋할 경우 그대로 커밋
- * 어떤 브랜치의 중간 커밋에서 커밋할 경우 새로운 브랜치 생성 후 새로운 브랜치에 커밋
- */
-router.post('/repos/:repo/contents/*', githubFileContentCommit);
 
 /**
  * 파일 삭제

@@ -2,36 +2,38 @@ import { Octokit } from '@octokit/rest';
 import { Directory, File } from '../types/file.type';
 
 /**
- * 새로운 레포지토리 생성
+ * 레포지토리 생성
  */
 export const insertRepo = async ({
   octokit,
-  repoName,
+  reponame,
   isPrivate,
 }: {
   octokit: Octokit;
-  repoName: string;
+  reponame: string;
   isPrivate: boolean;
 }) => {
   await octokit.repos.createForAuthenticatedUser({
-    name: repoName,
+    name: reponame,
     private: isPrivate,
   });
 };
 
 /**
- * 기존의 레포지토리 삭제
+ * 레포지토리 삭제
  */
 export const removeRepo = async ({
   octokit,
-  repoName,
+  username,
+  reponame,
 }: {
   octokit: Octokit;
-  repoName: string;
+  username: string;
+  reponame: string;
 }) => {
   await octokit.repos.delete({
-    owner: process.env.MY_GITHUB_USERNAME!,
-    repo: repoName,
+    owner: username,
+    repo: reponame,
   });
 };
 
@@ -42,8 +44,9 @@ export const selectRepos = async ({ octokit }: { octokit: Octokit }) => {
   const { data } = await octokit.repos.listForAuthenticatedUser();
   const repositories = data.map(repo => ({
     name: repo.name,
-    private: repo.anonymous_access_enabled,
+    private: repo.private,
   }));
+
   return repositories;
 };
 
@@ -52,20 +55,20 @@ export const selectRepos = async ({ octokit }: { octokit: Octokit }) => {
  */
 export const selectRepo = async ({
   octokit,
-  owner,
-  repoName,
+  username,
+  reponame,
   path = '',
   ref,
 }: {
   octokit: Octokit;
-  owner: string;
-  repoName: string;
+  username: string;
+  reponame: string;
   path?: string;
   ref?: string;
 }) => {
   const { data } = await octokit.repos.getContent({
-    owner,
-    repo: repoName,
+    owner: username,
+    repo: reponame,
     path,
     ref,
   });
@@ -75,29 +78,24 @@ export const selectRepo = async ({
   const structure: (Directory | File)[] = await Promise.all(
     root.map(async sub => {
       if (sub.type === 'dir') {
-        const subPath = `${path}/${sub.name}`;
-        const subContents = await selectRepo({
-          octokit,
-          owner,
-          repoName,
-          path: subPath,
-          ref,
-        });
         return {
           name: sub.name,
           type: sub.type,
-          path: sub.path.replace(
-            sub.name,
-            ''
-          ) /* 경로에 포한되어 있는 파일 이름 삭제 */,
+          path: sub.path,
           sha: sub.sha,
-          tree: subContents,
+          tree: await selectRepo({
+            octokit,
+            username,
+            reponame,
+            path: `${path}/${sub.name}`,
+            ref,
+          }),
         };
       } else {
         return {
           name: sub.name,
           type: sub.type,
-          path: sub.path.replace(sub.name, ''),
+          path: sub.path,
           sha: sub.sha,
         };
       }
@@ -108,123 +106,62 @@ export const selectRepo = async ({
 };
 
 /**
- * path로 파일 위치를 입력하면 파일의 내용을 반환한다.
- * path로 폴더 위치를 입력하면 폴더안의 폴더와 파일을 반환한다.
+ * 파일 조회 (폴더 제외)
  */
 export const selectFileContent = async ({
   octokit,
-  owner,
-  repoName,
+  username,
+  reponame,
   path,
   ref,
 }: {
   octokit: Octokit;
-  owner: string;
-  repoName: string;
+  username: string;
+  reponame: string;
   path: string;
   ref?: string;
 }) => {
-  const { data: content } = await octokit.repos.getContent({
-    owner,
-    repo: repoName,
+  const { data } = await octokit.repos.getContent({
+    owner: username,
+    repo: reponame,
     path,
     ref,
   });
 
-  return content;
+  if ('content' in data && 'encoding' in data) {
+    const content = {
+      name: data.name,
+      path: data.path,
+      sha: data.sha,
+      content: data.content,
+      encoding: data.encoding,
+    };
+
+    return content;
+  }
+
+  throw new Error('존재하지 않는 파일입니다.');
 };
 
-export const insertFileContent = async ({
-  octokit,
-  owner,
-  repoName,
-  path,
-  content,
-  message = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' }),
-  branchName,
-}: {
-  octokit: Octokit;
-  owner: string;
-  repoName: string;
-  path: string;
-  content: string;
-  message?: string;
-  branchName?: string;
-}) => {
-  await octokit.repos.createOrUpdateFileContents({
-    owner,
-    repo: repoName,
-    path,
-    message,
-    content: Buffer.from(content).toString('base64'),
-    branch: branchName,
-  });
-};
-
-export const updateFileContent = async ({
-  octokit,
-  owner,
-  repoName,
-  path,
-  content,
-  sha,
-  message = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' }),
-}: {
-  octokit: Octokit;
-  owner: string;
-  repoName: string;
-  path: string;
-  content: string;
-  sha: string;
-  message?: string;
-}) => {
-  await octokit.repos.createOrUpdateFileContents({
-    owner,
-    repo: repoName,
-    path,
-    message,
-    content: Buffer.from(content).toString('base64'),
-    sha,
-  });
-};
-
-export const deleteFileContent = async ({
-  octokit,
-  owner,
-  repoName,
-  path,
-  sha,
-  message = new Date().toLocaleString('ko-KR', { timeZone: 'UTC' }),
-}: {
-  octokit: Octokit;
-  owner: string;
-  repoName: string;
-  path: string;
-  sha: string;
-  message?: string;
-}) => {
-  await octokit.repos.deleteFile({
-    owner,
-    repo: repoName,
-    path,
-    message,
-    sha,
-  });
-};
-
+/**
+ * 브랜치 커밋 리스트 조회
+ */
 export const selectListCommits = async ({
   octokit,
-  owner,
-  repo,
+  username,
+  reponame,
+  branchname,
 }: {
   octokit: Octokit;
-  owner: string;
-  repo: string;
+  username: string;
+  reponame: string;
+  branchname?: string;
 }) => {
   try {
     const { data } = await octokit.repos.listCommits({
-      owner,
-      repo,
+      owner: username,
+      repo: reponame,
+      sha: branchname,
     });
     return data;
   } catch (error) {
@@ -232,25 +169,25 @@ export const selectListCommits = async ({
   }
 };
 
-export const selectCommit = async ({
-  octokit,
-  owner,
-  repo,
-  ref,
-}: {
-  octokit: Octokit;
-  owner: string;
-  repo: string;
-  ref: string;
-}) => {
-  try {
-    const { data } = await octokit.repos.getCommit({
-      owner,
-      repo,
-      ref,
-    });
-    return data;
-  } catch (error) {
-    return undefined;
-  }
-};
+// export const selectCommit = async ({
+//   octokit,
+//   username,
+//   reponame,
+//   ref,
+// }: {
+//   octokit: Octokit;
+//   username: string;
+//   reponame: string;
+//   ref: string;
+// }) => {
+//   try {
+//     const { data } = await octokit.repos.getCommit({
+//       username,
+//       repo: reponame,
+//       ref,
+//     });
+//     return data;
+//   } catch (error) {
+//     return undefined;
+//   }
+// };

@@ -8,11 +8,64 @@ import {
   selectRepo,
   selectRepos,
   selectFileContent,
-  insertFileContent,
-  updateFileContent,
-  deleteFileContent,
+  selectListCommits,
 } from '../octokits/repos.octokit';
 
+/**
+ * 레포지토리 생성
+ */
+export const addRepo = async ({
+  token,
+  reponame,
+  isPrivate,
+}: {
+  token: string;
+  reponame: string;
+  isPrivate: boolean;
+}) => {
+  try {
+    await insertRepo({
+      octokit: new Octokit({ auth: token }),
+      reponame,
+      isPrivate,
+    });
+  } catch (error) {
+    if (error instanceof RequestError) {
+      throw new GithubError();
+    }
+    throw new ServerError();
+  }
+};
+
+/**
+ * 레포지토리 삭제
+ */
+export const deleteRepo = async ({
+  token,
+  username,
+  reponame,
+}: {
+  token: string;
+  username: string;
+  reponame: string;
+}) => {
+  try {
+    await removeRepo({
+      octokit: new Octokit({ auth: token }),
+      username,
+      reponame,
+    });
+  } catch (error) {
+    if (error instanceof RequestError) {
+      throw new GithubError();
+    }
+    throw new ServerError();
+  }
+};
+
+/**
+ * 전체 레포지토리 목록 조회
+ */
 export const findRepos = async (token: string) => {
   try {
     const repos = await selectRepos({ octokit: new Octokit({ auth: token }) });
@@ -26,22 +79,25 @@ export const findRepos = async (token: string) => {
   }
 };
 
+/**
+ * 레포지토리 조회
+ */
 export const findRepo = async ({
   token,
-  owner,
-  repoName,
+  username,
+  reponame,
   ref,
 }: {
   token: string;
-  owner: string;
-  repoName: string;
+  username: string;
+  reponame: string;
   ref?: string;
 }) => {
   try {
     const repoStructure = await selectRepo({
       octokit: new Octokit({ auth: token }),
-      owner,
-      repoName,
+      username,
+      reponame,
       ref,
     });
     return repoStructure;
@@ -54,64 +110,27 @@ export const findRepo = async ({
   }
 };
 
-export const addRepo = async ({
+/**
+ * 파일 조회 (폴더 제외)
+ */
+export const findFileContent = async ({
   token,
-  repoName,
-  isPrivate,
-}: {
-  token: string;
-  repoName: string;
-  isPrivate: boolean;
-}) => {
-  try {
-    await insertRepo({
-      octokit: new Octokit({ auth: token }),
-      repoName,
-      isPrivate,
-    });
-  } catch (error) {
-    if (error instanceof RequestError) {
-      throw new GithubError();
-    }
-    throw new ServerError();
-  }
-};
-
-export const deleteRepo = async ({
-  token,
-  repoName,
-}: {
-  token: string;
-  repoName: string;
-}) => {
-  try {
-    await removeRepo({ octokit: new Octokit({ auth: token }), repoName });
-  } catch (error) {
-    if (error instanceof RequestError) {
-      throw new GithubError();
-    }
-    throw new ServerError();
-  }
-};
-
-export const findContent = async ({
-  token,
-  owner,
-  repoName,
+  username,
+  reponame,
   path,
   ref,
 }: {
   token: string;
-  owner: string;
-  repoName: string;
+  username: string;
+  reponame: string;
   path: string;
   ref?: string;
 }) => {
   try {
     const content = await selectFileContent({
       octokit: new Octokit({ auth: token }),
-      owner,
-      repoName,
+      username,
+      reponame,
       path,
       ref,
     });
@@ -125,33 +144,29 @@ export const findContent = async ({
   }
 };
 
-export const addContent = async ({
+/**
+ * 브랜치 커밋 리스트 조회
+ */
+export const findListCommits = async ({
   token,
-  owner,
-  repoName,
-  path,
-  content,
-  branchName,
-  message,
+  username,
+  reponame,
+  branch,
 }: {
   token: string;
-  owner: string;
-  repoName: string;
-  path: string;
-  content: string;
-  branchName?: string;
-  message?: string;
+  username: string;
+  reponame: string;
+  branch?: string;
 }) => {
   try {
-    await insertFileContent({
+    const commits = await selectListCommits({
       octokit: new Octokit({ auth: token }),
-      owner,
-      repoName,
-      path,
-      content,
-      branchName,
-      message,
+      username,
+      reponame,
+      branchname: branch,
     });
+
+    return commits;
   } catch (error) {
     if (error instanceof RequestError) {
       throw new GithubError();
@@ -160,92 +175,28 @@ export const addContent = async ({
   }
 };
 
-export const modifyContent = async ({
-  token,
-  owner,
-  repoName,
-  path,
-  content,
-  blobSHA,
-  message,
-}: {
-  token: string;
-  owner: string;
-  repoName: string;
-  path: string;
-  content: string;
-  blobSHA: string;
-  message?: string;
-}) => {
-  try {
-    await updateFileContent({
-      octokit: new Octokit({ auth: token }),
-      owner,
-      repoName,
-      path,
-      content,
-      sha: blobSHA,
-      message,
-    });
-  } catch (error) {
-    if (error instanceof RequestError) {
-      throw new GithubError();
-    }
-    throw new ServerError();
-  }
-};
-
-export const deleteContent = async ({
-  token,
-  owner,
-  repoName,
-  path,
-  blobSHA,
-  message,
-}: {
-  token: string;
-  owner: string;
-  repoName: string;
-  path: string;
-  blobSHA: string;
-  message?: string;
-}) => {
-  try {
-    await deleteFileContent({
-      octokit: new Octokit({ auth: token }),
-      owner,
-      repoName,
-      path,
-      sha: blobSHA,
-      message,
-    });
-  } catch (error) {
-    if (error instanceof RequestError) {
-      throw new GithubError();
-    }
-    throw new ServerError();
-  }
-};
-
+/**
+ * 브랜치 생성
+ */
 export const addBranch = async ({
   token,
-  owner,
-  repoName,
-  branchName,
+  username,
+  reponame,
+  branchname,
   commitSHA,
 }: {
   token: string;
-  owner: string;
-  repoName: string;
-  branchName: string;
+  username: string;
+  reponame: string;
+  branchname: string;
   commitSHA: string;
 }) => {
   try {
     const lastCommitSHA = await insertBranch({
       octokit: new Octokit({ auth: token }),
-      owner,
-      repoName,
-      branchName,
+      username,
+      reponame,
+      branchname,
       commitSHA,
     });
 
@@ -258,23 +209,26 @@ export const addBranch = async ({
   }
 };
 
+/**
+ * 브랜치 삭제
+ */
 export const deleteBranch = async ({
   token,
-  owner,
-  repoName,
-  branchName,
+  username,
+  reponame,
+  branchname,
 }: {
   token: string;
-  owner: string;
-  repoName: string;
-  branchName: string;
+  username: string;
+  reponame: string;
+  branchname: string;
 }) => {
   try {
     await removeBranch({
       octokit: new Octokit({ auth: token }),
-      owner,
-      repoName,
-      branchName,
+      username,
+      reponame,
+      branchname,
     });
   } catch (error) {
     if (error instanceof RequestError) {
