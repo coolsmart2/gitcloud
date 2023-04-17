@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import * as userService from '../service/user.service';
-import * as githubService from '../service/github.service';
+import * as userService from '../services/user.service';
+import * as githubService from '../services/github.service';
 import { GithubError } from '../constants/errors';
 
 /**
@@ -204,6 +204,9 @@ export const githubBranchDelete = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * 커밋 생성
+ */
 export const githubCommitCreate = async (req: Request, res: Response) => {
   const { repo: reponame, branch: branchname } = req.params;
   let { message, tree } = req.body;

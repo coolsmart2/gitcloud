@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { Directory, File } from '../types/tree.type';
+import { Commit } from '../types/commit.type';
 
 /**
  * 레포지토리 생성
@@ -145,6 +146,28 @@ export const selectFileContent = async ({
   throw new Error('존재하지 않는 파일입니다.');
 };
 
+export const selectListBranchs = async ({
+  octokit,
+  username,
+  reponame,
+}: {
+  octokit: Octokit;
+  username: string;
+  reponame: string;
+}) => {
+  const { data } = await octokit.repos.listBranches({
+    owner: username,
+    repo: reponame,
+  });
+
+  const branches = data.map(branch => ({
+    name: branch.name,
+    sha: branch.commit.sha,
+  }));
+
+  return branches;
+};
+
 /**
  * 브랜치 커밋 리스트 조회
  */
@@ -152,41 +175,26 @@ export const selectListCommits = async ({
   octokit,
   username,
   reponame,
-  branchname,
+  commitSHA,
 }: {
   octokit: Octokit;
   username: string;
   reponame: string;
-  branchname?: string;
+  commitSHA?: string;
 }) => {
   const { data } = await octokit.repos.listCommits({
     owner: username,
     repo: reponame,
-    sha: branchname,
+    sha: commitSHA,
   });
 
-  return data;
-};
+  const commits = data.map(commit => ({
+    sha: commit.sha,
+    name: commit.commit.message,
+    parents: commit.parents.map(parent => ({
+      sha: parent.sha,
+    })),
+  }));
 
-// export const selectCommit = async ({
-//   octokit,
-//   username,
-//   reponame,
-//   ref,
-// }: {
-//   octokit: Octokit;
-//   username: string;
-//   reponame: string;
-//   ref: string;
-// }) => {
-//   try {
-//     const { data } = await octokit.repos.getCommit({
-//       username,
-//       repo: reponame,
-//       ref,
-//     });
-//     return data;
-//   } catch (error) {
-//     return undefined;
-//   }
-// };
+  return commits;
+};

@@ -31,11 +31,6 @@ router.get('/repos/:repo', githubController.githubRepo);
 router.get('/repos/:repo/contents/*', githubController.githubFileContent);
 
 /**
- * 브랜치 커밋 리스트 조회
- */
-router.get('/repos/:repo/commits', githubController.githubCommitList);
-
-/**
  * 브랜치 생성
  */
 router.post(
@@ -50,6 +45,11 @@ router.delete(
   '/repos/:repo/branchs/:branch',
   githubController.githubBranchDelete
 );
+
+/**
+ * 브랜치 커밋 리스트 조회
+ */
+router.get('/repos/:repo/commits', githubController.githubCommitList);
 
 /**
  * 커밋 생성

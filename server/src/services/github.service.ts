@@ -16,8 +16,10 @@ import {
   selectRepos,
   selectFileContent,
   selectListCommits,
+  selectListBranchs,
 } from '../octokits/repos.octokit';
 import { Directory, File } from '../types/tree.type';
+import { Commit } from '../types/commit.type';
 
 /**
  * 레포지토리 생성
@@ -161,22 +163,33 @@ export const findListCommits = async ({
   token,
   username,
   reponame,
-  branchname,
 }: {
   token: string;
   username: string;
   reponame: string;
-  branchname?: string;
 }) => {
   try {
-    const commits = await selectListCommits({
+    const branchs = await selectListBranchs({
       octokit: new Octokit({ auth: token }),
       username,
       reponame,
-      branchname,
     });
 
-    return commits;
+    const totalCommits: Record<string, Commit[]> = {};
+
+    await Promise.all(
+      branchs.map(async ({ name, sha }) => {
+        const commits = await selectListCommits({
+          octokit: new Octokit({ auth: token }),
+          username,
+          reponame,
+          commitSHA: sha,
+        });
+        totalCommits[name] = commits;
+      })
+    );
+
+    return totalCommits;
   } catch (error) {
     if (error instanceof RequestError) {
       if (error.message === 'Git Repository is empty.') {
