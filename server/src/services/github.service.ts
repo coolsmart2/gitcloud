@@ -1,5 +1,4 @@
 import { RequestError } from '@octokit/request-error';
-import { Octokit } from '@octokit/rest';
 import { GithubError, ServerError } from '../constants/errors';
 import {
   insertBranch,
@@ -35,7 +34,7 @@ export const addRepo = async ({
 }) => {
   try {
     await insertRepo({
-      octokit: new Octokit({ auth: token }),
+      token,
       reponame,
       isPrivate,
     });
@@ -61,7 +60,7 @@ export const deleteRepo = async ({
 }) => {
   try {
     await removeRepo({
-      octokit: new Octokit({ auth: token }),
+      token,
       username,
       reponame,
     });
@@ -78,7 +77,7 @@ export const deleteRepo = async ({
  */
 export const findRepos = async (token: string) => {
   try {
-    const repos = await selectRepos({ octokit: new Octokit({ auth: token }) });
+    const repos = await selectRepos({ token });
 
     return repos;
   } catch (error) {
@@ -105,7 +104,7 @@ export const findRepo = async ({
 }) => {
   try {
     const repoStructure = await selectRepo({
-      octokit: new Octokit({ auth: token }),
+      token,
       username,
       reponame,
       ref,
@@ -140,7 +139,7 @@ export const findFileContent = async ({
 }) => {
   try {
     const content = await selectFileContent({
-      octokit: new Octokit({ auth: token }),
+      token,
       username,
       reponame,
       path,
@@ -170,7 +169,7 @@ export const findListCommits = async ({
 }) => {
   try {
     const branchs = await selectListBranchs({
-      octokit: new Octokit({ auth: token }),
+      token,
       username,
       reponame,
     });
@@ -180,7 +179,7 @@ export const findListCommits = async ({
     await Promise.all(
       branchs.map(async ({ name, sha }) => {
         const commits = await selectListCommits({
-          octokit: new Octokit({ auth: token }),
+          token,
           username,
           reponame,
           commitSHA: sha,
@@ -219,7 +218,7 @@ export const addBranch = async ({
 }) => {
   try {
     const lastCommitSHA = await insertBranch({
-      octokit: new Octokit({ auth: token }),
+      token,
       username,
       reponame,
       branchname,
@@ -251,7 +250,7 @@ export const deleteBranch = async ({
 }) => {
   try {
     await removeBranch({
-      octokit: new Octokit({ auth: token }),
+      token,
       username,
       reponame,
       branchname,
@@ -282,24 +281,23 @@ export const addCommit = async ({
   tree: (File | Directory)[];
   message?: string;
 }) => {
-  const octokit = new Octokit({ auth: token });
   try {
     const parentSHA = await selectBranch({
-      octokit,
+      token,
       username,
       reponame,
       branchname,
     });
 
     const treeSHA = await insertTree({
-      octokit,
+      token,
       username,
       reponame,
       tree,
     });
 
     const commitSHA = await insertCommit({
-      octokit,
+      token,
       username,
       reponame,
       parentSHA,
@@ -308,7 +306,7 @@ export const addCommit = async ({
     });
 
     await updateRef({
-      octokit,
+      token,
       username,
       reponame,
       branchname,

@@ -5,16 +5,20 @@ import { Directory, File } from '../types/tree.type';
  * 브랜치 (마지막 커밋) 조회
  */
 export const selectBranch = async ({
-  octokit,
+  token,
   username,
   reponame,
   branchname,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   branchname: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   const {
     data: {
       object: { sha },
@@ -31,18 +35,22 @@ export const selectBranch = async ({
  * 브랜치 생성
  */
 export const insertBranch = async ({
-  octokit,
+  token,
   username,
   reponame,
   branchname,
   commitSHA,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   branchname: string;
   commitSHA: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   await octokit.git.createRef({
     owner: username,
     repo: reponame,
@@ -55,16 +63,20 @@ export const insertBranch = async ({
  * 브랜치 삭제
  */
 export const removeBranch = async ({
-  octokit,
+  token,
   username,
   reponame,
   branchname,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   branchname: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   await octokit.git.deleteRef({
     owner: username,
     repo: reponame,
@@ -73,18 +85,22 @@ export const removeBranch = async ({
 };
 
 export const insertTree = async ({
-  octokit,
+  token,
   username,
   reponame,
   tree,
   baseSHA,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   tree: (File | Directory)[];
   baseSHA?: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   const {
     data: { sha },
   } = await octokit.git.createTree({
@@ -94,7 +110,7 @@ export const insertTree = async ({
       tree.map(async file => {
         if ('tree' in file) {
           const childTreeSHA = (await insertTree({
-            octokit,
+            token,
             username,
             reponame,
             tree: file.tree,
@@ -120,20 +136,24 @@ export const insertTree = async ({
 };
 
 export const insertCommit = async ({
-  octokit,
+  token,
   username,
   reponame,
   parentSHA,
   treeSHA,
   message = new Date().toString(),
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   treeSHA: string;
   parentSHA: string;
   message?: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   const {
     data: { sha },
   } = await octokit.git.createCommit({
@@ -147,18 +167,22 @@ export const insertCommit = async ({
 };
 
 export const updateRef = async ({
-  octokit,
+  token,
   username,
   reponame,
   branchname,
   commitSHA,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   branchname: string;
   commitSHA: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   const {
     data: {
       object: { sha },

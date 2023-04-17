@@ -6,14 +6,17 @@ import { Commit } from '../types/commit.type';
  * 레포지토리 생성
  */
 export const insertRepo = async ({
-  octokit,
+  token,
   reponame,
   isPrivate,
 }: {
-  octokit: Octokit;
+  token: string;
   reponame: string;
   isPrivate: boolean;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
   await octokit.repos.createForAuthenticatedUser({
     name: reponame,
     private: isPrivate,
@@ -26,14 +29,17 @@ export const insertRepo = async ({
  * 레포지토리 삭제
  */
 export const removeRepo = async ({
-  octokit,
+  token,
   username,
   reponame,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
   await octokit.repos.delete({
     owner: username,
     repo: reponame,
@@ -43,7 +49,11 @@ export const removeRepo = async ({
 /**
  * 전체 레포지토리 목록 조회
  */
-export const selectRepos = async ({ octokit }: { octokit: Octokit }) => {
+export const selectRepos = async ({ token }: { token: string }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   const { data } = await octokit.repos.listForAuthenticatedUser();
   const repositories = data.map(repo => ({
     name: repo.name,
@@ -57,18 +67,22 @@ export const selectRepos = async ({ octokit }: { octokit: Octokit }) => {
  * 레포지토리 조회
  */
 export const selectRepo = async ({
-  octokit,
+  token,
   username,
   reponame,
   path = '',
   ref,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   path?: string;
   ref?: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   const { data } = await octokit.repos.getContent({
     owner: username,
     repo: reponame,
@@ -87,7 +101,7 @@ export const selectRepo = async ({
           path: sub.path,
           sha: sub.sha,
           tree: await selectRepo({
-            octokit,
+            token,
             username,
             reponame,
             path: `${path}/${sub.name}`,
@@ -112,18 +126,21 @@ export const selectRepo = async ({
  * 파일 조회 (폴더 제외)
  */
 export const selectFileContent = async ({
-  octokit,
+  token,
   username,
   reponame,
   path,
   ref,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   path: string;
   ref?: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
   const { data } = await octokit.repos.getContent({
     owner: username,
     repo: reponame,
@@ -147,14 +164,17 @@ export const selectFileContent = async ({
 };
 
 export const selectListBranchs = async ({
-  octokit,
+  token,
   username,
   reponame,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
   const { data } = await octokit.repos.listBranches({
     owner: username,
     repo: reponame,
@@ -172,16 +192,20 @@ export const selectListBranchs = async ({
  * 브랜치 커밋 리스트 조회
  */
 export const selectListCommits = async ({
-  octokit,
+  token,
   username,
   reponame,
   commitSHA,
 }: {
-  octokit: Octokit;
+  token: string;
   username: string;
   reponame: string;
   commitSHA?: string;
 }) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
   const { data } = await octokit.repos.listCommits({
     owner: username,
     repo: reponame,
