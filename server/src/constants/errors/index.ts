@@ -4,6 +4,12 @@ export class GithubError extends Error {
   }
 }
 
+export class GithubBadCredentialsError extends Error {
+  constructor() {
+    super('GithubBadCredentialsError');
+  }
+}
+
 export class ServerError extends Error {
   constructor() {
     super('ServerError');

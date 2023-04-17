@@ -59,4 +59,6 @@ router.post(
   githubController.githubCommitCreate
 );
 
+router.post('/users', githubController.githubUser);
+
 export default router;

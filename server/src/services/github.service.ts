@@ -1,22 +1,12 @@
 import { RequestError } from '@octokit/request-error';
-import { GithubError, ServerError } from '../constants/errors';
 import {
-  insertBranch,
-  insertCommit,
-  insertTree,
-  removeBranch,
-  selectBranch,
-  updateRef,
-} from '../octokits/git.octokit';
-import {
-  insertRepo,
-  removeRepo,
-  selectRepo,
-  selectRepos,
-  selectFileContent,
-  selectListCommits,
-  selectListBranchs,
-} from '../octokits/repos.octokit';
+  GithubBadCredentialsError,
+  GithubError,
+  ServerError,
+} from '../constants/errors';
+import * as GithubOctokit from '../octokits/git.octokit';
+import * as ReposOctokit from '../octokits/repos.octokit';
+import * as UsersOctokit from '../octokits/users.octokit';
 import { Directory, File } from '../types/tree.type';
 import { Commit } from '../types/commit.type';
 
@@ -33,7 +23,7 @@ export const addRepo = async ({
   isPrivate: boolean;
 }) => {
   try {
-    await insertRepo({
+    await ReposOctokit.insertRepo({
       token,
       reponame,
       isPrivate,
@@ -59,7 +49,7 @@ export const deleteRepo = async ({
   reponame: string;
 }) => {
   try {
-    await removeRepo({
+    await ReposOctokit.removeRepo({
       token,
       username,
       reponame,
@@ -77,7 +67,7 @@ export const deleteRepo = async ({
  */
 export const findRepos = async (token: string) => {
   try {
-    const repos = await selectRepos({ token });
+    const repos = await ReposOctokit.selectRepos({ token });
 
     return repos;
   } catch (error) {
@@ -103,7 +93,7 @@ export const findRepo = async ({
   ref?: string;
 }) => {
   try {
-    const repoStructure = await selectRepo({
+    const repoStructure = await ReposOctokit.selectRepo({
       token,
       username,
       reponame,
@@ -138,7 +128,7 @@ export const findFileContent = async ({
   ref?: string;
 }) => {
   try {
-    const content = await selectFileContent({
+    const content = await ReposOctokit.selectFileContent({
       token,
       username,
       reponame,
@@ -168,7 +158,7 @@ export const findListCommits = async ({
   reponame: string;
 }) => {
   try {
-    const branchs = await selectListBranchs({
+    const branchs = await ReposOctokit.selectListBranchs({
       token,
       username,
       reponame,
@@ -178,7 +168,7 @@ export const findListCommits = async ({
 
     await Promise.all(
       branchs.map(async ({ name, sha }) => {
-        const commits = await selectListCommits({
+        const commits = await ReposOctokit.selectListCommits({
           token,
           username,
           reponame,
@@ -217,7 +207,7 @@ export const addBranch = async ({
   commitSHA: string;
 }) => {
   try {
-    const lastCommitSHA = await insertBranch({
+    const lastCommitSHA = await GithubOctokit.insertBranch({
       token,
       username,
       reponame,
@@ -249,7 +239,7 @@ export const deleteBranch = async ({
   branchname: string;
 }) => {
   try {
-    await removeBranch({
+    await GithubOctokit.removeBranch({
       token,
       username,
       reponame,
@@ -282,21 +272,21 @@ export const addCommit = async ({
   message?: string;
 }) => {
   try {
-    const parentSHA = await selectBranch({
+    const parentSHA = await GithubOctokit.selectBranch({
       token,
       username,
       reponame,
       branchname,
     });
 
-    const treeSHA = await insertTree({
+    const treeSHA = await GithubOctokit.insertTree({
       token,
       username,
       reponame,
       tree,
     });
 
-    const commitSHA = await insertCommit({
+    const commitSHA = await GithubOctokit.insertCommit({
       token,
       username,
       reponame,
@@ -305,7 +295,7 @@ export const addCommit = async ({
       message,
     });
 
-    await updateRef({
+    await GithubOctokit.updateRef({
       token,
       username,
       reponame,
@@ -314,7 +304,22 @@ export const addCommit = async ({
     });
   } catch (error) {
     if (error instanceof RequestError) {
+      throw new GithubError();
+    }
+    throw new ServerError();
+  }
+};
+
+export const findUser = async ({ token }: { token: string }) => {
+  try {
+    const user = await UsersOctokit.selectUser({ token });
+    return user;
+  } catch (error) {
+    if (error instanceof RequestError) {
       console.log(error);
+      if (error.message === 'Bad credentials.') {
+        throw new GithubBadCredentialsError();
+      }
       throw new GithubError();
     }
     throw new ServerError();

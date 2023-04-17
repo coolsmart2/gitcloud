@@ -234,3 +234,17 @@ export const githubCommitCreate = async (req: Request, res: Response) => {
     return res.status(500).send({ message: 'server error' });
   }
 };
+
+export const githubUser = async (req: Request, res: Response) => {
+  const { token } = req.body;
+
+  try {
+    const user = await githubService.findUser({ token });
+    return res.send({ message: 'success', data: user });
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
