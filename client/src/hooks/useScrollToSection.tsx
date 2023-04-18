@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 export default function useScrollToSection() {
   const { pathname, hash } = useLocation();
+  const [section, setSection] = useState('overview');
 
   useEffect(() => {
     if (hash) {
       const element = document.getElementById(hash.slice(1));
       if (element) {
+        setSection(hash.slice(1));
         element.scrollIntoView({ behavior: 'smooth' });
       }
     } else {
@@ -18,5 +20,5 @@ export default function useScrollToSection() {
     }
   }, [pathname, hash]);
 
-  return null;
+  return section;
 }

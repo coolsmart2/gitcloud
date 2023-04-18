@@ -35,8 +35,27 @@
 }
 
 .list__item {
+  height: 100%;
+  position: relative; /* 자식 태그를 위해 */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   padding: 0 20px;
   font-size: 17px;
+  cursor: pointer;
+}
+
+.list__item--active::after {
+  content: ' ';
+  position: absolute;
+  bottom: -2px;
+  height: 2px;
+  width: calc(100% - 40px);
+  background-color: black;
+}
+
+.list__item:hover {
+  background-color: #f5f5f5;
 }
 
 .header__login-wrapper.login {
@@ -47,13 +66,12 @@
 }
 
 .login__github {
-  width: 150px;
-  height: 50px;
-  color: #fff;
-  background-color: #333;
+  width: 200px;
+  height: 60px;
+  color: white;
+  background-color: black;
   border-radius: 5px;
   font-size: 20px;
-  cursor: pointer;
 }
 
 .login__github:hover {
@@ -61,12 +79,30 @@
 }
 
 .root-section {
-  margin: 50px 0;
+  margin: 50px 50px;
   scroll-margin: 130px 0;
 }
 
 #overview {
   height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .section-content {
+    h1 {
+      font-size: 40px;
+    }
+
+    p {
+      font-size: 20px;
+      color: gray;
+    }
+
+    * {
+      margin-bottom: 30px;
+    }
+  }
 }
 
 #how-to-use {
