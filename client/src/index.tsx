@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import ErrorPage from './error-page';
 import Root from './routes/root';
+import './index.scss';
 
 const router = createBrowserRouter([
   {
