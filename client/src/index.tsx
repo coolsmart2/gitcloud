@@ -14,10 +14,12 @@ const router = createBrowserRouter([
   {
     path: ':username',
     element: <div>username</div>,
-  },
-  {
-    path: ':username/:reponame/:branchname?',
-    element: <div>reponame</div>,
+    children: [
+      {
+        path: ':reponame/:branchname?',
+        element: <div>reponame</div>,
+      },
+    ],
   },
 ]);
 

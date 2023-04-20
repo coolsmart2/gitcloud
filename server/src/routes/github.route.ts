@@ -61,4 +61,8 @@ router.post(
 
 router.post('/users', githubController.githubUser);
 
+router.get('/oauth/callback', githubController.githubOAuthCallback);
+
+router.get('/oauth/complete', githubController.githubOAuthComplete);
+
 export default router;

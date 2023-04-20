@@ -248,3 +248,14 @@ export const githubUser = async (req: Request, res: Response) => {
     return res.status(500).send({ message: 'server error' });
   }
 };
+
+export const githubOAuthCallback = async (req: Request, res: Response) => {
+  const { code } = req.query;
+  console.log(code);
+
+  return res.redirect('/github/oauth/complete');
+};
+
+export const githubOAuthComplete = async (req: Request, res: Response) => {
+  return res.send('<h1>성공</h1>');
+};
