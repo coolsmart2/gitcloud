@@ -257,5 +257,5 @@ export const githubOAuthCallback = async (req: Request, res: Response) => {
 };
 
 export const githubOAuthComplete = async (req: Request, res: Response) => {
-  return res.send('<h1>성공</h1>');
+  return res.render('oauthComplete');
 };

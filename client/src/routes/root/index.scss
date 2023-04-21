@@ -1,11 +1,13 @@
+$header-height: 80px;
+
 .root-container {
   width: 100%;
-  padding-top: 80px; /* 헤더 높이 */
+  padding-top: $header-height; /* 헤더 높이 */
 }
 
 .header {
   width: 100%;
-  height: 80px;
+  height: $header-height;
   position: fixed; /* 헤더 상단에 고정 */
   top: 0;
   left: 0;
@@ -85,7 +87,7 @@
 }
 
 #overview {
-  height: calc(100vh - 80px);
+  height: calc(100vh - $header-height);
   display: flex;
   justify-content: center;
   align-items: center;

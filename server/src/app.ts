@@ -7,6 +7,11 @@ dotonv.config();
 
 const app = express();
 
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.engine('html', require('ejs').renderFile);
+
+// app.use(express.static(__dirname + 'public')); // TODO: 동작 안함...
 app.use(logger('dev'));
 app.use(express.json()); /* post시 body json으로 parse */
 
