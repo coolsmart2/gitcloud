@@ -1,13 +1,11 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './index.scss';
 import { useEffect, useState } from 'react';
 import useScrollToSection from '../../hooks/useScrollToSection';
 import axios from 'axios';
 
 export default function Root() {
-  const navigate = useNavigate();
-
-  const [section, sectionRef] = useScrollToSection();
+  const [section, onSectionClick, sectionRef] = useScrollToSection();
   const [oauthPopup, setOauthPopup] = useState<Window | null>(null);
 
   const createOauthPopup = () => {
@@ -63,18 +61,26 @@ export default function Root() {
         <nav className="header__navbar navbar">
           <ul className="navbar__list list">
             <li
-              className={`list__item${
-                section === 'overview' ? ' list__item--active' : ''
-              }`}
-              onClick={() => navigate('/#overview')}
+              className={
+                section === 'overview'
+                  ? 'list__item  list__item--active'
+                  : 'list__item'
+              }
+              onClick={() => {
+                onSectionClick('overview');
+              }}
             >
               개요
             </li>
             <li
-              className={`list__item${
-                section === 'how-to-use' ? ' list__item--active' : ''
-              }`}
-              onClick={() => navigate('/#how-to-use')}
+              className={
+                section === 'how-to-use'
+                  ? 'list__item  list__item--active'
+                  : 'list__item'
+              }
+              onClick={() => {
+                onSectionClick('how-to-use');
+              }}
             >
               사용방법
             </li>
