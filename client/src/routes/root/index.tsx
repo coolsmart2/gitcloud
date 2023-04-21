@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './index.scss';
 import { useEffect, useState } from 'react';
 import useScrollToSection from '../../hooks/useScrollToSection';
+import axios from 'axios';
 
 export default function Root() {
   const navigate = useNavigate();
@@ -29,17 +30,22 @@ export default function Root() {
     if (!oauthPopup) {
       return;
     }
-    const loginPopupInterval = setInterval(() => {
+    const loginPopupInterval = setInterval(async () => {
       const currentUrl = oauthPopup.location.href;
       const params = new URL(currentUrl).searchParams;
       const code = params.get('code');
       if (!code) {
         return;
       }
-      console.log(code);
       clearInterval(loginPopupInterval);
       oauthPopup.close();
       setOauthPopup(null);
+      const { data } = await axios.post(
+        'http://localhost:8080/github/oauth',
+        { code },
+        { withCredentials: true }
+      );
+      console.log(data); // TODO: code를 이용해서 oauth 로그인
     }, 500);
     return () => {
       clearInterval(loginPopupInterval);

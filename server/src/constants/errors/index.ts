@@ -15,3 +15,9 @@ export class ServerError extends Error {
     super('ServerError');
   }
 }
+
+export class MySqlError extends Error {
+  constructor() {
+    super('MySqlError');
+  }
+}

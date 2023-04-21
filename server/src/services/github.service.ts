@@ -9,6 +9,7 @@ import * as ReposOctokit from '../octokits/repos.octokit';
 import * as UsersOctokit from '../octokits/users.octokit';
 import { Directory, File } from '../types/tree.type';
 import { Commit } from '../types/commit.type';
+import axios from 'axios';
 
 /**
  * 레포지토리 생성
@@ -310,7 +311,7 @@ export const addCommit = async ({
   }
 };
 
-export const findUser = async ({ token }: { token: string }) => {
+export const findUser = async (token: string) => {
   try {
     const user = await UsersOctokit.selectUser({ token });
     return user;
@@ -322,6 +323,34 @@ export const findUser = async ({ token }: { token: string }) => {
       }
       throw new GithubError();
     }
+    throw new ServerError();
+  }
+};
+
+export const findUserByCode = async (code: string) => {
+  try {
+    const {
+      data: { access_token },
+    } = await axios.post(
+      'https://github.com/login/oauth/access_token',
+      {
+        client_id: process.env.GITHUB_CLIENT_ID,
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
+        code,
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+        },
+      }
+    );
+    const { data: user } = await axios.get('https://api.github.com/user', {
+      headers: {
+        Authorization: `token ${access_token}`,
+      },
+    });
+    return user;
+  } catch (error) {
     throw new ServerError();
   }
 };
