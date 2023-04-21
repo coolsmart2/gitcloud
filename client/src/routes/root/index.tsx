@@ -10,20 +10,35 @@ export default function Root() {
   const [loginPopup, setLoginPopup] = useState<Window | null>(null);
 
   useEffect(() => {
+    const currentUrl = window.location.href;
+    const searchParams = new URL(currentUrl).searchParams;
+    const code = searchParams.get('code');
+    if (code) {
+      window.opener.postMessage({ code }, window.location.origin);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!loginPopup) {
       return;
     }
-    // const checkLoginPopup = setInterval(() => {
-    //   console.log(loginPopup.window.location.href);
-    //   if (loginPopup.window.location.href?.includes('github/oauth/complete')) {
-    //     loginPopup.close();
-    //   }
-    //   if (!loginPopup || !loginPopup.closed) {
-    //     return;
-    //   }
-    //   clearInterval(checkLoginPopup);
-    //   setLoginPopup(null);
-    // }, 1000);
+
+    const oauthCodeListener = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+      const { code } = event.data;
+      console.log(code);
+      loginPopup.close();
+      setLoginPopup(null);
+    };
+
+    window.addEventListener('message', oauthCodeListener, false);
+    return () => {
+      window.removeEventListener('message', oauthCodeListener);
+      loginPopup?.close();
+      setLoginPopup(null);
+    };
   }, [loginPopup]);
 
   return (
@@ -65,13 +80,12 @@ export default function Root() {
               }}, left=${
                 outerWidth / 2 - newWindowWidth / 2
               }, width=500, height=600, status=no, menubar=no, toolbar=no, resizable=no`;
-              setLoginPopup(
-                window.open(
-                  'https://github.com/login/oauth/authorize?client_id=aa35721dd67709b79ce2',
-                  '_blank',
-                  options
-                )
+              const popup = window.open(
+                'https://github.com/login/oauth/authorize?client_id=aa35721dd67709b79ce2',
+                '_blank',
+                options
               );
+              setLoginPopup(popup);
             }}
           >
             <b>GitHub</b>로 시작하기
