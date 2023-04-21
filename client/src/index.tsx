@@ -4,11 +4,17 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import ErrorPage from './error-page';
 import Root from './routes/root';
 import './index.scss';
+import OauthCallback from './routes/oauthCallback';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: '/oauth/callback',
+    element: <OauthCallback />,
     errorElement: <ErrorPage />,
   },
   {

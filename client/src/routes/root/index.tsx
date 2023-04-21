@@ -7,39 +7,46 @@ export default function Root() {
   const navigate = useNavigate();
 
   const [section, sectionRef] = useScrollToSection();
-  const [loginPopup, setLoginPopup] = useState<Window | null>(null);
+  const [oauthPopup, setOauthPopup] = useState<Window | null>(null);
+
+  const createOauthPopup = () => {
+    const outerWidth = window.outerWidth;
+    const outerHeight = window.outerHeight;
+    const newWindowWidth = 500;
+    const newWindowHeight = 600;
+    const options = `top=${outerHeight / 2 - newWindowHeight / 2}}, left=${
+      outerWidth / 2 - newWindowWidth / 2
+    }, width=500, height=600, status=no, menubar=no, toolbar=no, resizable=no`;
+    const popup = window.open(
+      'https://github.com/login/oauth/authorize?client_id=aa35721dd67709b79ce2',
+      '_blank',
+      options
+    );
+    setOauthPopup(popup);
+  };
 
   useEffect(() => {
-    const currentUrl = window.location.href;
-    const searchParams = new URL(currentUrl).searchParams;
-    const code = searchParams.get('code');
-    if (code) {
-      window.opener.postMessage({ code }, window.location.origin);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!loginPopup) {
+    if (!oauthPopup) {
       return;
     }
-
-    const oauthCodeListener = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) {
+    const loginPopupInterval = setInterval(() => {
+      const currentUrl = oauthPopup.location.href;
+      const params = new URL(currentUrl).searchParams;
+      const code = params.get('code');
+      if (!code) {
         return;
       }
-      const { code } = event.data;
       console.log(code);
-      loginPopup.close();
-      setLoginPopup(null);
-    };
-
-    window.addEventListener('message', oauthCodeListener, false);
+      clearInterval(loginPopupInterval);
+      oauthPopup.close();
+      setOauthPopup(null);
+    }, 500);
     return () => {
-      window.removeEventListener('message', oauthCodeListener);
-      loginPopup?.close();
-      setLoginPopup(null);
+      clearInterval(loginPopupInterval);
+      oauthPopup?.close();
+      setOauthPopup(null);
     };
-  }, [loginPopup]);
+  }, [oauthPopup]);
 
   return (
     <div className="root-container">
@@ -68,26 +75,7 @@ export default function Root() {
           </ul>
         </nav>
         <div className="header__login-wrapper login">
-          <button
-            className="login__github"
-            onClick={() => {
-              const outerWidth = window.outerWidth;
-              const outerHeight = window.outerHeight;
-              const newWindowWidth = 500;
-              const newWindowHeight = 600;
-              const options = `top=${
-                outerHeight / 2 - newWindowHeight / 2
-              }}, left=${
-                outerWidth / 2 - newWindowWidth / 2
-              }, width=500, height=600, status=no, menubar=no, toolbar=no, resizable=no`;
-              const popup = window.open(
-                'https://github.com/login/oauth/authorize?client_id=aa35721dd67709b79ce2',
-                '_blank',
-                options
-              );
-              setLoginPopup(popup);
-            }}
-          >
+          <button className="login__github" onClick={createOauthPopup}>
             <b>GitHub</b>로 시작하기
           </button>
         </div>
@@ -98,7 +86,7 @@ export default function Root() {
           <p>문서를 더 효율적으로 관리할 수 있어요.</p>
           <p>코딩을 하지 않아도 GitHub를 사용해볼 수 있어요.</p>
           <div className="section__login-wrapper login">
-            <button className="login__github">
+            <button className="login__github" onClick={createOauthPopup}>
               <b>GitHub</b>로 시작하기
             </button>
           </div>
