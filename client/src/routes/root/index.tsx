@@ -1,12 +1,16 @@
-import { Link } from 'react-router-dom';
 import './index.scss';
 import { useEffect, useState } from 'react';
 import useScrollToSection from '../../hooks/useScrollToSection';
 import axios from 'axios';
+import Header from '../../components/Header';
+import Section from '../../components/Section';
+import Overview from '../../components/Section/Overview';
+import HowToUse from '../../components/Section/HowToUse';
 
 export default function Root() {
-  const [section, onSectionClick, sectionRef] = useScrollToSection();
+  const [section, setSection, sectionRef] = useScrollToSection();
   const [oauthPopup, setOauthPopup] = useState<Window | null>(null);
+  const [user, setUser] = useState<string>('');
 
   const createOauthPopup = () => {
     const outerWidth = window.outerWidth;
@@ -54,62 +58,22 @@ export default function Root() {
 
   return (
     <div className="root-container">
-      <header className="header">
-        <div className="header__logo">
-          <Link to="/">GitCloud</Link>
-        </div>
-        <nav className="header__navbar navbar">
-          <ul className="navbar__list list">
-            <li
-              className={
-                section === 'overview'
-                  ? 'list__item  list__item--active'
-                  : 'list__item'
-              }
-              onClick={() => {
-                onSectionClick('overview');
-              }}
-            >
-              개요
-            </li>
-            <li
-              className={
-                section === 'how-to-use'
-                  ? 'list__item  list__item--active'
-                  : 'list__item'
-              }
-              onClick={() => {
-                onSectionClick('how-to-use');
-              }}
-            >
-              사용방법
-            </li>
-          </ul>
-        </nav>
-        <div className="header__login-wrapper login">
-          <button className="login__github" onClick={createOauthPopup}>
-            <b>GitHub</b>로 시작하기
-          </button>
-        </div>
-      </header>
-      <section id="overview" className="root-section" ref={sectionRef}>
-        <div className="section-content">
-          <h1>GitCloud로 언제 어디서든 문서작업 버전 관리</h1>
-          <p>문서를 더 효율적으로 관리할 수 있어요.</p>
-          <p>코딩을 하지 않아도 GitHub를 사용해볼 수 있어요.</p>
-          <div className="section__login-wrapper login">
-            <button className="login__github" onClick={createOauthPopup}>
-              <b>GitHub</b>로 시작하기
-            </button>
-          </div>
-        </div>
-      </section>
-      <hr />
-      <section
-        id="how-to-use"
-        className="root-section"
-        ref={sectionRef}
-      ></section>
+      <Header
+        isLogin={false}
+        hasToken={false}
+        section={section}
+        setSection={setSection}
+        onLoginClick={createOauthPopup}
+        onTokenClick={() => {}}
+      />
+      <main className="section-container">
+        <Section id="overview" ref={sectionRef}>
+          <Overview onClick={createOauthPopup} />
+        </Section>
+        <Section id="how-to-use" ref={sectionRef}>
+          <HowToUse />
+        </Section>
+      </main>
     </div>
   );
 }

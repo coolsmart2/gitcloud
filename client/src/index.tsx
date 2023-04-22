@@ -4,13 +4,19 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import ErrorPage from './error-page';
 import Root from './routes/root';
 import './index.scss';
-import OauthCallback from './routes/oauthCallback';
+import OauthCallback from './routes/oauth-callback';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
     errorElement: <ErrorPage />,
+    children: [
+      {
+        path: '/token',
+        element: <ErrorPage />,
+      },
+    ],
   },
   {
     path: '/oauth/callback',
