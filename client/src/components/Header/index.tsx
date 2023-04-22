@@ -16,7 +16,11 @@ export default function Header({
   section,
   setSection,
   onLoginClick,
+  onTokenClick,
 }: HeaderProps) {
+  const initStart = !isLogin && !hasToken;
+  const canStart = isLogin && hasToken;
+
   return (
     <header className="header">
       <div className="header__logo">
@@ -50,11 +54,31 @@ export default function Header({
           </li>
         </ul>
       </nav>
-      <div className="header__login-wrapper login">
-        <button className="login__github" onClick={onLoginClick}>
-          <b>GitHub</b>로 시작하기
-        </button>
-      </div>
+      {isLogin && (
+        <div className="header__token-wrapper">
+          <button className="token__button" onClick={onTokenClick}>
+            토큰 입력
+          </button>
+        </div>
+      )}
+      {initStart && (
+        <div className="header__button-wrapper">
+          <button className="login__github" onClick={onLoginClick}>
+            <b>GitHub</b>로 시작하기
+          </button>
+        </div>
+      )}
+      {!initStart && (
+        <div className="header__button-wrapper">
+          <button
+            className="button-start"
+            onClick={onLoginClick}
+            disabled={!canStart}
+          >
+            시작하기
+          </button>
+        </div>
+      )}
     </header>
   );
 }

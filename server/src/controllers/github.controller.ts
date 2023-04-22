@@ -264,9 +264,9 @@ export const githubOAuth = async (req: Request, res: Response) => {
       user = await userService.findOneByProviderId(oauthUser.node_id);
     }
     if (!user[0].personal_access_token) {
-      return res.send({ message: 'personal_access_token not existed' });
+      return res.send({ message: 'token error' });
     }
-    return res.send({ message: 'success', oauthUser });
+    return res.send({ message: 'success' });
   } catch (error) {
     return res.status(500).send({ message: 'server error' });
   }

@@ -47,7 +47,10 @@ export default function Root() {
         { code },
         { withCredentials: true }
       );
-      console.log(data); // TODO: code를 이용해서 oauth 로그인
+      if (data.message == 'token error') {
+        console.log(data);
+      }
+      // console.log(data); // TODO: code를 이용해서 oauth 로그인
     }, 500);
     return () => {
       clearInterval(loginPopupInterval);

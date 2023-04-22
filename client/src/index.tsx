@@ -11,12 +11,6 @@ const router = createBrowserRouter([
     path: '/',
     element: <Root />,
     errorElement: <ErrorPage />,
-    children: [
-      {
-        path: '/token',
-        element: <ErrorPage />,
-      },
-    ],
   },
   {
     path: '/oauth/callback',

@@ -55,11 +55,28 @@
   background-color: black;
 }
 
-.header__login-wrapper.login {
+.header__token-wrapper {
   height: 100%;
   display: flex;
   align-items: center;
-  margin: 0 20px;
+  margin-right: 20px;
+}
+
+.token__button {
+  width: 120px;
+  height: 60px;
+  color: white;
+  background-color: red;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.header__button-wrapper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
 }
 
 .login__github {
@@ -68,10 +85,20 @@
   color: white;
   background-color: black;
   border-radius: 5px;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
 }
 
 .login__github:hover {
   opacity: 0.8;
+}
+
+.button-start {
+  width: 200px;
+  height: 60px;
+  color: white;
+  background-color: green;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
 }
