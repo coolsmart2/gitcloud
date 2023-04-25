@@ -251,19 +251,21 @@ import { GithubError } from '../constants/errors';
 
 export const githubOAuth = async (req: Request, res: Response) => {
   const { code } = req.body;
+  console.log(req.session.userId);
   try {
     const oauthUser = await githubService.findUserByCode(code);
-    let user = await userService.findOneByProviderId(oauthUser.node_id);
-    if (user.length === 0) {
+    let user = (await userService.findOneByProviderId(oauthUser.node_id))[0];
+    if (!user) {
       await userService.add({
         providerId: oauthUser.node_id,
         username: oauthUser.login,
         name: oauthUser.name,
         avatarUrl: oauthUser.avatar_url,
       });
-      user = await userService.findOneByProviderId(oauthUser.node_id);
+      user = (await userService.findOneByProviderId(oauthUser.node_id))[0];
     }
-    if (!user[0].personal_access_token) {
+    req.session.userId = user.id;
+    if (!user.personal_access_token) {
       return res.send({ message: 'token error' });
     }
     return res.send({ message: 'success' });

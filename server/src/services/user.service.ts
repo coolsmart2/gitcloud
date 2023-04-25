@@ -40,10 +40,19 @@ export const add = async ({
   }
 };
 
-export const updatePersonalAccessToken = ({
+export const updatePersonalAccessToken = async ({
   id,
   personalAccessToken,
 }: {
   id: number;
   personalAccessToken: string;
-}) => {};
+}) => {
+  try {
+    return userRepository.updateToken({
+      id,
+      personalAccessToken,
+    });
+  } catch (error) {
+    throw new ServerError();
+  }
+};

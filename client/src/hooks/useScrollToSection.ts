@@ -56,6 +56,41 @@ export default function useScrollToSection() {
     }
   }, []);
 
+  const smoothScroll = useCallback(
+    (endX: number, endY: number, duration: number) => {
+      const [startX, startY] = [window.scrollX, window.scrollY];
+      const [distanceX, distanceY] = [endX - startX, endY - startY];
+      const startTime = Date.now();
+
+      const easeInOutQuart = (
+        time: number,
+        from: number,
+        distance: number,
+        duration: number
+      ) => {
+        if ((time /= duration / 2) < 1)
+          return (distance / 2) * time * time * time * time + from;
+        return (-distance / 2) * ((time -= 2) * time * time * time - 2) + from;
+      };
+
+      const scrollAnimation = () => {
+        const time = Date.now() - startTime;
+        const [newX, newY] = [
+          Math.round(easeInOutQuart(time, startX, distanceX, duration)),
+          Math.round(easeInOutQuart(time, startY, distanceY, duration)),
+        ];
+        if (time > duration) {
+          return;
+        }
+        window.scrollTo(newX, newY);
+        requestAnimationFrame(scrollAnimation);
+      };
+
+      scrollAnimation();
+    },
+    []
+  );
+
   useEffect(() => {
     window.addEventListener('scroll', handleSectionScroll);
     return () => {
@@ -66,7 +101,7 @@ export default function useScrollToSection() {
   }, []);
 
   useEffect(() => {
-    if (mode == 'click') {
+    if (mode === 'click') {
       if (scroll == sectionPos[section].minHeight) {
         setMode('scroll');
       }
@@ -84,7 +119,7 @@ export default function useScrollToSection() {
   }, [scroll, mode]);
 
   useEffect(() => {
-    if (mode == 'scroll') {
+    if (mode === 'scroll') {
       window.removeEventListener('wheel', handlePreventWheelScroll);
       window.removeEventListener('keydown', handlePreventKeyBoardScroll);
       return;
@@ -93,11 +128,8 @@ export default function useScrollToSection() {
       passive: false,
     });
     window.addEventListener('keydown', handlePreventKeyBoardScroll);
-    window.scrollTo({
-      top: sectionPos[section].minHeight,
-      behavior: 'smooth', // TODO: 부드럽게 이동시 스크롤 이벤트 발생하여 메뉴바 깜박거리는 현상
-    });
-  }, [mode, section]);
+    smoothScroll(0, sectionPos[section].minHeight, 500);
+  }, [section, mode]);
 
   return [section, handleSectionClick, ref] as [
     string,

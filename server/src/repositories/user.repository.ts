@@ -58,3 +58,25 @@ export const add = async ({
     if (conn) conn.release();
   }
 };
+
+export const updateToken = async ({
+  id,
+  personalAccessToken,
+}: {
+  id: number;
+  personalAccessToken: string;
+}) => {
+  let conn = null;
+  try {
+    conn = await cp.getConnection();
+    const result = await conn.query(QUERY.UPDATE_USER_PERSONAL_ACCESS_TOKEN, [
+      personalAccessToken,
+      id,
+    ]);
+    return result?.[0];
+  } catch (error) {
+    throw new MySqlError();
+  } finally {
+    if (conn) conn.release();
+  }
+};

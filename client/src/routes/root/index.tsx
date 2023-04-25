@@ -10,7 +10,8 @@ import HowToUse from '../../components/Section/HowToUse';
 export default function Root() {
   const [section, setSection, sectionRef] = useScrollToSection();
   const [oauthPopup, setOauthPopup] = useState<Window | null>(null);
-  const [user, setUser] = useState<string>('');
+  const [isLogin, setIsLogin] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
 
   const createOauthPopup = () => {
     const outerWidth = window.outerWidth;
@@ -43,14 +44,14 @@ export default function Root() {
       oauthPopup.close();
       setOauthPopup(null);
       const { data } = await axios.post(
-        'http://localhost:8080/github/oauth',
+        'http://127.0.0.1:8080/github/oauth',
         { code },
         { withCredentials: true }
       );
-      if (data.message == 'token error') {
-        console.log(data);
+      setIsLogin(true);
+      if (data.message == 'success') {
+        setHasToken(true);
       }
-      // console.log(data); // TODO: code를 이용해서 oauth 로그인
     }, 500);
     return () => {
       clearInterval(loginPopupInterval);
@@ -62,12 +63,12 @@ export default function Root() {
   return (
     <div className="root-container">
       <Header
-        isLogin={false}
-        hasToken={false}
+        isLogin={isLogin}
+        hasToken={hasToken}
+        setHasToken={setHasToken}
         section={section}
         setSection={setSection}
         onLoginClick={createOauthPopup}
-        onTokenClick={() => {}}
       />
       <main className="section-container">
         <Section id="overview" ref={sectionRef}>

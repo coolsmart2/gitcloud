@@ -1,8 +1,6 @@
 import { Router } from 'express';
-import dotenv from 'dotenv';
 import * as githubController from '../controllers/github.controller';
 
-dotenv.config();
 const router = Router();
 
 // /**

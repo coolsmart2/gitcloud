@@ -1,6 +1,5 @@
 import { Octokit } from '@octokit/rest';
 import { Directory, File } from '../types/tree.type';
-import { Commit } from '../types/commit.type';
 
 /**
  * 레포지토리 생성
