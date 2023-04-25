@@ -1,5 +1,5 @@
 import './index.scss';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useScrollToSection from '../../hooks/useScrollToSection';
 import axios from 'axios';
 import Header from '../../components/Header';
@@ -12,6 +12,7 @@ export default function Root() {
   const [oauthPopup, setOauthPopup] = useState<Window | null>(null);
   const [isLogin, setIsLogin] = useState(false);
   const [hasToken, setHasToken] = useState(false);
+  const popupInterval = useRef<number | null>(null);
 
   const createOauthPopup = () => {
     const outerWidth = window.outerWidth;
@@ -33,32 +34,35 @@ export default function Root() {
     if (!oauthPopup) {
       return;
     }
-    const loginPopupInterval = setInterval(async () => {
+    if (isLogin) {
+      oauthPopup?.close();
+      setOauthPopup(null);
+      return;
+    }
+    popupInterval.current = setInterval(async () => {
       const currentUrl = oauthPopup.location.href;
       const params = new URL(currentUrl).searchParams;
       const code = params.get('code');
       if (!code) {
         return;
       }
-      clearInterval(loginPopupInterval);
-      oauthPopup.close();
-      setOauthPopup(null);
+      popupInterval.current && clearInterval(popupInterval.current);
       const { data } = await axios.post(
         'http://127.0.0.1:8080/github/oauth',
         { code },
         { withCredentials: true }
       );
-      setIsLogin(true);
       if (data.message == 'success') {
         setHasToken(true);
       }
+      setIsLogin(true);
     }, 500);
     return () => {
-      clearInterval(loginPopupInterval);
+      popupInterval.current && clearInterval(popupInterval.current);
       oauthPopup?.close();
       setOauthPopup(null);
     };
-  }, [oauthPopup]);
+  }, [oauthPopup, isLogin]);
 
   return (
     <div className="root-container">
