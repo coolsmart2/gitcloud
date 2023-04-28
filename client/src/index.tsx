@@ -1,12 +1,12 @@
-import React, { createContext } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { RecoilRoot } from 'recoil';
 import ErrorPage from './error-page';
 import Root from './routes/root';
-import './index.scss';
 import OAuthCallback from './routes/oauth-callback';
-import axios from 'axios';
-import { RecoilRoot } from 'recoil';
+import { getGitHubRepoAPI, getGitHubReposAPI } from './apis/github';
+import './index.scss';
 
 const router = createBrowserRouter([
   {
@@ -23,25 +23,15 @@ const router = createBrowserRouter([
     path: '/github',
     element: <div>username</div>,
     loader: async () => {
-      const { data: repos } = await axios.get(
-        'http://127.0.0.1:8080/github/repos',
-        {
-          withCredentials: true,
-        }
-      );
+      const repos = await getGitHubReposAPI();
       return repos;
     },
     children: [
       {
         path: ':reponame',
         loader: async ({ params }) => {
-          const { reponame } = params;
-          const { data: repo } = await axios.get(
-            `http://127.0.0.1:8080/github/repos/${reponame}`,
-            {
-              withCredentials: true,
-            }
-          );
+          const { reponame } = params as { reponame: string };
+          const repo = await getGitHubRepoAPI({ reponame });
           return repo;
         },
         element: <div>reponame</div>,

@@ -262,6 +262,7 @@ export const githubOAuth = async (req: Request, res: Response) => {
   try {
     const oauthUser = await githubService.findUserByCode(code);
     let user = await userService.findOneByProviderId(oauthUser.node_id);
+    // 사용자가 회원가입이 되어 있지 않은 경우
     if (!user) {
       console.log(oauthUser);
       await userService.add({

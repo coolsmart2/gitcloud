@@ -12,6 +12,10 @@ export default function useUserState() {
   }, []);
 
   useEffect(() => {
+    if (user) {
+      return;
+    }
+
     const userJson = sessionStorage.getItem('user');
     if (userJson) {
       setUser(JSON.parse(userJson));

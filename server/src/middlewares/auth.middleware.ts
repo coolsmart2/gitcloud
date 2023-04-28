@@ -7,7 +7,7 @@ export const checkSession = (
 ) => {
   const userId = req.session.userId as number;
   if (!userId) {
-    return res.status(404).send({ message: 'auth error' });
+    return res.status(401).send({ message: 'auth error' });
   }
   return next();
 };

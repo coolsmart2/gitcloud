@@ -1,8 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
-import './index.scss';
 import { useState } from 'react';
-import axios from 'axios';
 import useUserState from '../../hooks/useUserState';
+import { postTokenAPI } from '../../apis/user';
+import './index.scss';
 
 interface HeaderProps {
   section: string;
@@ -28,11 +28,7 @@ export default function Header({
     e.preventDefault();
     if (user) {
       try {
-        await axios.post(
-          'http://127.0.0.1:8080/user/token',
-          { token },
-          { withCredentials: true }
-        );
+        await postTokenAPI({ token });
         setUser({ ...user, hasToken: true });
         setIsTokenOpen(false);
       } catch (error) {

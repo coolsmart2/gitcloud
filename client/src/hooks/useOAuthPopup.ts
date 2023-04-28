@@ -1,6 +1,6 @@
-import axios from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import useUserState from './useUserState';
+import { postGitHubOAuthAPI } from '../apis/github';
 
 const GITHUB_OAUTH_URL = 'https://github.com/login/oauth/authorize';
 const GITHUB_OAUTH_CLIENT_ID = 'aa35721dd67709b79ce2';
@@ -41,11 +41,7 @@ export default function useOAuthPopup() {
         return;
       }
       popupInterval.current && clearInterval(popupInterval.current);
-      const { data } = await axios.post(
-        'http://127.0.0.1:8080/github/oauth',
-        { code },
-        { withCredentials: true }
-      );
+      const data = await postGitHubOAuthAPI({ code });
       setUser(data.data);
     }, 500);
     return () => {
