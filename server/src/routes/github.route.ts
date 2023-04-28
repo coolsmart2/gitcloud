@@ -1,12 +1,17 @@
 import { Router } from 'express';
 import * as githubController from '../controllers/github.controller';
+import * as authMiddleware from '../middlewares/auth.middleware';
 
 const router = Router();
 
 /**
  * 전체 레포지토리 목록 조회
  */
-router.get('/repos', githubController.githubRepoList);
+router.get(
+  '/repos',
+  authMiddleware.checkSession,
+  githubController.githubRepoList
+);
 
 // /**
 //  * 레포지토리 생성
@@ -21,7 +26,11 @@ router.get('/repos', githubController.githubRepoList);
 /**
  * 레포지토리 조회 (디렉토리 구조)
  */
-router.get('/repos/:repo', githubController.githubRepo);
+router.get(
+  '/repos/:repo',
+  authMiddleware.checkSession,
+  githubController.githubRepo
+);
 
 // /**
 //  * 특정 커밋 시점의 레포지토리, 파일 조회

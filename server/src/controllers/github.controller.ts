@@ -8,7 +8,6 @@ import { GithubError } from '../constants/errors';
  */
 export const githubRepoList = async (req: Request, res: Response) => {
   const userId = req.session.userId as number;
-  console.log(await userService.findOneById(userId));
   const { personal_access_token: token } = await userService.findOneById(
     userId
   );
