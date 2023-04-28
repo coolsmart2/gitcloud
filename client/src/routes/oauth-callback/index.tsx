@@ -1,6 +1,6 @@
 import './index.scss';
 
-export default function OauthCallback() {
+export default function OAuthCallback() {
   return (
     <div className="oauth-callback-container">
       <div className="success-logo-wrapper">

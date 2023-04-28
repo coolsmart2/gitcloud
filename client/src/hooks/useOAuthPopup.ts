@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
-import { userState } from '../recoil/atoms';
+import useUserState from './useUserState';
 
 const GITHUB_OAUTH_URL = 'https://github.com/login/oauth/authorize';
 const GITHUB_OAUTH_CLIENT_ID = 'aa35721dd67709b79ce2';
@@ -9,7 +8,7 @@ const POPUP_WIDTH = 500;
 const POPUP_HEIGHT = 600;
 
 export default function useOAuthPopup() {
-  const [user, setUser] = useRecoilState(userState);
+  const [user, setUser] = useUserState();
   const [oauthPopup, setOauthPopup] = useState<Window | null>(null);
   const popupInterval = useRef<number | null>(null);
 
@@ -29,7 +28,7 @@ export default function useOAuthPopup() {
     if (!oauthPopup) {
       return;
     }
-    if (!!user) {
+    if (user) {
       oauthPopup?.close();
       setOauthPopup(null);
       return;

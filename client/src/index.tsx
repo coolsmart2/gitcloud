@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import ErrorPage from './error-page';
 import Root from './routes/root';
 import './index.scss';
-import OauthCallback from './routes/oauth-callback';
+import OAuthCallback from './routes/oauth-callback';
 import axios from 'axios';
 import { RecoilRoot } from 'recoil';
 
@@ -15,8 +15,8 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: '/oauth/callback',
-    element: <OauthCallback />,
+    path: '/oauth-callback',
+    element: <OAuthCallback />,
     errorElement: <ErrorPage />,
   },
   {

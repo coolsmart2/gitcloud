@@ -2,8 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './index.scss';
 import { useState } from 'react';
 import axios from 'axios';
-import { useRecoilState } from 'recoil';
-import { userState } from '../../recoil/atoms';
+import useUserState from '../../hooks/useUserState';
 
 interface HeaderProps {
   section: string;
@@ -17,7 +16,7 @@ export default function Header({
   onLoginClick,
 }: HeaderProps) {
   const navigate = useNavigate();
-  const [user, setUser] = useRecoilState(userState);
+  const [user, setUser] = useUserState();
 
   const [token, setToken] = useState('');
   const [isTokenOpen, setIsTokenOpen] = useState(false);
@@ -78,14 +77,7 @@ export default function Header({
             </li>
           </ul>
         </nav>
-        {!isLogin && (
-          <div className="header__button-wrapper">
-            <button className="login__github" onClick={onLoginClick}>
-              <b>GitHub</b>로 시작하기
-            </button>
-          </div>
-        )}
-        {isLogin && (
+        {isLogin ? (
           <>
             <div className="header__token-wrapper">
               <button
@@ -105,6 +97,12 @@ export default function Header({
               </button>
             </div>
           </>
+        ) : (
+          <div className="header__button-wrapper">
+            <button className="login__github" onClick={onLoginClick}>
+              <b>GitHub</b>로 시작하기
+            </button>
+          </div>
         )}
       </header>
       {isTokenOpen && (
