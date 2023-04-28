@@ -20,19 +20,16 @@ export const findOneByProviderId = async (providerId: string) => {
 export const add = async ({
   providerId,
   username,
-  name,
   avatarUrl,
 }: {
   providerId: string;
   username: string;
-  name: string;
   avatarUrl: string;
 }) => {
   try {
     return userRepository.add({
       providerId,
       username,
-      name,
       avatarUrl,
     });
   } catch (error) {

@@ -8,7 +8,7 @@ export const findOneById = async (id: number) => {
   try {
     conn = await cp.getConnection();
     const result = await conn.query(QUERY.SELECT_USER_BY_ID, [id]);
-    return result?.[0] as unknown as User[];
+    return (result?.[0] as unknown as User[])[0];
   } catch (error) {
     throw new MySqlError();
   } finally {
@@ -34,12 +34,10 @@ export const findOneByProviderId = async (providerId: string) => {
 export const add = async ({
   providerId,
   username,
-  name,
   avatarUrl,
 }: {
   providerId: string;
   username: string;
-  name: string;
   avatarUrl: string;
 }) => {
   let conn = null;
@@ -48,7 +46,6 @@ export const add = async ({
     const result = await conn.query(QUERY.INSERT_USER, [
       providerId,
       username,
-      name,
       avatarUrl,
     ]);
     return result?.[0];

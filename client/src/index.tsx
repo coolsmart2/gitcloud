@@ -6,6 +6,7 @@ import Root from './routes/root';
 import './index.scss';
 import OauthCallback from './routes/oauth-callback';
 import { User } from './types';
+import axios from 'axios';
 
 const router = createBrowserRouter([
   {
@@ -19,18 +20,33 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
-    path: ':username',
+    path: '/github',
     element: <div>username</div>,
+    loader: async () => {
+      const { data: repos } = await axios.get(
+        'http://127.0.0.1:8080/github/repos',
+        {
+          withCredentials: true,
+        }
+      );
+      return repos;
+    },
     children: [
       {
-        path: ':reponame/:branchname?',
+        path: ':reponame',
+        loader: async ({ params }) => {
+          const { reponame } = params;
+          const { data: repo } = await axios.get(
+            `http://127.0.0.1:8080/github/repos/${reponame}`,
+            {
+              withCredentials: true,
+            }
+          );
+          return repo;
+        },
         element: <div>reponame</div>,
       },
     ],
-  },
-  {
-    path: '/grandmother',
-    element: <h1>할머니 생신 축하드려요!!!</h1>,
   },
 ]);
 

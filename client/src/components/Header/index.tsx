@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './index.scss';
-import Modal from '../Modal';
 import { useState } from 'react';
 import axios from 'axios';
 
@@ -21,6 +20,8 @@ export default function Header({
   setSection,
   onLoginClick,
 }: HeaderProps) {
+  const navigate = useNavigate();
+
   const initStart = !isLogin && !hasToken;
   const canStart = isLogin && hasToken;
 
@@ -57,6 +58,7 @@ export default function Header({
                   : 'list__item'
               }
               onClick={() => {
+                navigate('/#overview');
                 setSection('overview');
               }}
             >
@@ -69,6 +71,7 @@ export default function Header({
                   : 'list__item'
               }
               onClick={() => {
+                navigate('/#how-to-use');
                 setSection('how-to-use');
               }}
             >
@@ -97,7 +100,7 @@ export default function Header({
           <div className="header__button-wrapper">
             <button
               className="button-start"
-              onClick={onLoginClick}
+              onClick={() => navigate('/github')}
               disabled={!canStart}
             >
               시작하기

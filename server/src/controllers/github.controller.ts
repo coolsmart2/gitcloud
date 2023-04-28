@@ -3,52 +3,61 @@ import * as userService from '../services/user.service';
 import * as githubService from '../services/github.service';
 import { GithubError } from '../constants/errors';
 
-// /**
-//  * 전체 레포지토리 목록 조회
-//  */
-// export const githubRepoList = async (req: Request, res: Response) => {
-//   const { token } = userService.findOneById(1);
+/**
+ * 전체 레포지토리 목록 조회
+ */
+export const githubRepoList = async (req: Request, res: Response) => {
+  const userId = req.session.userId as number;
+  console.log(await userService.findOneById(userId));
+  const { personal_access_token: token } = await userService.findOneById(
+    userId
+  );
 
-//   if (!token) return res.status(404).send({ message: 'token error' });
+  if (!token) return res.status(404).send({ message: 'token error' });
 
-//   try {
-//     const repos = await githubService.findRepos(token);
+  try {
+    console.log(token);
+    const repos = await githubService.findRepos(token);
 
-//     return res.send({ message: 'success', data: repos });
-//   } catch (error) {
-//     if (error instanceof GithubError) {
-//       return res.status(422).send({ message: 'github api error' });
-//     }
-//     return res.status(500).send({ message: 'server error' });
-//   }
-// };
+    return res.send({ message: 'success', data: repos });
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
 
-// /**
-//  * 레포지토리 조회
-//  */
-// export const githubRepo = async (req: Request, res: Response) => {
-//   const { repo: reponame } = req.params;
-//   const { ref } = req.query as { ref: string };
-//   const { username, token } = userService.findOneById(1);
+/**
+ * 레포지토리 조회
+ */
+export const githubRepo = async (req: Request, res: Response) => {
+  const { repo: reponame } = req.params;
+  const { ref } = req.query as { ref: string };
+  const userId = req.session.userId as number;
+  const { username, personal_access_token: token } =
+    await userService.findOneById(userId);
 
-//   if (!username || !token)
-//     return res.status(404).send({ message: 'token error' });
+  console.log(username, token);
 
-//   try {
-//     const repoTree = await githubService.findRepo({
-//       token,
-//       username,
-//       reponame,
-//       ref,
-//     });
-//     return res.send({ message: 'success', data: repoTree });
-//   } catch (error) {
-//     if (error instanceof GithubError) {
-//       return res.status(422).send({ message: 'github api error' });
-//     }
-//     return res.status(500).send({ message: 'server error' });
-//   }
-// };
+  if (!username || !token)
+    return res.status(404).send({ message: 'token error' });
+
+  try {
+    const repoTree = await githubService.findRepo({
+      token,
+      username,
+      reponame,
+      ref,
+    });
+    return res.send({ message: 'success', data: repoTree });
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
 
 // /**
 //  * 파일 조회 (폴더 제외)
@@ -251,15 +260,15 @@ import { GithubError } from '../constants/errors';
 
 export const githubOAuth = async (req: Request, res: Response) => {
   const { code } = req.body;
-  console.log(req.session.userId);
+  console.log(code);
   try {
     const oauthUser = await githubService.findUserByCode(code);
     let user = (await userService.findOneByProviderId(oauthUser.node_id))[0];
     if (!user) {
+      console.log(oauthUser);
       await userService.add({
         providerId: oauthUser.node_id,
         username: oauthUser.login,
-        name: oauthUser.name,
         avatarUrl: oauthUser.avatar_url,
       });
       user = (await userService.findOneByProviderId(oauthUser.node_id))[0];

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const HEADER_HEIGHT = 80;
 
@@ -11,12 +10,12 @@ interface SectionPos {
 }
 
 export default function useScrollToSection() {
-  const navigate = useNavigate();
   const [sectionPos, setSectionPos] = useState<SectionPos>({});
   const [section, setSection] = useState('overview');
   const [mode, setMode] = useState<'scroll' | 'click'>('scroll');
   const [scroll, setScroll] = useState(window.scrollY);
 
+  // todo: 이 코드 이해가 잘 안된다.
   const ref = useCallback((node: HTMLElement) => {
     if (node !== null) {
       sectionPos[node.id] = {
@@ -37,7 +36,6 @@ export default function useScrollToSection() {
   }, []);
 
   const handleSectionClick = useCallback((section: string) => {
-    navigate(`/#${section}`);
     setSection(section);
     setMode('click');
   }, []);

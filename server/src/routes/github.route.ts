@@ -3,10 +3,10 @@ import * as githubController from '../controllers/github.controller';
 
 const router = Router();
 
-// /**
-//  * 전체 레포지토리 목록 조회
-//  */
-// router.get('/repos', githubController.githubRepoList);
+/**
+ * 전체 레포지토리 목록 조회
+ */
+router.get('/repos', githubController.githubRepoList);
 
 // /**
 //  * 레포지토리 생성
@@ -18,10 +18,10 @@ const router = Router();
 //  */
 // router.delete('/repos/:repo', githubController.githubRepoDelete);
 
-// /**
-//  * 레포지토리 조회 (디렉토리 구조)
-//  */
-// router.get('/repos/:repo', githubController.githubRepo);
+/**
+ * 레포지토리 조회 (디렉토리 구조)
+ */
+router.get('/repos/:repo', githubController.githubRepo);
 
 // /**
 //  * 특정 커밋 시점의 레포지토리, 파일 조회
