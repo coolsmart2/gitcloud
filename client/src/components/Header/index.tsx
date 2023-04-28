@@ -86,7 +86,7 @@ export default function Header({
             <div className="header__button-wrapper">
               <button
                 className="button-start"
-                onClick={() => navigate('/github')}
+                onClick={onLoginClick}
                 disabled={!hasToken}
               >
                 시작하기

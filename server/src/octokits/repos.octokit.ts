@@ -53,8 +53,11 @@ export const selectRepos = async ({ token }: { token: string }) => {
     auth: token,
   });
 
-  const { data } = await octokit.repos.listForAuthenticatedUser();
+  const { data } = await octokit.repos.listForAuthenticatedUser({
+    type: 'owner',
+  });
   const repositories = data.map(repo => ({
+    id: repo.id,
     name: repo.name,
     private: repo.private,
   }));

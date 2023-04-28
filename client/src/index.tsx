@@ -7,6 +7,7 @@ import Root from './routes/root';
 import OAuthCallback from './routes/oauth-callback';
 import { getGitHubRepoAPI, getGitHubReposAPI } from './apis/github';
 import './index.scss';
+import GitHub from './routes/github';
 
 const router = createBrowserRouter([
   {
@@ -21,9 +22,9 @@ const router = createBrowserRouter([
   },
   {
     path: '/github',
-    element: <div>username</div>,
+    element: <GitHub />,
     loader: async () => {
-      const repos = await getGitHubReposAPI();
+      const { data: repos } = await getGitHubReposAPI();
       return repos;
     },
     children: [
@@ -31,7 +32,7 @@ const router = createBrowserRouter([
         path: ':reponame',
         loader: async ({ params }) => {
           const { reponame } = params as { reponame: string };
-          const repo = await getGitHubRepoAPI({ reponame });
+          const { data: repo } = await getGitHubRepoAPI({ reponame });
           return repo;
         },
         element: <div>reponame</div>,
