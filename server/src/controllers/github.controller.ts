@@ -260,10 +260,9 @@ export const githubRepo = async (req: Request, res: Response) => {
 
 export const githubOAuth = async (req: Request, res: Response) => {
   const { code } = req.body;
-  console.log(code);
   try {
     const oauthUser = await githubService.findUserByCode(code);
-    let user = (await userService.findOneByProviderId(oauthUser.node_id))[0];
+    let user = await userService.findOneByProviderId(oauthUser.node_id);
     if (!user) {
       console.log(oauthUser);
       await userService.add({
@@ -271,13 +270,17 @@ export const githubOAuth = async (req: Request, res: Response) => {
         username: oauthUser.login,
         avatarUrl: oauthUser.avatar_url,
       });
-      user = (await userService.findOneByProviderId(oauthUser.node_id))[0];
+      user = await userService.findOneByProviderId(oauthUser.node_id);
     }
     req.session.userId = user.id;
-    if (!user.personal_access_token) {
-      return res.send({ message: 'token error' });
-    }
-    return res.send({ message: 'success' });
+    return res.send({
+      message: 'success',
+      data: {
+        username: user.username,
+        avatarUrl: user.avatar_url,
+        hasToken: !!user.personal_access_token,
+      },
+    });
   } catch (error) {
     return res.status(500).send({ message: 'server error' });
   }

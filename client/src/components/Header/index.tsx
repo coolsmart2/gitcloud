@@ -2,44 +2,43 @@ import { Link, useNavigate } from 'react-router-dom';
 import './index.scss';
 import { useState } from 'react';
 import axios from 'axios';
+import { useRecoilState } from 'recoil';
+import { userState } from '../../recoil/atoms';
 
 interface HeaderProps {
-  isLogin: boolean;
-  hasToken: boolean;
-  setHasToken: (hasToken: boolean) => void;
   section: string;
   setSection: (section: string) => void;
   onLoginClick: () => void;
 }
 
 export default function Header({
-  isLogin,
-  hasToken,
-  setHasToken,
   section,
   setSection,
   onLoginClick,
 }: HeaderProps) {
   const navigate = useNavigate();
-
-  const initStart = !isLogin && !hasToken;
-  const canStart = isLogin && hasToken;
+  const [user, setUser] = useRecoilState(userState);
 
   const [token, setToken] = useState('');
-  const [isTokenInput, setIsTokenInput] = useState(false);
+  const [isTokenOpen, setIsTokenOpen] = useState(false);
+
+  const isLogin = !!user;
+  const hasToken = !!user && user.hasToken;
 
   const handleSummit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      await axios.post(
-        'http://127.0.0.1:8080/user/token',
-        { token },
-        { withCredentials: true }
-      );
-      setHasToken(true);
-      setIsTokenInput(false);
-    } catch (error) {
-      console.log(error);
+    if (user) {
+      try {
+        await axios.post(
+          'http://127.0.0.1:8080/user/token',
+          { token },
+          { withCredentials: true }
+        );
+        setUser({ ...user, hasToken: true });
+        setIsTokenOpen(false);
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -79,36 +78,36 @@ export default function Header({
             </li>
           </ul>
         </nav>
-        {isLogin && (
-          <div className="header__token-wrapper">
-            <button
-              className="token__button"
-              onClick={() => setIsTokenInput(prev => !prev)}
-            >
-              토큰
-            </button>
-          </div>
-        )}
-        {initStart && (
+        {!isLogin && (
           <div className="header__button-wrapper">
             <button className="login__github" onClick={onLoginClick}>
               <b>GitHub</b>로 시작하기
             </button>
           </div>
         )}
-        {!initStart && (
-          <div className="header__button-wrapper">
-            <button
-              className="button-start"
-              onClick={() => navigate('/github')}
-              disabled={!canStart}
-            >
-              시작하기
-            </button>
-          </div>
+        {isLogin && (
+          <>
+            <div className="header__token-wrapper">
+              <button
+                className="token__button"
+                onClick={() => setIsTokenOpen(prev => !prev)}
+              >
+                토큰
+              </button>
+            </div>
+            <div className="header__button-wrapper">
+              <button
+                className="button-start"
+                onClick={() => navigate('/github')}
+                disabled={!hasToken}
+              >
+                시작하기
+              </button>
+            </div>
+          </>
         )}
       </header>
-      {isTokenInput && (
+      {isTokenOpen && (
         <div className="token-container">
           <form className="token-form" onSubmit={handleSummit}>
             <input

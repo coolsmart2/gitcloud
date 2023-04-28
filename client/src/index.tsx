@@ -5,8 +5,8 @@ import ErrorPage from './error-page';
 import Root from './routes/root';
 import './index.scss';
 import OauthCallback from './routes/oauth-callback';
-import { User } from './types';
 import axios from 'axios';
+import { RecoilRoot } from 'recoil';
 
 const router = createBrowserRouter([
   {
@@ -50,16 +50,10 @@ const router = createBrowserRouter([
   },
 ]);
 
-const UserContext = createContext<User | null>(null);
-
-function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null);
-
-  return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
-}
-
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <RecoilRoot>
+      <RouterProvider router={router} />
+    </RecoilRoot>
   </React.StrictMode>
 );

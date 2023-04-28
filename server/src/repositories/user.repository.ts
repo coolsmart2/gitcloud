@@ -23,7 +23,7 @@ export const findOneByProviderId = async (providerId: string) => {
     const result = await conn.query(QUERY.SELECT_USER_BY_PROVIDER_ID, [
       providerId,
     ]);
-    return result?.[0] as unknown as User[];
+    return (result?.[0] as unknown as User[])[0];
   } catch (error) {
     throw new MySqlError();
   } finally {
