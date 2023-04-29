@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { RecoilRoot } from 'recoil';
 import ErrorPage from './error-page';
 import Root from './routes/root';
 import OAuthCallback from './routes/oauth-callback';
-import { getGitHubRepoAPI, getGitHubReposAPI } from './apis/github';
-import './index.scss';
+import { getGitHubReposAPI } from './apis/github';
+import RepoWindow from './components/RepoWindow';
 import GitHub from './routes/github';
+import './index.scss';
+import RepoContext, { RepoProvider } from './contexts/RepoContext';
 
 const router = createBrowserRouter([
   {
@@ -30,12 +32,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: ':reponame',
-        loader: async ({ params }) => {
-          const { reponame } = params as { reponame: string };
-          const { data: repo } = await getGitHubRepoAPI({ reponame });
-          return repo;
-        },
-        element: <div>reponame</div>,
+        element: (
+          <RepoProvider>
+            <RepoWindow />
+          </RepoProvider>
+        ),
       },
     ],
   },

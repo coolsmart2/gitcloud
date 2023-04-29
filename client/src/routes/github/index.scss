@@ -1,11 +1,13 @@
 .github-container {
   height: 100vh;
-  // background-color: #eee;
 }
 
 .github-background {
+  height: 100%;
   padding: 30px;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, auto));
+  grid-template-rows: repeat(auto-fill, minmax(100px, auto));
   gap: 20px;
 }

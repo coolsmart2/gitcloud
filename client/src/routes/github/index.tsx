@@ -1,11 +1,11 @@
-import { useLoaderData, useNavigate } from 'react-router-dom';
-import { Repo } from '../../types';
-import Repository from '../../components/Repository';
-import { useState } from 'react';
+import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
+import { RepoInfo } from '../../types';
+import RepoIcon from '../../components/RepoIcon';
+import React, { useState } from 'react';
 import './index.scss';
 
 export default function GitHub() {
-  const repos = useLoaderData() as Repo[];
+  const repos = useLoaderData() as RepoInfo[];
   const navigate = useNavigate();
 
   const [checkedRepo, setCheckedRepo] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export default function GitHub() {
         onClick={() => setCheckedRepo(null)}
       >
         {repos.map(repo => (
-          <Repository
+          <RepoIcon
             key={repo.id}
             checked={checkedRepo === repo.name}
             onClick={handleRepoClick(repo.name)}
@@ -39,6 +39,11 @@ export default function GitHub() {
           />
         ))}
       </main>
+      <section className="github-repo">
+        <React.Suspense fallback={<div>loading...</div>}>
+          <Outlet />
+        </React.Suspense>
+      </section>
     </div>
   );
 }

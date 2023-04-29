@@ -4,7 +4,7 @@ import {
 } from 'react-icons/ri';
 import './index.scss';
 
-interface RepoProps {
+interface RepoIconProps {
   name: string;
   private: boolean;
   createdAt: string;
@@ -12,14 +12,14 @@ interface RepoProps {
   checked: boolean;
   onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
-export default function Repo({
+export default function RepoIcon({
   name,
   private: _private,
   createdAt,
   updatedAt,
   checked,
   onClick,
-}: RepoProps) {
+}: RepoIconProps) {
   return (
     <div
       className={'repo-container' + (checked ? ' checked' : '')}

@@ -13,13 +13,13 @@
   .repo-image {
     background-color: #eee;
     border-radius: 5px;
+    box-shadow: 0 0 0 2px #adb6bd;
+    box-sizing: border-box;
   }
 
   .repo-name {
-    width: fit-content;
-    height: fit-content;
+    white-space: pre-wrap;
     overflow: visible;
-    white-space: pre-line;
     color: white;
     background-color: #1263ce;
     border: 2px solid #1263ce;
@@ -33,13 +33,20 @@
 }
 
 .repo-name {
-  position: absolute;
-  top: calc(100% - 21px);
   width: 100%;
   height: fit-content;
+  position: absolute;
+  top: calc(100% - 21px);
   line-height: 21px;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }

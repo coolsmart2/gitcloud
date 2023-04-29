@@ -1,0 +1,16 @@
+.file-wrapper {
+  display: flex;
+  gap: 5px;
+  padding: 4px 0;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #eee;
+  }
+}
+
+.file__name {
+  overflow: hidden;
+  flex: 1;
+  white-space: nowrap;
+}
