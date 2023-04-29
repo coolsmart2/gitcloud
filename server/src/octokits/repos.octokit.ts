@@ -60,6 +60,8 @@ export const selectRepos = async ({ token }: { token: string }) => {
     id: repo.id,
     name: repo.name,
     private: repo.private,
+    createdAt: repo.created_at,
+    updatedAt: repo.updated_at,
   }));
 
   return repositories;

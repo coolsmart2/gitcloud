@@ -1,0 +1,11 @@
+.github-container {
+  height: 100vh;
+  // background-color: #eee;
+}
+
+.github-background {
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, auto));
+  gap: 20px;
+}
