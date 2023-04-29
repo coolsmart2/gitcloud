@@ -1,4 +1,5 @@
 import { GoFileDirectory } from 'react-icons/go';
+import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
 import './index.scss';
 import { useState } from 'react';
 import { Tree } from '../../types';
@@ -17,9 +18,14 @@ export default function Directory({ depth, name, tree }: DirectoryProps) {
     <>
       <div
         className="dir-wrapper"
-        style={{ paddingLeft: `${20 * depth}px` }}
+        style={{ paddingLeft: `${10 * depth}px` }}
         onClick={() => setIsOpened(prev => !prev)}
       >
+        {isOpened ? (
+          <MdKeyboardArrowDown size={18} />
+        ) : (
+          <MdKeyboardArrowRight size={18} />
+        )}
         <GoFileDirectory className="dir__icon" size={18} />
         <div className="dir__name">{name}</div>
       </div>

@@ -1,0 +1,57 @@
+.repo-explorer-skeleton-container {
+  width: 25%;
+  height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow-x: hidden;
+
+  -webkit-animation: blink 1s ease-in-out infinite alternate;
+  -moz-animation: blink 1s ease-in-out infinite alternate;
+  animation: blink 1s ease-in-out infinite alternate;
+}
+
+.dir-file-skeleton {
+  display: flex;
+  gap: 5px;
+  padding: 4px 0;
+  padding-left: 33px;
+
+  &__type {
+    width: 19px;
+    height: 19px;
+    background-color: #eee;
+  }
+
+  &__name {
+    height: 19px;
+    background-color: #eee;
+  }
+}
+
+@-webkit-keyframes blink {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@-moz-keyframes blink {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}

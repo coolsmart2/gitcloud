@@ -1,3 +1,5 @@
+@import '../../common.scss';
+
 .dir-wrapper {
   display: flex;
   gap: 5px;
@@ -13,4 +15,6 @@
   overflow: hidden;
   flex: 1;
   white-space: nowrap;
+
+  @include prevent-text-select;
 }

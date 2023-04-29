@@ -5,6 +5,7 @@ import './index.scss';
 import React, { useContext, useEffect } from 'react';
 import RepoContext from '../../contexts/RepoContext';
 import RepoExplorer from '../RepoExplorer';
+import RepoExplorerSkeleton from '../RepoExplorer/skeleton';
 
 export default function RepoWindow() {
   const repo = useLoaderData() as Repo;
@@ -23,7 +24,7 @@ export default function RepoWindow() {
         </Link>
       </div>
       <div className="repo-window__body">
-        <React.Suspense fallback={<div>loading...</div>}>
+        <React.Suspense fallback={<RepoExplorerSkeleton />}>
           <RepoExplorer reponame={reponame} />
         </React.Suspense>
         <div className="repo-content__content">
