@@ -1,22 +1,48 @@
 .repo-window-container {
   width: 100%;
-  height: 100vh;
-  position: absolute;
-  top: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  position: absolute;
+  top: 0;
   background-color: white;
   z-index: 10;
 }
 
 .repo-window__header {
+  height: 60px;
   display: flex;
   padding: 10px;
+  box-sizing: border-box;
   justify-content: right;
+  border-bottom: 1px solid #eee;
 }
 
 .repo-window__body {
+  height: calc(100% - 60px);
+  position: relative;
+}
+
+.repo-window__sidebar {
   height: 100%;
-  padding: 0 10px;
-  display: flex;
+  position: absolute;
+  left: 0;
+}
+
+.repo-window__vertical {
+  width: 5px;
+  height: 100%;
+  position: absolute;
+  background-color: #eee;
+  cursor: col-resize;
+
+  &:hover {
+    background-color: #ddd;
+  }
+}
+
+.repo-window__content {
+  width: 100px;
+  height: 100%;
+  position: absolute;
 }

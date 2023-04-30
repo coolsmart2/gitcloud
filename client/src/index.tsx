@@ -9,7 +9,7 @@ import { getGitHubReposAPI } from './apis/github';
 import RepoWindow from './components/RepoWindow';
 import GitHub from './routes/github';
 import './index.scss';
-import RepoContext, { RepoProvider } from './contexts/RepoContext';
+import { RepoProvider } from './contexts/RepoContext';
 
 const router = createBrowserRouter([
   {

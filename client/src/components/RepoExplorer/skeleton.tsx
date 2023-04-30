@@ -3,7 +3,7 @@ import './skeleton.scss';
 export default function RepoExplorerSkeleton() {
   return (
     <div className="repo-explorer-skeleton-container">
-      {Array(20)
+      {Array(15)
         .fill(null)
         .map((_, i) => (
           <div key={i} className="dir-file-skeleton">
