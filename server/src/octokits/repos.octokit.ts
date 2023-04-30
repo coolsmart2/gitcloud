@@ -157,8 +157,7 @@ export const selectFileContent = async ({
       name: data.name,
       path: data.path,
       sha: data.sha,
-      content: data.content,
-      encoding: data.encoding,
+      content: Buffer.from(data.content, 'base64').toString('utf-8'),
     };
 
     return content;

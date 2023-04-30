@@ -8,10 +8,11 @@ import File from '../File';
 interface DirectoryProps {
   depth: number;
   name: string;
+  path: string;
   tree: Tree[];
 }
 
-export default function Directory({ depth, name, tree }: DirectoryProps) {
+export default function Directory({ depth, name, path, tree }: DirectoryProps) {
   const [isOpened, setIsOpened] = useState(false);
 
   return (
@@ -36,12 +37,20 @@ export default function Directory({ depth, name, tree }: DirectoryProps) {
               <Directory
                 depth={depth + 1}
                 name={data.name}
+                path={`${path}/${data.name}`}
                 tree={data.tree!}
                 key={data.sha}
               />
             );
           }
-          return <File name={data.name} depth={depth + 1} key={data.sha} />;
+          return (
+            <File
+              name={data.name}
+              path={`${path}/${data.name}`}
+              depth={depth + 1}
+              key={data.sha}
+            />
+          );
         })}
     </>
   );

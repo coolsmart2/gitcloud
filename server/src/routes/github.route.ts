@@ -32,10 +32,10 @@ router.get(
   githubController.githubRepo
 );
 
-// /**
-//  * 특정 커밋 시점의 레포지토리, 파일 조회
-//  */
-// router.get('/repos/:repo/contents/*', githubController.githubFileContent);
+/**
+ * 특정 커밋 시점의 레포지토리, 파일 조회
+ */
+router.get('/repos/:repo/contents/*', githubController.githubFileContent);
 
 // /**
 //  * 브랜치 생성

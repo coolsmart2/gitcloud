@@ -1,18 +1,38 @@
-import { Link, useLoaderData, useParams } from 'react-router-dom';
-import { Repo } from '../../types';
+import { Link, useParams } from 'react-router-dom';
 import { RiCloseCircleFill } from 'react-icons/ri';
-import './index.scss';
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import RepoContext from '../../contexts/RepoContext';
+import React, { useContext, useEffect, useState } from 'react';
 import RepoExplorer from '../RepoExplorer';
 import RepoExplorerSkeleton from '../RepoExplorer/skeleton';
+import './index.scss';
+import RepoEditor from '../RepoEditor';
+import { RepoProvider, useRepoContext } from '../../contexts/RepoContext';
 
 const VERTICAL_LINE_WIDTH = 5;
 
 export default function RepoWindow() {
   const { reponame } = useParams() as { reponame: string };
-  const [isResizing, setIsResizing] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [verticalX, setVerticalX] = useState(300);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const {
+    state: { path, branch },
+  } = useRepoContext();
+
+  useEffect(() => {
+    window.addEventListener('resize', () => {
+      setWindowWidth(window.innerWidth);
+    });
+    return () => {
+      window.removeEventListener('resize', () => {
+        setWindowWidth(window.innerWidth);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log(path, branch);
+  }, [path, branch]);
 
   const handleMouseDown = () => {
     setIsResizing(true);
@@ -55,12 +75,18 @@ export default function RepoWindow() {
         <div
           className="repo-window__content"
           style={{
-            width: window.innerWidth - verticalX - VERTICAL_LINE_WIDTH,
+            width: windowWidth - verticalX - VERTICAL_LINE_WIDTH,
             left: verticalX + VERTICAL_LINE_WIDTH,
           }}
         >
-          <div className="repo-window__content__editer">에디터</div>
-          <div className="repo-window__content__log">로그</div>
+          <div className="repo-window__content__editor">
+            {path !== '/' && (
+              <React.Suspense fallback={<div>loading...</div>}>
+                <RepoEditor reponame={reponame} />
+              </React.Suspense>
+            )}
+          </div>
+          {/* <div className="repo-window__content__log">로그</div> */}
         </div>
       </div>
     </div>

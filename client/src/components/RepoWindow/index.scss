@@ -45,4 +45,9 @@
   width: 100px;
   height: 100%;
   position: absolute;
+  overflow: auto;
+
+  &__editor {
+    height: 100%;
+  }
 }

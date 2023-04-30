@@ -1,19 +1,35 @@
-import { createContext, useState } from 'react';
-import { Repo } from '../types';
+import { createContext, useContext, useState } from 'react';
 
-const RepoContext = createContext(
-  {} as { repo: Repo | null; setRepo: (repo: Repo) => void }
-);
+type RepoContextType = {
+  state: {
+    path: string;
+    branch: string | null;
+  };
+  actions: {
+    setPath: (path: string) => void;
+    setBranch: (branch: string) => void;
+  };
+};
 
-const RepoProvider = ({ children }: { children: React.ReactNode }) => {
-  const [repo, setRepo] = useState<Repo | null>(null);
+const RepoContext = createContext<RepoContextType | null>(null);
+
+export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
+  const [path, setPath] = useState('/');
+  const [branch, setBranch] = useState<string | null>(null);
 
   return (
-    <RepoContext.Provider value={{ repo, setRepo }}>
+    <RepoContext.Provider
+      value={{ state: { path, branch }, actions: { setPath, setBranch } }}
+    >
       {children}
     </RepoContext.Provider>
   );
 };
 
-export { RepoProvider };
-export default RepoContext;
+export const useRepoContext = () => {
+  const context = useContext(RepoContext);
+  if (!context) {
+    throw new Error('useRepoContext must be used within a RepoProvider');
+  }
+  return context;
+};

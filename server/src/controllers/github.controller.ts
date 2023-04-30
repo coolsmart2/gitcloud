@@ -37,8 +37,6 @@ export const githubRepo = async (req: Request, res: Response) => {
   const { username, personal_access_token: token } =
     await userService.findOneById(userId);
 
-  console.log(username, token);
-
   if (!username || !token)
     return res.status(404).send({ message: 'token error' });
 
@@ -58,36 +56,39 @@ export const githubRepo = async (req: Request, res: Response) => {
   }
 };
 
-// /**
-//  * 파일 조회 (폴더 제외)
-//  */
-// export const githubFileContent = async (req: Request, res: Response) => {
-//   const { repo: reponame } = req.params;
-//   const path = req.params[0];
-//   const { ref } = req.query as { ref: string };
+/**
+ * 파일 조회 (폴더 제외)
+ */
+export const githubFileContent = async (req: Request, res: Response) => {
+  const { repo: reponame } = req.params;
+  const path = req.params[0];
+  const { ref } = req.query as { ref: string };
+  const userId = req.session.userId as number;
+  const { username, personal_access_token: token } =
+    await userService.findOneById(userId);
 
-//   const { username, token } = userService.findOneById(1);
+  if (!username || !token)
+    return res.status(404).send({ message: 'token error' });
 
-//   if (!username || !token)
-//     return res.status(404).send({ message: 'token error' });
+  console.log(reponame, path, ref);
 
-//   try {
-//     const content = await githubService.findFileContent({
-//       token,
-//       username,
-//       reponame,
-//       path,
-//       ref,
-//     });
+  try {
+    const content = await githubService.findFileContent({
+      token,
+      username,
+      reponame,
+      path,
+      ref,
+    });
 
-//     return res.send({ message: 'success', data: content });
-//   } catch (error) {
-//     if (error instanceof GithubError) {
-//       return res.status(422).send({ message: 'github api error' });
-//     }
-//     return res.status(500).send({ message: 'server error' });
-//   }
-// };
+    return res.send({ message: 'success', data: content });
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
 
 // /**
 //  * 레포지토리 생성

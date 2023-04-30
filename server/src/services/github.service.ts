@@ -140,6 +140,7 @@ export const findFileContent = async ({
     return content;
   } catch (error) {
     if (error instanceof RequestError) {
+      console.log(error);
       throw new GithubError();
     }
     throw new ServerError();

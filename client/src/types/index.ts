@@ -24,3 +24,10 @@ export interface Repo {
   name: string;
   tree: Tree[];
 }
+
+export interface File {
+  name: string;
+  path: string;
+  sha: string;
+  content: string;
+}
