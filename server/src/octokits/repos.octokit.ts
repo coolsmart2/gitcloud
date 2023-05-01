@@ -1,5 +1,4 @@
 import { Octokit } from '@octokit/rest';
-import { Directory, File } from '../types/tree.type';
 
 /**
  * 레포지토리 생성
@@ -60,6 +59,7 @@ export const selectRepos = async ({ token }: { token: string }) => {
     id: repo.id,
     name: repo.name,
     private: repo.private,
+    defaultBranch: repo.default_branch,
     createdAt: repo.created_at,
     updatedAt: repo.updated_at,
   }));
@@ -68,9 +68,9 @@ export const selectRepos = async ({ token }: { token: string }) => {
 };
 
 /**
- * 레포지토리 조회
+ * 레포지토리 트리 조회
  */
-export const selectRepo = async ({
+export const selectRepoTree = async ({
   token,
   username,
   reponame,
@@ -87,43 +87,34 @@ export const selectRepo = async ({
     auth: token,
   });
 
-  const { data } = await octokit.repos.getContent({
+  const {
+    data: {
+      object: { sha: commitSHA },
+    },
+  } = await octokit.git.getRef({
     owner: username,
     repo: reponame,
-    path,
-    ref,
+    ref: `heads/${ref}`,
   });
 
-  const root = !Array.isArray(data) ? [data] : data;
+  const {
+    data: {
+      tree: { sha: baseTreeSHA },
+    },
+  } = await octokit.git.getCommit({
+    owner: username,
+    repo: reponame,
+    commit_sha: commitSHA,
+  });
 
-  const structure: (Directory | File)[] = await Promise.all(
-    root.map(async sub => {
-      if (sub.type === 'dir') {
-        return {
-          name: sub.name,
-          type: sub.type,
-          path: sub.path,
-          sha: sub.sha,
-          tree: await selectRepo({
-            token,
-            username,
-            reponame,
-            path: `${path}/${sub.name}`,
-            ref,
-          }),
-        };
-      } else {
-        return {
-          name: sub.name,
-          type: sub.type,
-          path: sub.path,
-          sha: sub.sha,
-        };
-      }
-    })
-  );
+  const { data: tree } = await octokit.git.getTree({
+    owner: username,
+    repo: reponame,
+    tree_sha: baseTreeSHA,
+    recursive: 'true',
+  });
 
-  return structure;
+  return tree;
 };
 
 /**

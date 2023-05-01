@@ -1,10 +1,10 @@
 import { Octokit } from '@octokit/rest';
-import { Directory, File } from '../types/tree.type';
+import { FileRequest } from '../types/tree.type';
 
 /**
  * 브랜치 (마지막 커밋) 조회
  */
-export const selectBranch = async ({
+export const selectCommitSHA = async ({
   token,
   username,
   reponame,
@@ -21,14 +21,14 @@ export const selectBranch = async ({
 
   const {
     data: {
-      object: { sha },
+      object: { sha: commitSHA },
     },
   } = await octokit.git.getRef({
     owner: username,
     repo: reponame,
     ref: `heads/${branchname}`,
   });
-  return sha;
+  return commitSHA;
 };
 
 /**
@@ -89,48 +89,39 @@ export const insertTree = async ({
   username,
   reponame,
   tree,
-  baseSHA,
+  baseTreeSHA,
 }: {
   token: string;
   username: string;
   reponame: string;
-  tree: (File | Directory)[];
-  baseSHA?: string;
-}) => {
+  tree: FileRequest[];
+  baseTreeSHA?: string;
+}): Promise<string> => {
   const octokit = new Octokit({
     auth: token,
   });
+
+  const prevTree = await selectTree({
+    token,
+    username,
+    reponame,
+    baseTreeSHA: baseTreeSHA!,
+  });
+
+  console.log(prevTree);
 
   const {
     data: { sha },
   } = await octokit.git.createTree({
     owner: username,
     repo: reponame,
-    tree: await Promise.all(
-      tree.map(async file => {
-        if ('tree' in file) {
-          const childTreeSHA = (await insertTree({
-            token,
-            username,
-            reponame,
-            tree: file.tree,
-          })) as string;
-          return {
-            path: file.path,
-            mode: '040000',
-            type: 'tree',
-            sha: childTreeSHA,
-          };
-        } else {
-          return {
-            path: file.path,
-            mode: '100644',
-            type: 'blob',
-            content: file.content,
-          };
-        }
-      })
-    ),
+    base_tree: baseTreeSHA,
+    tree: tree.map(file => ({
+      path: file.path,
+      mode: '100644',
+      type: 'blob',
+      content: file.content,
+    })),
   });
   return sha;
 };
@@ -194,4 +185,57 @@ export const updateRef = async ({
     sha: commitSHA,
   });
   return sha;
+};
+
+export const selectBaseTreeSHA = async ({
+  token,
+  username,
+  reponame,
+  commitSHA,
+}: {
+  token: string;
+  username: string;
+  reponame: string;
+  commitSHA: string;
+}) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  const {
+    data: {
+      tree: { sha: baseTreeSHA },
+    },
+  } = await octokit.git.getCommit({
+    owner: username,
+    repo: reponame,
+    commit_sha: commitSHA,
+  });
+
+  return baseTreeSHA;
+};
+
+export const selectTree = async ({
+  token,
+  username,
+  reponame,
+  baseTreeSHA,
+}: {
+  token: string;
+  username: string;
+  reponame: string;
+  baseTreeSHA: string;
+}) => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  const { data: tree } = await octokit.git.getTree({
+    owner: username,
+    repo: reponame,
+    tree_sha: baseTreeSHA,
+    recursive: 'true',
+  });
+
+  return tree;
 };

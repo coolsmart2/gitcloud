@@ -6,10 +6,14 @@ import File from '../File';
 
 interface RepoExplorerProps {
   reponame: string;
+  branchname?: string;
 }
 
-export default function RepoExplorer({ reponame }: RepoExplorerProps) {
-  const tree = useRecoilValue(repoExplorerSelector(reponame));
+export default function RepoExplorer({
+  reponame,
+  branchname,
+}: RepoExplorerProps) {
+  const tree = useRecoilValue(repoExplorerSelector({ reponame, branchname }));
   return (
     <div className="repo-explorer-container">
       {tree.map(data => {

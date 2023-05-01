@@ -29,7 +29,7 @@ router.get(
 router.get(
   '/repos/:repo',
   authMiddleware.checkSession,
-  githubController.githubRepo
+  githubController.githubRepoTree
 );
 
 /**
@@ -69,5 +69,10 @@ router.get('/repos/:repo/contents/*', githubController.githubFileContent);
 // router.post('/users', githubController.githubUser);
 
 router.post('/oauth', githubController.githubOAuth);
+
+router.post(
+  '/test/repos/:repo/branchs/:branch/commits',
+  githubController.githubTest
+);
 
 export default router;

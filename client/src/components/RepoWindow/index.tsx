@@ -1,15 +1,16 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { RiCloseCircleFill } from 'react-icons/ri';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import RepoExplorer from '../RepoExplorer';
 import RepoExplorerSkeleton from '../RepoExplorer/skeleton';
-import './index.scss';
 import RepoEditor from '../RepoEditor';
-import { RepoProvider, useRepoContext } from '../../contexts/RepoContext';
+import { useRepoContext } from '../../contexts/RepoContext';
+import './index.scss';
 
 const VERTICAL_LINE_WIDTH = 5;
 
 export default function RepoWindow() {
+  const query = new URLSearchParams(useLocation().search); // 이런식으로 컴포넌트에 변수를 선언해도 될까?
   const { reponame } = useParams() as { reponame: string };
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [verticalX, setVerticalX] = useState(300);
@@ -29,10 +30,6 @@ export default function RepoWindow() {
       });
     };
   }, []);
-
-  useEffect(() => {
-    console.log(path, branch);
-  }, [path, branch]);
 
   const handleMouseDown = () => {
     setIsResizing(true);
@@ -64,7 +61,10 @@ export default function RepoWindow() {
       >
         <div className="repo-window__sidebar" style={{ width: verticalX }}>
           <React.Suspense fallback={<RepoExplorerSkeleton />}>
-            <RepoExplorer reponame={reponame} />
+            <RepoExplorer
+              reponame={reponame}
+              branchname={query.get('ref') ?? undefined}
+            />
           </React.Suspense>
         </div>
         <div

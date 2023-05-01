@@ -2,3 +2,20 @@
   width: 100%;
   height: 100%;
 }
+.repo-editor__title {
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  padding-left: 10px;
+  border-bottom: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.repo-editor__textarea {
+  width: 100%;
+  height: calc(100% - 45px); // todo: 40px로 하면 세로 스크롤 생기는 문제
+  padding-left: 20px;
+  resize: none;
+  border: none;
+  box-sizing: border-box;
+}

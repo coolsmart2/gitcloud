@@ -3,7 +3,7 @@ import { createContext, useContext, useState } from 'react';
 type RepoContextType = {
   state: {
     path: string;
-    branch: string | null;
+    branch?: string;
   };
   actions: {
     setPath: (path: string) => void;
@@ -15,7 +15,7 @@ const RepoContext = createContext<RepoContextType | null>(null);
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
   const [path, setPath] = useState('/');
-  const [branch, setBranch] = useState<string | null>(null);
+  const [branch, setBranch] = useState<string>();
 
   return (
     <RepoContext.Provider

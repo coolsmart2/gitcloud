@@ -7,9 +7,9 @@ import {
 import * as GithubOctokit from '../octokits/git.octokit';
 import * as ReposOctokit from '../octokits/repos.octokit';
 import * as UsersOctokit from '../octokits/users.octokit';
-import { Directory, File } from '../types/tree.type';
 import { Commit } from '../types/commit.type';
 import axios from 'axios';
+import { FileRequest } from '../types/tree.type';
 
 /**
  * 레포지토리 생성
@@ -66,7 +66,7 @@ export const deleteRepo = async ({
 /**
  * 전체 레포지토리 목록 조회
  */
-export const findRepos = async (token: string) => {
+export const findRepoList = async (token: string) => {
   try {
     const repos = await ReposOctokit.selectRepos({ token });
 
@@ -82,7 +82,7 @@ export const findRepos = async (token: string) => {
 /**
  * 레포지토리 조회
  */
-export const findRepo = async ({
+export const findRepoTree = async ({
   token,
   username,
   reponame,
@@ -91,19 +91,35 @@ export const findRepo = async ({
   token: string;
   username: string;
   reponame: string;
-  ref?: string;
+  ref: string;
 }) => {
   try {
-    const repoStructure = await ReposOctokit.selectRepo({
+    const commitSHA = await GithubOctokit.selectCommitSHA({
       token,
       username,
       reponame,
-      ref,
+      branchname: ref,
     });
-    return repoStructure;
+
+    const baseTreeSHA = await GithubOctokit.selectBaseTreeSHA({
+      token,
+      username,
+      reponame,
+      commitSHA,
+    });
+
+    const repo = await GithubOctokit.selectTree({
+      token,
+      username,
+      reponame,
+      baseTreeSHA,
+    });
+
+    return repo.tree;
   } catch (error) {
     if (error instanceof RequestError) {
-      if (error.message === 'This repository is empty.') {
+      if (error.message === 'Git Repository is empty.') {
+        // "This repository is empty." 에서 메시지 바뀜
         return [];
       }
       throw new GithubError();
@@ -140,7 +156,6 @@ export const findFileContent = async ({
     return content;
   } catch (error) {
     if (error instanceof RequestError) {
-      console.log(error);
       throw new GithubError();
     }
     throw new ServerError();
@@ -270,15 +285,22 @@ export const addCommit = async ({
   username: string;
   reponame: string;
   branchname: string;
-  tree: (File | Directory)[];
+  tree: FileRequest[];
   message?: string;
 }) => {
   try {
-    const parentSHA = await GithubOctokit.selectBranch({
+    const parentSHA = await GithubOctokit.selectCommitSHA({
       token,
       username,
       reponame,
       branchname,
+    });
+
+    const baseTreeSHA = await GithubOctokit.selectBaseTreeSHA({
+      token,
+      username,
+      reponame,
+      commitSHA: parentSHA,
     });
 
     const treeSHA = await GithubOctokit.insertTree({
@@ -286,6 +308,7 @@ export const addCommit = async ({
       username,
       reponame,
       tree,
+      baseTreeSHA,
     });
 
     const commitSHA = await GithubOctokit.insertCommit({
@@ -306,6 +329,7 @@ export const addCommit = async ({
     });
   } catch (error) {
     if (error instanceof RequestError) {
+      console.log(error);
       throw new GithubError();
     }
     throw new ServerError();

@@ -16,7 +16,7 @@ export const githubRepoList = async (req: Request, res: Response) => {
 
   try {
     console.log(token);
-    const repos = await githubService.findRepos(token);
+    const repos = await githubService.findRepoList(token);
 
     return res.send({ message: 'success', data: repos });
   } catch (error) {
@@ -30,7 +30,7 @@ export const githubRepoList = async (req: Request, res: Response) => {
 /**
  * 레포지토리 조회
  */
-export const githubRepo = async (req: Request, res: Response) => {
+export const githubRepoTree = async (req: Request, res: Response) => {
   const { repo: reponame } = req.params;
   const { ref } = req.query as { ref: string };
   const userId = req.session.userId as number;
@@ -41,7 +41,7 @@ export const githubRepo = async (req: Request, res: Response) => {
     return res.status(404).send({ message: 'token error' });
 
   try {
-    const repoTree = await githubService.findRepo({
+    const repoTree = await githubService.findRepoTree({
       token,
       username,
       reponame,
@@ -283,6 +283,36 @@ export const githubOAuth = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
+    return res.status(500).send({ message: 'server error' });
+  }
+};
+
+export const githubTest = async (req: Request, res: Response) => {
+  const { repo: reponame, branch: branchname } = req.params;
+  let { message, tree } = req.body;
+
+  const { username, personal_access_token: token } =
+    await userService.findOneById(1);
+
+  if (!username || !token)
+    return res.status(404).send({ message: 'token error' });
+
+  try {
+    await githubService.addCommit({
+      token,
+      username,
+      reponame,
+      branchname,
+      tree,
+      message,
+    });
+
+    return res.send({ message: 'success' });
+  } catch (error) {
+    console.log(error);
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
     return res.status(500).send({ message: 'server error' });
   }
 };

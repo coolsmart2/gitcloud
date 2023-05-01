@@ -8,21 +8,23 @@ export interface RepoInfo {
   id: number;
   name: string;
   private: boolean;
+  defaultBranch: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Tree {
-  name: string;
-  type: 'file' | 'dir' | 'submodule' | 'symlink';
-  path: string;
+export interface TreeBlob {
+  path?: string;
+  mode?: string;
+  type?: string;
   sha?: string;
-  tree?: Tree[];
+  size?: number;
+  url?: string;
 }
 
 export interface Repo {
   name: string;
-  tree: Tree[];
+  tree: TreeBlob[];
 }
 
 export interface File {
@@ -30,4 +32,17 @@ export interface File {
   path: string;
   sha: string;
   content: string;
+}
+
+interface OpenedFiles {
+  [path: string]: File & {
+    isChanged: boolean;
+  };
+}
+
+interface Workspace {
+  currPath: string;
+  tabPaths: string[];
+  changedFiles: OpenedFiles;
+  branch?: string;
 }

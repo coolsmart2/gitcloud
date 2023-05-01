@@ -1,6 +1,6 @@
 import { File, Tree } from '.';
 
-export interface RepoExplorerResponse {
+export interface RepoTreeResponse {
   message: string;
   data: Tree[];
 }

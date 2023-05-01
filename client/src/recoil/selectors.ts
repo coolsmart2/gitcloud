@@ -1,5 +1,5 @@
 import { selectorFamily } from 'recoil';
-import { File, Tree, User } from '../types';
+import { File, TreeBlob, User } from '../types';
 import {
   getGitHubFileAPI,
   getGitHubRepoAPI,
@@ -19,12 +19,17 @@ export const userSelector = selectorFamily<
   },
 });
 
-export const repoExplorerSelector = selectorFamily<Tree[], string>({
+export const repoExplorerSelector = selectorFamily<
+  TreeBlob[],
+  { reponame: string; branchname?: string }
+>({
   key: 'repoExplorerSelector',
-  get: (reponame: string) => async () => {
-    const { data } = await getGitHubRepoAPI({ reponame });
-    return data;
-  },
+  get:
+    ({ reponame, branchname }) =>
+    async () => {
+      const { data } = await getGitHubRepoAPI({ reponame, branchname });
+      return data;
+    },
 });
 
 export const repoFileSelector = selectorFamily<

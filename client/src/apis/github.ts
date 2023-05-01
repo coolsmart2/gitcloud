@@ -1,5 +1,5 @@
 import { defaultAxios } from '.';
-import { RepoExplorerResponse, RepoFileResponse } from '../types/response';
+import { RepoTreeResponse, RepoFileResponse } from '../types/response';
 
 export const postGitHubOAuthAPI = async ({ code }: { code: string }) => {
   const { data } = await defaultAxios.post('/github/oauth', { code });
@@ -13,10 +13,14 @@ export const getGitHubReposAPI = async () => {
 
 export const getGitHubRepoAPI = async ({
   reponame,
+  branchname,
 }: {
   reponame: string;
-}): Promise<RepoExplorerResponse> => {
-  const { data } = await defaultAxios.get(`/github/repos/${reponame}`);
+  branchname?: string;
+}): Promise<RepoTreeResponse> => {
+  const { data } = await defaultAxios.get(
+    `/github/repos/${reponame}${branchname ? `?ref=${branchname}` : ''}`
+  );
   return data;
 };
 

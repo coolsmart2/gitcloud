@@ -1,14 +1,13 @@
-export interface DefaultFile {
-  name: string;
+export interface FileRequest {
   path: string;
-  type: 'file' | 'dir' | 'submodule' | 'symlink';
-  sha?: string;
-}
-
-export interface File extends DefaultFile {
+  status: 'added' | 'modified' | 'removed';
   content?: string;
+  url?: string;
 }
 
-export interface Directory extends DefaultFile {
-  tree: (Directory | File)[];
+export interface FileResponse {
+  path: string;
+  content: string;
 }
+
+export interface Tree {}

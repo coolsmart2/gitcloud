@@ -18,11 +18,14 @@ export default function RepoEditor({ reponame }: RepoEditorProps) {
 
   return (
     <div className="repo-editor-container">
-      <div>{file.name}</div>
-      <hr />
-      <div>{file.path}</div>
-      <hr />
-      <textarea value={file.content} style={{ width: '90%', height: '90%' }} />
+      <div className="repo-editor__title">
+        <b>{file.name}</b> {file.path}
+      </div>
+      <textarea
+        className="repo-editor__textarea"
+        wrap="off"
+        value={file.content}
+      />
     </div>
   );
 }

@@ -10,12 +10,18 @@ export default function GitHub() {
 
   const [checkedRepo, setCheckedRepo] = useState<string | null>(null);
 
-  const handleRepoClick = (name: string) => {
+  const handleRepoClick = ({
+    name,
+    defaultBranch,
+  }: {
+    name: string;
+    defaultBranch: string;
+  }) => {
     return (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       e.stopPropagation();
       setCheckedRepo(name);
       if (e.detail == 2) {
-        navigate(`/github/${name}`);
+        navigate(`/github/${name}?ref=${defaultBranch}`);
       }
     };
   };
@@ -34,15 +40,16 @@ export default function GitHub() {
           <RepoIcon
             key={repo.id}
             checked={checkedRepo === repo.name}
-            onClick={handleRepoClick(repo.name)}
+            onClick={handleRepoClick({
+              name: repo.name,
+              defaultBranch: repo.defaultBranch,
+            })}
             {...repo}
           />
         ))}
       </main>
       <section className="github-repo">
-        <React.Suspense fallback={<div>loading...</div>}>
-          <Outlet />
-        </React.Suspense>
+        <Outlet />
       </section>
     </div>
   );
