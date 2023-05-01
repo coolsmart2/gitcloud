@@ -13,6 +13,10 @@
   svg {
     min-width: 20px;
   }
+
+  &.changed {
+    background-color: moccasin;
+  }
 }
 
 .file__name {

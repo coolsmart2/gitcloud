@@ -12,7 +12,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
   const [workspace, setWorkspace] = useState<Workspace>({
     currPath: undefined,
     currBranch: undefined,
-    tabPaths: [],
+    tab: [],
     changedFiles: {},
   });
 

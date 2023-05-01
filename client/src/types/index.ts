@@ -7,8 +7,8 @@ export interface File {
 }
 
 export interface ChangedFile {
-  content: string;
-  isChanged: boolean;
+  changedContent: string;
+  originalContent: string;
 }
 
 export interface ChangedFiles {
@@ -18,6 +18,6 @@ export interface ChangedFiles {
 export interface Workspace {
   currPath?: string;
   currBranch?: string;
-  tabPaths?: string[];
-  changedFiles?: ChangedFiles;
+  tab: string[];
+  changedFiles: ChangedFiles;
 }

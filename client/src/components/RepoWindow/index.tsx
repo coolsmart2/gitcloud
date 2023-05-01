@@ -16,9 +16,11 @@ export default function RepoWindow() {
   const [verticalX, setVerticalX] = useState(300);
   const [isResizing, setIsResizing] = useState(false);
 
-  const { workspace } = useRepoContext();
+  const { workspace, setWorkspace } = useRepoContext();
+  const { currPath } = workspace;
 
   useEffect(() => {
+    setWorkspace({ ...workspace, currBranch: query.get('ref') ?? undefined });
     window.addEventListener('resize', () => {
       setWindowWidth(window.innerWidth);
     });
@@ -78,7 +80,7 @@ export default function RepoWindow() {
           }}
         >
           <div className="repo-window__content__editor">
-            {workspace.currPath && (
+            {currPath && (
               <React.Suspense fallback={<div>loading...</div>}>
                 <RepoEditor reponame={reponame} />
               </React.Suspense>

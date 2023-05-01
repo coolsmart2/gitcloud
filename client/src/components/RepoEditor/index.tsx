@@ -2,6 +2,7 @@ import { useRecoilValue } from 'recoil';
 import { useRepoContext } from '../../contexts/RepoContext';
 import { repoFileSelector } from '../../recoil/selectors';
 import './index.scss';
+import { useEffect } from 'react';
 
 // todo: 나중에 유틸로 빼주자
 const convertBase64ToString = (base64: string) => {
@@ -18,7 +19,8 @@ interface RepoEditorProps {
 }
 
 export default function RepoEditor({ reponame }: RepoEditorProps) {
-  const { workspace } = useRepoContext();
+  const { workspace, setWorkspace } = useRepoContext();
+  const { currPath, changedFiles } = workspace;
 
   const file = useRecoilValue(
     repoFileSelector({
@@ -28,6 +30,38 @@ export default function RepoEditor({ reponame }: RepoEditorProps) {
     })
   );
 
+  useEffect(() => {
+    if (!currPath) {
+      return;
+    }
+    if (!(currPath in changedFiles)) {
+      const originalContent = convertBase64ToString(file.content);
+      setWorkspace({
+        ...workspace,
+        changedFiles: {
+          ...changedFiles,
+          [currPath]: {
+            changedContent: originalContent,
+            originalContent,
+          },
+        },
+      });
+    }
+  }, [currPath]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setWorkspace({
+      ...workspace,
+      changedFiles: {
+        ...changedFiles,
+        [currPath!]: {
+          ...changedFiles[currPath!],
+          changedContent: e.target.value,
+        },
+      },
+    });
+  };
+
   return (
     <div className="repo-editor-container">
       <div className="repo-editor__title">
@@ -36,7 +70,8 @@ export default function RepoEditor({ reponame }: RepoEditorProps) {
       <textarea
         className="repo-editor__textarea"
         wrap="off"
-        value={convertBase64ToString(file.content)}
+        value={changedFiles[currPath!]?.changedContent}
+        onChange={handleChange}
       />
     </div>
   );
