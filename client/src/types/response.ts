@@ -1,11 +1,36 @@
-import { File, Tree } from '.';
-
-export interface RepoTreeResponse {
+export interface DefaultResponse {
   message: string;
-  data: Tree[];
 }
 
-export interface RepoFileResponse {
-  message: string;
-  data: File;
+export interface UserResponse {
+  username: string;
+  avatarUrl: string;
+  hasToken: boolean;
+}
+
+export interface RepoInfoResponse {
+  id: number;
+  name: string;
+  private: boolean;
+  defaultBranch: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TreeBlobResponse {
+  path: string;
+  mode: string;
+  type: 'blob' | 'tree';
+  sha: string;
+  size: number;
+  url: string;
+  tree?: TreeBlobResponse[];
+}
+
+export interface FileResponse {
+  name: string;
+  path: string;
+  sha: string;
+  content: string;
+  encoding: string;
 }

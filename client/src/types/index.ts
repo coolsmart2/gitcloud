@@ -1,33 +1,3 @@
-export interface User {
-  username: string;
-  avatarUrl: string;
-  hasToken: boolean;
-}
-
-export interface RepoInfo {
-  id: number;
-  name: string;
-  private: boolean;
-  defaultBranch: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface TreeBlob {
-  path: string;
-  mode: string;
-  type: 'blob' | 'tree';
-  sha: string;
-  size: number;
-  url: string;
-  tree?: TreeBlob[];
-}
-
-// export interface Repo {
-//   name: string;
-//   tree: TreeBlob[];
-// }
-
 export interface File {
   name: string;
   path: string;
@@ -36,15 +6,18 @@ export interface File {
   encoding: string;
 }
 
-interface OpenedFiles {
-  [path: string]: File & {
-    isChanged: boolean;
-  };
+export interface ChangedFile {
+  content: string;
+  isChanged: boolean;
 }
 
-interface Workspace {
-  currPath: string;
-  tabPaths: string[];
-  changedFiles: OpenedFiles;
-  branch?: string;
+export interface ChangedFiles {
+  [path: string]: ChangedFile;
+}
+
+export interface Workspace {
+  currPath?: string;
+  currBranch?: string;
+  tabPaths?: string[];
+  changedFiles?: ChangedFiles;
 }

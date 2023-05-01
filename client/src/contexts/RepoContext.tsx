@@ -1,26 +1,23 @@
 import { createContext, useContext, useState } from 'react';
+import { Workspace } from '../types';
 
 type RepoContextType = {
-  state: {
-    path: string;
-    branch?: string;
-  };
-  actions: {
-    setPath: (path: string) => void;
-    setBranch: (branch: string) => void;
-  };
+  workspace: Workspace;
+  setWorkspace: (workspace: Workspace) => void;
 };
 
 const RepoContext = createContext<RepoContextType | null>(null);
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
-  const [path, setPath] = useState('/');
-  const [branch, setBranch] = useState<string>();
+  const [workspace, setWorkspace] = useState<Workspace>({
+    currPath: undefined,
+    currBranch: undefined,
+    tabPaths: [],
+    changedFiles: {},
+  });
 
   return (
-    <RepoContext.Provider
-      value={{ state: { path, branch }, actions: { setPath, setBranch } }}
-    >
+    <RepoContext.Provider value={{ workspace, setWorkspace }}>
       {children}
     </RepoContext.Provider>
   );

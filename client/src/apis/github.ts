@@ -1,12 +1,24 @@
 import { defaultAxios } from '.';
-import { RepoTreeResponse, RepoFileResponse } from '../types/response';
+import {
+  FileResponse,
+  RepoInfoResponse,
+  TreeBlobResponse,
+  UserResponse,
+} from '../types/response';
 
-export const postGitHubOAuthAPI = async ({ code }: { code: string }) => {
+export const postGitHubOAuthAPI = async ({
+  code,
+}: {
+  code: string;
+}): Promise<{ message: string; data: UserResponse }> => {
   const { data } = await defaultAxios.post('/github/oauth', { code });
   return data;
 };
 
-export const getGitHubReposAPI = async () => {
+export const getGitHubReposAPI = async (): Promise<{
+  message: string;
+  data: RepoInfoResponse[];
+}> => {
   const { data } = await defaultAxios.get('/github/repos');
   return data;
 };
@@ -17,7 +29,7 @@ export const getGitHubRepoAPI = async ({
 }: {
   reponame: string;
   branchname?: string;
-}): Promise<RepoTreeResponse> => {
+}): Promise<{ message: string; data: TreeBlobResponse[] }> => {
   const { data } = await defaultAxios.get(
     `/github/repos/${reponame}${branchname ? `?ref=${branchname}` : ''}`
   );
@@ -32,7 +44,7 @@ export const getGitHubFileAPI = async ({
   reponame: string;
   path: string;
   ref?: string;
-}): Promise<RepoFileResponse> => {
+}): Promise<{ message: string; data: FileResponse }> => {
   const { data } = await defaultAxios.get(
     `/github/repos/${reponame}/contents/${path}${ref ? `?ref=${ref}` : ''}`
   );

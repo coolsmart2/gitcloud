@@ -1,15 +1,16 @@
 import { selectorFamily } from 'recoil';
-import { File, TreeBlob, User } from '../types';
 import {
   getGitHubFileAPI,
   getGitHubRepoAPI,
   postGitHubOAuthAPI,
 } from '../apis/github';
+import {
+  FileResponse,
+  TreeBlobResponse,
+  UserResponse,
+} from '../types/response';
 
-export const userSelector = selectorFamily<
-  { message: string; data: User },
-  string
->({
+export const userSelector = selectorFamily<UserResponse, string>({
   key: 'userSelector',
   get: (code: string) => {
     return async () => {
@@ -20,7 +21,7 @@ export const userSelector = selectorFamily<
 });
 
 export const repoExplorerSelector = selectorFamily<
-  TreeBlob[],
+  TreeBlobResponse[],
   { reponame: string; branchname?: string }
 >({
   key: 'repoExplorerSelector',
@@ -33,7 +34,7 @@ export const repoExplorerSelector = selectorFamily<
 });
 
 export const repoFileSelector = selectorFamily<
-  File,
+  FileResponse,
   { reponame: string; path: string; ref?: string }
 >({
   key: 'repoFileSelector',

@@ -281,6 +281,9 @@ export const selectRecursiveTree = async ({
   );
 
   return recursiveTree.sort((a, b) => {
+    if (a.type === 'tree' && b.type === 'tree') {
+      return 0;
+    }
     if (a.type === 'tree') {
       return -1;
     }

@@ -9,16 +9,14 @@ interface FileProps {
 }
 
 export default function File({ name, path, depth }: FileProps) {
-  const {
-    actions: { setPath },
-  } = useRepoContext();
+  const { workspace, setWorkspace } = useRepoContext();
 
   return (
     <div
       className="file-wrapper"
       style={{ paddingLeft: `${10 * depth + 23}px` }}
       onClick={() => {
-        setPath(path);
+        setWorkspace({ ...workspace, currPath: path });
       }}
     >
       <GoFile className="file__icon" size={18} />

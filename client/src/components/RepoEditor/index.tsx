@@ -18,12 +18,14 @@ interface RepoEditorProps {
 }
 
 export default function RepoEditor({ reponame }: RepoEditorProps) {
-  const {
-    state: { path, branch },
-  } = useRepoContext();
+  const { workspace } = useRepoContext();
 
   const file = useRecoilValue(
-    repoFileSelector({ reponame, path, ref: branch })
+    repoFileSelector({
+      reponame,
+      path: workspace.currPath!,
+      ref: workspace.currBranch,
+    })
   );
 
   return (
