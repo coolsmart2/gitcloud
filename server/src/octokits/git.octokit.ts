@@ -280,5 +280,15 @@ export const selectRecursiveTree = async ({
     })
   );
 
-  return recursiveTree;
+  return recursiveTree.sort((a, b) => {
+    if (a.type === 'tree') {
+      return -1;
+    }
+    if (b.type === 'tree') {
+      return 1;
+    }
+    const aPath = a.path || '';
+    const bPath = b.path || '';
+    return aPath.localeCompare(bPath);
+  });
 };

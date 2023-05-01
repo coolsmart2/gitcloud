@@ -14,12 +14,13 @@ export interface RepoInfo {
 }
 
 export interface TreeBlob {
-  path?: string;
-  mode?: string;
-  type?: 'blob' | 'tree';
-  sha?: string;
-  size?: number;
-  url?: string;
+  path: string;
+  mode: string;
+  type: 'blob' | 'tree';
+  sha: string;
+  size: number;
+  url: string;
+  tree?: TreeBlob[];
 }
 
 // export interface Repo {

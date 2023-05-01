@@ -16,20 +16,20 @@ export default function RepoExplorer({
   const tree = useRecoilValue(repoExplorerSelector({ reponame, branchname }));
   return (
     <div className="repo-explorer-container">
-      {tree.map(data => {
-        if (data.type === 'dir') {
+      {tree.map(item => {
+        if (item.type === 'tree') {
           return (
             <Directory
               depth={1}
-              name={data.name}
-              path={data.name}
-              tree={data.tree!}
-              key={data.sha}
+              name={item.path}
+              path={item.path}
+              tree={item.tree!}
+              key={item.sha}
             />
           );
         }
         return (
-          <File name={data.name} path={data.name} depth={1} key={data.sha} />
+          <File depth={1} name={item.path} path={item.path} key={item.sha} />
         );
       })}
     </div>

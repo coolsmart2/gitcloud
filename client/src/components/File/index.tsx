@@ -3,9 +3,9 @@ import './index.scss';
 import { useRepoContext } from '../../contexts/RepoContext';
 
 interface FileProps {
+  depth: number;
   name: string;
   path: string;
-  depth: number;
 }
 
 export default function File({ name, path, depth }: FileProps) {
