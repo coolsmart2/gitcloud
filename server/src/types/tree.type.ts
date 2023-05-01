@@ -10,4 +10,12 @@ export interface FileResponse {
   content: string;
 }
 
-export interface Tree {}
+export interface TreeBlob {
+  path?: string | undefined;
+  mode?: string | undefined;
+  type?: string | undefined;
+  sha?: string | undefined;
+  size?: number | undefined;
+  url?: string | undefined;
+  tree?: TreeBlob[];
+}

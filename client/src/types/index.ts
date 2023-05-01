@@ -16,16 +16,16 @@ export interface RepoInfo {
 export interface TreeBlob {
   path?: string;
   mode?: string;
-  type?: string;
+  type?: 'blob' | 'tree';
   sha?: string;
   size?: number;
   url?: string;
 }
 
-export interface Repo {
-  name: string;
-  tree: TreeBlob[];
-}
+// export interface Repo {
+//   name: string;
+//   tree: TreeBlob[];
+// }
 
 export interface File {
   name: string;

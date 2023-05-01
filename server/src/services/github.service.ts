@@ -108,14 +108,14 @@ export const findRepoTree = async ({
       commitSHA,
     });
 
-    const repo = await GithubOctokit.selectTree({
+    const recursiveTree = await GithubOctokit.selectRecursiveTree({
       token,
       username,
       reponame,
       baseTreeSHA,
     });
 
-    return repo.tree;
+    return recursiveTree;
   } catch (error) {
     if (error instanceof RequestError) {
       if (error.message === 'Git Repository is empty.') {

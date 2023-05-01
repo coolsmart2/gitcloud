@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { FileRequest } from '../types/tree.type';
+import { FileRequest, TreeBlob } from '../types/tree.type';
 
 /**
  * 브랜치 (마지막 커밋) 조회
@@ -230,7 +230,9 @@ export const selectTree = async ({
     auth: token,
   });
 
-  const { data: tree } = await octokit.git.getTree({
+  const {
+    data: { tree },
+  } = await octokit.git.getTree({
     owner: username,
     repo: reponame,
     tree_sha: baseTreeSHA,
@@ -238,4 +240,45 @@ export const selectTree = async ({
   });
 
   return tree;
+};
+
+export const selectRecursiveTree = async ({
+  token,
+  username,
+  reponame,
+  baseTreeSHA,
+}: {
+  token: string;
+  username: string;
+  reponame: string;
+  baseTreeSHA: string;
+}): Promise<TreeBlob[]> => {
+  const octokit = new Octokit({
+    auth: token,
+  });
+
+  const {
+    data: { tree },
+  } = await octokit.git.getTree({
+    owner: username,
+    repo: reponame,
+    tree_sha: baseTreeSHA,
+  });
+
+  const recursiveTree = await Promise.all(
+    tree.map(async item => {
+      if (item.type === 'blob') {
+        return item;
+      }
+      const subTree = await selectRecursiveTree({
+        token,
+        username,
+        reponame,
+        baseTreeSHA: item.sha!,
+      });
+      return { ...item, tree: subTree };
+    })
+  );
+
+  return recursiveTree;
 };
