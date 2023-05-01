@@ -33,6 +33,7 @@ export interface File {
   path: string;
   sha: string;
   content: string;
+  encoding: string;
 }
 
 interface OpenedFiles {
