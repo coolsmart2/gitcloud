@@ -14,8 +14,13 @@
   display: flex;
   padding: 10px;
   box-sizing: border-box;
-  justify-content: right;
+  justify-content: space-between;
   border-bottom: 1px solid #eee;
+
+  .repo-window__title {
+    margin: 0 20px;
+    line-height: 40px;
+  }
 }
 
 .repo-window__body {
@@ -46,6 +51,7 @@
   height: 100%;
   position: absolute;
   overflow: hidden;
+  background-color: #ccc;
 
   &__tab {
     height: 60px;

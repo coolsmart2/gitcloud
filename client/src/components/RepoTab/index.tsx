@@ -10,19 +10,27 @@ export default function RepoTab() {
   const { workspace, setWorkspace } = useRepoContext();
   const { currPath, tab } = workspace;
 
-  const handleTabClick = (path: string) => {
-    return () => {
-      setWorkspace({ ...workspace, currPath: path });
-    };
-  };
-
-  const handleTabRemove = (path: string) => {
+  const handleCloseMouseDown = (path: string) => {
     return (e: React.MouseEvent) => {
       e.stopPropagation();
       const newTab = removeTab(tab, path);
       const newCurrPath =
         currPath === path ? newTab[newTab.length - 1] : currPath;
       setWorkspace({ ...workspace, tab: newTab, currPath: newCurrPath });
+    };
+  };
+
+  const handleTabMouseDown = (path: string) => {
+    return (e: React.MouseEvent) => {
+      // 마우스 좌클릭
+      if (e.button === 0) {
+        setWorkspace({ ...workspace, currPath: path });
+      }
+      // 마우스 휠클릭
+      if (e.button === 1) {
+        e.preventDefault();
+        handleCloseMouseDown(path)(e);
+      }
     };
   };
 
@@ -36,14 +44,15 @@ export default function RepoTab() {
             <div
               className={`repo-tab__item${isActive ? ' active' : ''}`}
               key={index}
-              onClick={handleTabClick(path)}
+              onMouseDown={handleTabMouseDown(path)}
+              draggable
             >
               {filename}
               <RiCloseFill
                 size={20}
                 color="gray"
                 cursor={'pointer'}
-                onClick={handleTabRemove(path)}
+                onMouseDown={handleCloseMouseDown(path)}
               />
             </div>
           );

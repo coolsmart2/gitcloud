@@ -7,6 +7,7 @@ import RepoEditor from '../RepoEditor';
 import { useRepoContext } from '../../contexts/RepoContext';
 import RepoTab from '../RepoTab';
 import './index.scss';
+import RepoEditorSkeleton from '../RepoEditor/skeleton';
 
 const VERTICAL_LINE_WIDTH = 5;
 
@@ -20,6 +21,27 @@ export default function RepoWindow() {
   const { workspace, setWorkspace } = useRepoContext();
   const { currPath } = workspace;
 
+  const handleMouseDown = () => {
+    setIsResizing(true);
+    document.body.style.cursor = 'col-resize';
+  };
+
+  const handleMouseUp = () => {
+    setIsResizing(false);
+    document.body.style.cursor = 'auto';
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isResizing) {
+      setVerticalX(
+        Math.max(
+          0,
+          Math.min(e.clientX || e.pageX, windowWidth - VERTICAL_LINE_WIDTH)
+        )
+      );
+    }
+  };
+
   useEffect(() => {
     setWorkspace({ ...workspace, currBranch: query.get('ref') ?? undefined });
     window.addEventListener('resize', () => {
@@ -32,34 +54,24 @@ export default function RepoWindow() {
     };
   }, []);
 
-  const handleMouseDown = () => {
-    setIsResizing(true);
-    document.body.style.cursor = 'col-resize';
-  };
-
-  const handleMouseUp = () => {
-    setIsResizing(false);
-    document.body.style.cursor = 'auto';
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isResizing) {
-      setVerticalX(e.clientX || e.pageX);
-    }
-  };
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
 
   return (
     <div className="repo-window-container">
       <div className="repo-window__header">
+        <h1 className="repo-window__title">{reponame}</h1>
         <Link to="/github">
           <RiCloseCircleFill size={35} color="red" cursor={'pointer'} />
         </Link>
       </div>
-      <div
-        className="repo-window__body"
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-      >
+      <div className="repo-window__body">
         <div className="repo-window__sidebar" style={{ width: verticalX }}>
           <React.Suspense fallback={<RepoExplorerSkeleton />}>
             <RepoExplorer
@@ -80,17 +92,18 @@ export default function RepoWindow() {
             left: verticalX + VERTICAL_LINE_WIDTH,
           }}
         >
-          <div className="repo-window__content__tab">
-            <RepoTab />
-          </div>
-          <div className="repo-window__content__editor">
-            {currPath && (
-              <React.Suspense fallback={<div>loading...</div>}>
-                <RepoEditor reponame={reponame} />
-              </React.Suspense>
-            )}
-          </div>
-          {/* <div className="repo-window__content__log">로그</div> */}
+          {currPath && (
+            <>
+              <div className="repo-window__content__tab">
+                <RepoTab />
+              </div>
+              <div className="repo-window__content__editor">
+                <React.Suspense fallback={<RepoEditorSkeleton />}>
+                  <RepoEditor reponame={reponame} />
+                </React.Suspense>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

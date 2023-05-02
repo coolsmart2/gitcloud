@@ -9,23 +9,30 @@
   display: flex;
   gap: 1px;
   background-color: #ccc;
+  overflow: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &__item {
+    min-width: fit-content;
     padding-left: 12px;
     padding-right: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    border-top-right-radius: 10px;
-    border-top-left-radius: 10px;
     background-color: #eee;
+    border-bottom: 1px solid #ccc;
     cursor: pointer;
     @include prevent-text-select;
 
     &.active {
       background-color: white;
-      font-weight: 600;
+      border-bottom: 1px solid white;
     }
 
     svg:hover {
@@ -39,6 +46,9 @@
     font-size: 15px;
     line-height: 25px;
     padding-left: 10px;
+    border-bottom: 1px solid #ccc;
+    box-sizing: border-box;
+    background-color: white;
     @include prevent-text-select;
   }
 }
