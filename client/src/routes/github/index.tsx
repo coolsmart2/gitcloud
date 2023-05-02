@@ -1,11 +1,11 @@
 import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
-import { RepoInfo } from '../../types';
+import { RepoInfoResponse } from '../../types/response';
 import RepoIcon from '../../components/RepoIcon';
 import React, { useState } from 'react';
 import './index.scss';
 
 export default function GitHub() {
-  const repos = useLoaderData() as RepoInfo[];
+  const repos = useLoaderData() as RepoInfoResponse[];
   const navigate = useNavigate();
 
   const [checkedRepo, setCheckedRepo] = useState<string | null>(null);

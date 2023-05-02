@@ -64,9 +64,6 @@ export default function RepoEditor({ reponame }: RepoEditorProps) {
 
   return (
     <div className="repo-editor-container">
-      <div className="repo-editor__title">
-        <b>{file.name}</b> {file.path}
-      </div>
       <textarea
         className="repo-editor__textarea"
         wrap="off"

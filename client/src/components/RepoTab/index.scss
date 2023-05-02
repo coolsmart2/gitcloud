@@ -1,0 +1,44 @@
+@import '../../common.scss';
+
+.repo-tab-container {
+  height: 100%;
+}
+
+.repo-tab {
+  height: 35px;
+  display: flex;
+  gap: 1px;
+  background-color: #ccc;
+
+  &__item {
+    padding-left: 12px;
+    padding-right: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    background-color: #eee;
+    cursor: pointer;
+    @include prevent-text-select;
+
+    &.active {
+      background-color: white;
+      font-weight: 600;
+    }
+
+    svg:hover {
+      background-color: #ccc;
+      border-radius: 5px;
+    }
+  }
+
+  &__path {
+    height: 25px;
+    font-size: 15px;
+    line-height: 25px;
+    padding-left: 10px;
+    @include prevent-text-select;
+  }
+}

@@ -45,9 +45,13 @@
   width: 100px;
   height: 100%;
   position: absolute;
-  overflow: auto;
+  overflow: hidden;
+
+  &__tab {
+    height: 60px;
+  }
 
   &__editor {
-    height: 100%;
+    height: calc(100% - 35px);
   }
 }

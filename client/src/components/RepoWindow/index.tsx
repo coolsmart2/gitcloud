@@ -5,6 +5,7 @@ import RepoExplorer from '../RepoExplorer';
 import RepoExplorerSkeleton from '../RepoExplorer/skeleton';
 import RepoEditor from '../RepoEditor';
 import { useRepoContext } from '../../contexts/RepoContext';
+import RepoTab from '../RepoTab';
 import './index.scss';
 
 const VERTICAL_LINE_WIDTH = 5;
@@ -79,6 +80,9 @@ export default function RepoWindow() {
             left: verticalX + VERTICAL_LINE_WIDTH,
           }}
         >
+          <div className="repo-window__content__tab">
+            <RepoTab />
+          </div>
           <div className="repo-window__content__editor">
             {currPath && (
               <React.Suspense fallback={<div>loading...</div>}>

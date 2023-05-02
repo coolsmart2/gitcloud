@@ -1,7 +1,14 @@
 import { GoFile } from 'react-icons/go';
 import './index.scss';
 import { useRepoContext } from '../../contexts/RepoContext';
-import { ChangedFile } from '../../types';
+
+// todo: 유틸로 옮기기
+const addTab = (tab: string[], path: string) => {
+  if (tab.includes(path)) {
+    return tab;
+  }
+  return [...tab, path];
+};
 
 interface FileProps {
   depth: number;
@@ -23,7 +30,7 @@ export default function File({ name, path, depth }: FileProps) {
         const newWorkspace = {
           ...workspace,
           currPath: path,
-          tab: [...tab, path],
+          tab: addTab(tab, path),
         };
 
         setWorkspace(newWorkspace);
