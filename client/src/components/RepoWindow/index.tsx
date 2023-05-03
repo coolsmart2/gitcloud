@@ -8,8 +8,19 @@ import { useRepoContext } from '../../contexts/RepoContext';
 import RepoTab from '../RepoTab';
 import './index.scss';
 import RepoEditorSkeleton from '../RepoEditor/skeleton';
+import ContextMenu from '../ContextMenu';
 
 const VERTICAL_LINE_WIDTH = 5;
+const directoryItems = [
+  { label: '새 파일', onClick: () => {} },
+  { label: '새 폴더', onClick: () => {} },
+  { label: '이름 바꾸기', onClick: () => {} },
+  { label: '삭제', onClick: () => {} },
+];
+const fileItems = [
+  { label: '이름 바꾸기', onClick: () => {} },
+  { label: '삭제', onClick: () => {} },
+];
 
 export default function RepoWindow() {
   const query = new URLSearchParams(useLocation().search); // 이런식으로 컴포넌트에 변수를 선언해도 될까?
@@ -18,8 +29,13 @@ export default function RepoWindow() {
   const [verticalX, setVerticalX] = useState(300);
   const [isResizing, setIsResizing] = useState(false);
 
-  const { workspace, setWorkspace } = useRepoContext();
-  const { currPath } = workspace;
+  const {
+    state: {
+      workspace,
+      contextMenu: { file, directory },
+    },
+    action: { setWorkspace, closeAllContextMenus },
+  } = useRepoContext();
 
   const handleMouseDown = () => {
     setIsResizing(true);
@@ -64,7 +80,12 @@ export default function RepoWindow() {
   }, [isResizing]);
 
   return (
-    <div className="repo-window-container">
+    <div
+      className="repo-window-container"
+      onMouseDown={() => {
+        closeAllContextMenus();
+      }}
+    >
       <div className="repo-window__header">
         <h1 className="repo-window__title">{reponame}</h1>
         <Link to="/github">
@@ -92,7 +113,7 @@ export default function RepoWindow() {
             left: verticalX + VERTICAL_LINE_WIDTH,
           }}
         >
-          {currPath && (
+          {workspace.currPath && (
             <>
               <div className="repo-window__content__tab">
                 <RepoTab />
@@ -106,6 +127,8 @@ export default function RepoWindow() {
           )}
         </div>
       </div>
+      {directory && <ContextMenu items={directoryItems} />}
+      {file && <ContextMenu items={fileItems} />}
     </div>
   );
 }

@@ -9,6 +9,7 @@ export interface File {
 export interface ChangedFile {
   changedContent: string;
   originalContent: string;
+  changedPath?: string; // 파일명을 변경한 경우
 }
 
 export interface ChangedFiles {

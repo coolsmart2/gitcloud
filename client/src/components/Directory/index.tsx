@@ -1,18 +1,22 @@
 import { GoFileDirectory } from 'react-icons/go';
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
-import './index.scss';
 import { useState } from 'react';
-import { TreeBlob } from '../../types';
 import File from '../File';
+import { TreeBlobResponse } from '../../types/response';
+import './index.scss';
+import { useRepoContext } from '../../contexts/RepoContext';
 
 interface DirectoryProps {
   depth: number;
   name: string;
   path: string;
-  tree: TreeBlob[];
+  tree: TreeBlobResponse[];
 }
 
 export default function Directory({ depth, name, path, tree }: DirectoryProps) {
+  const {
+    action: { openContextMenu, setMousePos },
+  } = useRepoContext();
   const [isOpened, setIsOpened] = useState(false);
 
   return (
@@ -21,6 +25,11 @@ export default function Directory({ depth, name, path, tree }: DirectoryProps) {
         className="dir-wrapper"
         style={{ paddingLeft: `${10 * depth}px` }}
         onClick={() => setIsOpened(prev => !prev)}
+        onContextMenu={e => {
+          e.preventDefault();
+          openContextMenu('directory');
+          setMousePos({ x: e.clientX || e.pageX, y: e.clientY || e.pageY });
+        }}
       >
         {isOpened ? (
           <MdKeyboardArrowDown size={18} />

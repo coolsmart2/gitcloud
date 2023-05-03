@@ -17,7 +17,10 @@ interface FileProps {
 }
 
 export default function File({ name, path, depth }: FileProps) {
-  const { workspace, setWorkspace } = useRepoContext();
+  const {
+    state: { workspace },
+    action: { setWorkspace, openContextMenu, setMousePos },
+  } = useRepoContext();
   const { tab, changedFiles } = workspace;
   const isChanged =
     changedFiles[path]?.originalContent !== changedFiles[path]?.changedContent;
@@ -32,8 +35,12 @@ export default function File({ name, path, depth }: FileProps) {
           currPath: path,
           tab: addTab(tab, path),
         };
-
         setWorkspace(newWorkspace);
+      }}
+      onContextMenu={e => {
+        e.preventDefault();
+        openContextMenu('file');
+        setMousePos({ x: e.clientX || e.pageX, y: e.clientY || e.pageY });
       }}
     >
       <GoFile className="file__icon" size={18} />

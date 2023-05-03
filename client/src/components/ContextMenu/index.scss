@@ -1,0 +1,27 @@
+@import '../../common.scss';
+
+.context-menu {
+  width: 100px;
+  min-width: max-content;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  border-radius: 5px;
+  z-index: 100;
+  color: white;
+  font-size: 15px;
+  background-color: gray;
+  border: 1px solid #eee;
+  opacity: 0.85;
+
+  @include prevent-text-select;
+}
+
+.context-menu__item {
+  padding: 3px 5px;
+  border-radius: 5px;
+  &:hover {
+    background-color: cornflowerblue;
+  }
+}

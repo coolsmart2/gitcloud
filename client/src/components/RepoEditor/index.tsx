@@ -19,7 +19,10 @@ interface RepoEditorProps {
 }
 
 export default function RepoEditor({ reponame }: RepoEditorProps) {
-  const { workspace, setWorkspace } = useRepoContext();
+  const {
+    state: { workspace },
+    action: { setWorkspace },
+  } = useRepoContext();
   const { currPath, changedFiles } = workspace;
 
   const file = useRecoilValue(
