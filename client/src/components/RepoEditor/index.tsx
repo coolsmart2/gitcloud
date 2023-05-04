@@ -1,76 +1,54 @@
-import { useRecoilValue } from 'recoil';
-import { useRepoContext } from '../../contexts/RepoContext';
-import { repoFileSelector } from '../../recoil/selectors';
-import './index.scss';
 import { useEffect } from 'react';
+import { getGitHubFileAPI } from '../../apis/github';
+import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
+import RepoEditorSkeleton from './skeleton';
+import './index.scss';
 
-// todo: 나중에 유틸로 빼주자
-const convertBase64ToString = (base64: string) => {
-  const decodedString = atob(base64);
-  const utf8Decoder = new TextDecoder('utf-8');
-  const urf8String = utf8Decoder.decode(
-    new Uint8Array([...decodedString].map(char => char.charCodeAt(0)))
-  );
-  return urf8String;
-};
+export default function RepoEditor() {
+  const { reponame, branchname, selectedPath, cachedFiles, changedFiles } =
+    useRepoValue();
+  const { cacheFile, modifyFile, popFile } = useRepoActions();
 
-interface RepoEditorProps {
-  reponame: string;
-}
+  const content =
+    selectedPath &&
+    (changedFiles[selectedPath]?.content || cachedFiles[selectedPath]?.content);
 
-export default function RepoEditor({ reponame }: RepoEditorProps) {
-  const {
-    state: { workspace },
-    action: { setWorkspace },
-  } = useRepoContext();
-  const { selected, changedFiles } = workspace;
-
-  const file = useRecoilValue(
-    repoFileSelector({
-      reponame,
-      path: workspace.selected!,
-      ref: workspace.branch,
-    })
-  );
-
-  useEffect(() => {
-    if (!selected) {
-      return;
-    }
-    if (!(selected in changedFiles)) {
-      const originalContent = convertBase64ToString(file.content);
-      setWorkspace({
-        ...workspace,
-        changedFiles: {
-          ...changedFiles,
-          [selected]: {
-            changedContent: originalContent,
-            originalContent,
-          },
-        },
+  const fetchFile = async () => {
+    if (reponame && branchname && selectedPath && !cachedFiles[selectedPath]) {
+      const { data } = await getGitHubFileAPI({
+        reponame,
+        path: selectedPath,
+        ref: branchname,
       });
+      cacheFile(data.path, data.content);
     }
-  }, [selected]);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setWorkspace({
-      ...workspace,
-      changedFiles: {
-        ...changedFiles,
-        [selected!]: {
-          ...changedFiles[selected!],
-          changedContent: e.target.value,
-        },
-      },
-    });
+    if (selectedPath && selectedPath in cachedFiles) {
+      const { value } = e.target;
+      if (cachedFiles[selectedPath].content !== value) {
+        modifyFile(selectedPath, value);
+      } else {
+        popFile(selectedPath);
+      }
+    }
   };
+
+  useEffect(() => {
+    fetchFile();
+  }, [selectedPath]);
+
+  if (!reponame || !branchname || !selectedPath || !content) {
+    return <RepoEditorSkeleton />;
+  }
 
   return (
     <div className="repo-editor-container">
       <textarea
         className="repo-editor__textarea"
         wrap="off"
-        value={changedFiles[selected!]?.changedContent}
+        value={content}
         onChange={handleChange}
       />
     </div>

@@ -6,12 +6,16 @@ import {
   DirectoryInfo,
 } from '../types/repo.type';
 import { TreeBlobResponse } from '../types/response';
-import { convertTreeBlobResponseToExplorer } from '../utils/repo.util';
+import {
+  convertBase64ToString,
+  convertTreeBlobResponseToExplorer,
+} from '../utils/repo.util';
 
 interface RepoValue {
+  reponame: string | null;
   selectedPath: string | null;
   focusedPath: string | null;
-  branch: string | null;
+  branchname: string | null;
   tab: string[];
   changedFiles: Record<string, ChangedFileState>;
   cachedFiles: Record<string, CachedFileState>;
@@ -19,40 +23,51 @@ interface RepoValue {
 }
 
 interface RepoActions {
+  setReponame(reponame: string): void;
   selectFile(path: string): void;
   selectDir(path: string): void;
   focusPath(path: string): void;
-  setBranch(branch: string | null): void;
+  setBranchname(branchname: string | null): void;
   selectTab(path: string): void;
   removeTab(path: string): void;
   setExplorer(treeBlob: TreeBlobResponse[]): void;
   removeFocusedPath(): void;
+  cacheFile(path: string, content: string): void;
+  modifyFile(path: string, content: string): void;
+  popFile(path: string): void;
 }
 
 const RepoValueContext = createContext<RepoValue>({
+  reponame: null,
   selectedPath: null,
   focusedPath: null,
-  branch: null,
+  branchname: null,
   tab: [],
   changedFiles: {},
   cachedFiles: {},
   explorer: null,
 });
+
 const RepoActionsContext = createContext<RepoActions>({
+  setReponame: () => {},
   selectFile: () => {},
   selectDir: () => {},
   focusPath: () => {},
-  setBranch: () => {},
+  setBranchname: () => {},
   selectTab: () => {},
   removeTab: () => {},
   setExplorer: () => {},
   removeFocusedPath: () => {},
+  cacheFile: () => {},
+  modifyFile: () => {},
+  popFile: () => {},
 });
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedPath, setSelectedPath] = useState<string | null>(null); // 선택된 파일 경로 (ex. 파일-폴더 좌클릭, 탭 클릭)
   const [focusedPath, setFocusedPath] = useState<string | null>(null); // 포커싱된 파일 경로 (ex. 파일-폴더 우클릭)
-  const [branch, setBranch] = useState<string | null>(null); // 현재 브랜치
+  const [reponame, setReponame] = useState<string | null>(null); // 현재 레포지토리 이름
+  const [branchname, setBranchname] = useState<string | null>(null); // 현재 브랜치
   const [tab, setTab] = useState<string[]>([]); // 열려있는 파일 경로 리스트 (ex. 탭, 탭 순서)
   const [changedFiles, setChangedFiles] = useState<
     Record<string, ChangedFileState>
@@ -68,6 +83,8 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
 
   const actions = useMemo(
     () => ({
+      // 레포지토리 이름 설정
+      setReponame,
       // 탐색기에서 파일 좌클릭
       selectFile(path: string) {
         setSelectedPath(path);
@@ -88,8 +105,8 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         setFocusedPath(path);
       },
       // todo: 미완성
-      setBranch(branch: string) {
-        setBranch(branch);
+      setBranchname(branchname: string) {
+        setBranchname(branchname);
       },
       // 열려있는 탭 간 이동
       selectTab(path: string) {
@@ -113,31 +130,21 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         setFocusedPath(null);
       },
       // 파일 내용 수정시
-      modifyFile({ path, content }: { path: string; content: string }) {
-        if (path in changedFiles) {
-          if (cachedFiles[path].content !== content) {
-            setChangedFiles({
-              ...changedFiles,
-              [path]: {
-                state: 'modified',
-                content,
-              },
-            });
-          } else {
-            setChangedFiles(prev => {
-              delete prev[path];
-              return prev; // { ...prev }
-            });
-          }
-        } else {
-          setChangedFiles({
-            ...changedFiles,
-            [path]: {
-              state: 'modified',
-              content,
-            },
-          });
-        }
+      modifyFile(path: string, content: string) {
+        setChangedFiles({
+          ...changedFiles,
+          [path]: {
+            state: 'modified',
+            content,
+          },
+        });
+      },
+      // 파일 수정시 원본과 동일해질 경우
+      popFile(path: string) {
+        setChangedFiles(prev => {
+          delete prev[path];
+          return { ...prev };
+        });
       },
       // 탐색기에서 파일 추가
       addFile(path: string) {
@@ -154,6 +161,13 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       setExplorer(treeBlob: TreeBlobResponse[]) {
         setExplorer(convertTreeBlobResponseToExplorer(treeBlob));
       },
+      cacheFile(path: string, base64: string) {
+        setSelectedPath(path);
+        setCachedFiles(prev => ({
+          ...prev,
+          [path]: { content: convertBase64ToString(base64) },
+        }));
+      },
     }),
     []
   );
@@ -162,9 +176,10 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
     <RepoActionsContext.Provider value={actions}>
       <RepoValueContext.Provider
         value={{
+          reponame,
           selectedPath,
           focusedPath,
-          branch,
+          branchname,
           tab,
           changedFiles,
           cachedFiles,

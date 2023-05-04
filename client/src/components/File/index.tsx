@@ -12,11 +12,11 @@ export default function File({ name, path, depth }: FileProps) {
   const { selectedPath, focusedPath, changedFiles, cachedFiles } =
     useRepoValue();
   const { selectFile } = useRepoActions();
-  const isChanged = changedFiles[path]?.content !== cachedFiles[path]?.content;
+  const isModified = path in changedFiles;
 
   return (
     <div
-      className={`file-wrapper${isChanged ? ' changed' : ''}${
+      className={`file-wrapper${isModified ? ' modified' : ''}${
         path === selectedPath ? ' selected' : ''
       }${path === focusedPath ? ' focused' : ''}`}
       style={{ paddingLeft: `${10 * depth + 23}px` }}

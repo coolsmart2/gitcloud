@@ -6,30 +6,24 @@ import RepoExplorerSkeleton from './skeleton';
 import { getGitHubRepoAPI } from '../../apis/github';
 import './index.scss';
 
-interface RepoExplorerProps {
-  reponame: string;
-  branchname?: string;
-}
-
-export default function RepoExplorer({
-  reponame,
-  branchname,
-}: RepoExplorerProps) {
-  const { explorer } = useRepoValue();
+export default function RepoExplorer() {
+  const { reponame, branchname, explorer } = useRepoValue();
   const { setExplorer } = useRepoActions();
 
   const fetchExplorer = async () => {
-    const { data } = await getGitHubRepoAPI({ reponame, branchname });
-    setExplorer(data);
+    if (reponame && branchname) {
+      const { data } = await getGitHubRepoAPI({ reponame, branchname });
+      setExplorer(data);
+    }
   };
 
   useEffect(() => {
     if (!explorer) {
       fetchExplorer();
     }
-  }, [explorer]);
+  }, [explorer, reponame, branchname]);
 
-  if (!explorer || !branchname) {
+  if (!reponame || !branchname || !explorer) {
     return <RepoExplorerSkeleton />;
   }
 

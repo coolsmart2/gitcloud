@@ -1,14 +1,11 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { RiCloseCircleFill } from 'react-icons/ri';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import RepoExplorer from '../RepoExplorer';
-import RepoExplorerSkeleton from '../RepoExplorer/skeleton';
 import RepoEditor from '../RepoEditor';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import RepoTab from '../RepoTab';
 import './index.scss';
-import RepoEditorSkeleton from '../RepoEditor/skeleton';
-import ContextMenu from '../ContextMenu';
 
 const VERTICAL_LINE_WIDTH = 5;
 const directoryItems = [
@@ -23,11 +20,11 @@ const fileItems = [
 ];
 
 export default function RepoWindow() {
-  const query = new URLSearchParams(useLocation().search); // 이런식으로 컴포넌트에 변수를 선언해도 될까?
   const { reponame } = useParams() as { reponame: string };
+  const query = new URLSearchParams(useLocation().search); // 이런식으로 컴포넌트에 변수를 선언해도 될까?
 
   const { tab } = useRepoValue();
-  const { setBranch, removeFocusedPath } = useRepoActions();
+  const { setReponame, setBranchname, removeFocusedPath } = useRepoActions();
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [verticalX, setVerticalX] = useState(300);
@@ -55,7 +52,8 @@ export default function RepoWindow() {
   };
 
   useEffect(() => {
-    setBranch(query.get('ref'));
+    setReponame(reponame);
+    setBranchname(query.get('ref'));
     window.addEventListener('resize', () => {
       setWindowWidth(window.innerWidth);
     });
@@ -90,10 +88,7 @@ export default function RepoWindow() {
       </div>
       <div className="repo-window__body">
         <div className="repo-window__sidebar" style={{ width: verticalX }}>
-          <RepoExplorer
-            reponame={reponame}
-            branchname={query.get('ref') ?? undefined}
-          />
+          <RepoExplorer />
         </div>
         <div
           className="repo-window__vertical"
@@ -112,11 +107,9 @@ export default function RepoWindow() {
               <div className="repo-window__content__tab">
                 <RepoTab />
               </div>
-              {/* <div className="repo-window__content__editor">
-                <React.Suspense fallback={<RepoEditorSkeleton />}>
-                  <RepoEditor reponame={reponame} />
-                </React.Suspense>
-              </div> */}
+              <div className="repo-window__content__editor">
+                <RepoEditor />
+              </div>
             </>
           )}
         </div>

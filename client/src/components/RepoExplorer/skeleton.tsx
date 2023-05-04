@@ -6,10 +6,10 @@ export default function RepoExplorerSkeleton() {
       {Array(15)
         .fill(null)
         .map((_, i) => (
-          <div key={i} className="dir-file-skeleton">
-            <div className="dir-file-skeleton__type" />
+          <div key={i} className="explorer-skeleton">
+            <div className="explorer-skeleton__type" />
             <div
-              className="dir-file-skeleton__name"
+              className="explorer-skeleton__name"
               style={{ width: Math.random() * 100 + 50 }}
             />
           </div>

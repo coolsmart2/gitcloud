@@ -5,9 +5,12 @@
 
 .repo-editor__textarea {
   width: 100%;
-  height: 100%;
+  height: calc(
+    100vh - 120px
+  ); // todo: 스크롤바가 아래 가려서 안보여서 임시방편으로 해결
   padding-left: 20px;
   resize: none;
   border: none;
+
   box-sizing: border-box;
 }

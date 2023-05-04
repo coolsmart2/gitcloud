@@ -32,3 +32,12 @@ export const addCachedFile = (
     [fileResponse.path]: { content: fileResponse.content },
   };
 };
+
+export const convertBase64ToString = (base64: string) => {
+  const decodedString = atob(base64);
+  const utf8Decoder = new TextDecoder('utf-8');
+  const urf8String = utf8Decoder.decode(
+    new Uint8Array([...decodedString].map(char => char.charCodeAt(0)))
+  );
+  return urf8String;
+};
