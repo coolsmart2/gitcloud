@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import RepoExplorer from '../RepoExplorer';
 import RepoExplorerSkeleton from '../RepoExplorer/skeleton';
 import RepoEditor from '../RepoEditor';
-import { useRepoContext } from '../../contexts/RepoContext';
+import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import RepoTab from '../RepoTab';
 import './index.scss';
 import RepoEditorSkeleton from '../RepoEditor/skeleton';
@@ -25,17 +25,13 @@ const fileItems = [
 export default function RepoWindow() {
   const query = new URLSearchParams(useLocation().search); // 이런식으로 컴포넌트에 변수를 선언해도 될까?
   const { reponame } = useParams() as { reponame: string };
+
+  const { tab } = useRepoValue();
+  const { setBranch, removeFocusedPath } = useRepoActions();
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [verticalX, setVerticalX] = useState(300);
   const [isResizing, setIsResizing] = useState(false);
-
-  const {
-    state: {
-      workspace,
-      contextMenu: { file, directory },
-    },
-    action: { setWorkspace, closeAllContextMenus },
-  } = useRepoContext();
 
   const handleMouseDown = () => {
     setIsResizing(true);
@@ -59,7 +55,7 @@ export default function RepoWindow() {
   };
 
   useEffect(() => {
-    setWorkspace({ ...workspace, currBranch: query.get('ref') ?? undefined });
+    setBranch(query.get('ref'));
     window.addEventListener('resize', () => {
       setWindowWidth(window.innerWidth);
     });
@@ -83,7 +79,7 @@ export default function RepoWindow() {
     <div
       className="repo-window-container"
       onMouseDown={() => {
-        closeAllContextMenus();
+        removeFocusedPath();
       }}
     >
       <div className="repo-window__header">
@@ -94,12 +90,10 @@ export default function RepoWindow() {
       </div>
       <div className="repo-window__body">
         <div className="repo-window__sidebar" style={{ width: verticalX }}>
-          <React.Suspense fallback={<RepoExplorerSkeleton />}>
-            <RepoExplorer
-              reponame={reponame}
-              branchname={query.get('ref') ?? undefined}
-            />
-          </React.Suspense>
+          <RepoExplorer
+            reponame={reponame}
+            branchname={query.get('ref') ?? undefined}
+          />
         </div>
         <div
           className="repo-window__vertical"
@@ -113,22 +107,22 @@ export default function RepoWindow() {
             left: verticalX + VERTICAL_LINE_WIDTH,
           }}
         >
-          {workspace.currPath && (
+          {tab.length > 0 && (
             <>
               <div className="repo-window__content__tab">
                 <RepoTab />
               </div>
-              <div className="repo-window__content__editor">
+              {/* <div className="repo-window__content__editor">
                 <React.Suspense fallback={<RepoEditorSkeleton />}>
                   <RepoEditor reponame={reponame} />
                 </React.Suspense>
-              </div>
+              </div> */}
             </>
           )}
         </div>
       </div>
-      {directory && <ContextMenu items={directoryItems} />}
-      {file && <ContextMenu items={fileItems} />}
+      {/* {directory && <ContextMenu items={directoryItems} />}
+      {file && <ContextMenu items={fileItems} />} */}
     </div>
   );
 }

@@ -23,42 +23,42 @@ export default function RepoEditor({ reponame }: RepoEditorProps) {
     state: { workspace },
     action: { setWorkspace },
   } = useRepoContext();
-  const { currPath, changedFiles } = workspace;
+  const { selected, changedFiles } = workspace;
 
   const file = useRecoilValue(
     repoFileSelector({
       reponame,
-      path: workspace.currPath!,
-      ref: workspace.currBranch,
+      path: workspace.selected!,
+      ref: workspace.branch,
     })
   );
 
   useEffect(() => {
-    if (!currPath) {
+    if (!selected) {
       return;
     }
-    if (!(currPath in changedFiles)) {
+    if (!(selected in changedFiles)) {
       const originalContent = convertBase64ToString(file.content);
       setWorkspace({
         ...workspace,
         changedFiles: {
           ...changedFiles,
-          [currPath]: {
+          [selected]: {
             changedContent: originalContent,
             originalContent,
           },
         },
       });
     }
-  }, [currPath]);
+  }, [selected]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setWorkspace({
       ...workspace,
       changedFiles: {
         ...changedFiles,
-        [currPath!]: {
-          ...changedFiles[currPath!],
+        [selected!]: {
+          ...changedFiles[selected!],
           changedContent: e.target.value,
         },
       },
@@ -70,7 +70,7 @@ export default function RepoEditor({ reponame }: RepoEditorProps) {
       <textarea
         className="repo-editor__textarea"
         wrap="off"
-        value={changedFiles[currPath!]?.changedContent}
+        value={changedFiles[selected!]?.changedContent}
         onChange={handleChange}
       />
     </div>

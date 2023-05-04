@@ -17,8 +17,17 @@ export interface ChangedFiles {
 }
 
 export interface Workspace {
-  currPath?: string;
-  currBranch?: string;
+  selected?: string;
+  focused?: string;
+  branch?: string;
   tab: string[];
   changedFiles: ChangedFiles;
+  mode:
+    | 'EDIT_CONTENT'
+    | 'EDIT_PATH'
+    | 'DEFAULT'
+    | 'ADD_FILE'
+    | 'ADD_DIR'
+    | 'REMOVE_FILE'
+    | 'REMOVE_DIR';
 }

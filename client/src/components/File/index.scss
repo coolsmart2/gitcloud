@@ -1,9 +1,11 @@
 @import '../../common.scss';
 
 .file-wrapper {
+  height: 27px;
   display: flex;
   gap: 5px;
   padding: 4px 0;
+  box-sizing: border-box;
   cursor: pointer;
 
   &:hover {
@@ -16,6 +18,14 @@
 
   &.changed {
     background-color: moccasin;
+  }
+
+  &.selected {
+    background-color: steelblue;
+  }
+
+  &.focused {
+    box-shadow: inset 0 0 0 1px gray;
   }
 }
 

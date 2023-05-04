@@ -1,8 +1,10 @@
-import { useRecoilValue } from 'recoil';
-import { repoExplorerSelector } from '../../recoil/selectors';
-import './index.scss';
+import { useEffect } from 'react';
 import Directory from '../Directory';
 import File from '../File';
+import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
+import RepoExplorerSkeleton from './skeleton';
+import { getGitHubRepoAPI } from '../../apis/github';
+import './index.scss';
 
 interface RepoExplorerProps {
   reponame: string;
@@ -13,23 +15,40 @@ export default function RepoExplorer({
   reponame,
   branchname,
 }: RepoExplorerProps) {
-  const tree = useRecoilValue(repoExplorerSelector({ reponame, branchname }));
+  const { explorer } = useRepoValue();
+  const { setExplorer } = useRepoActions();
+
+  const fetchExplorer = async () => {
+    const { data } = await getGitHubRepoAPI({ reponame, branchname });
+    setExplorer(data);
+  };
+
+  useEffect(() => {
+    if (!explorer) {
+      fetchExplorer();
+    }
+  }, [explorer]);
+
+  if (!explorer || !branchname) {
+    return <RepoExplorerSkeleton />;
+  }
+
   return (
     <div className="repo-explorer-container">
-      {tree.map(item => {
-        if (item.type === 'tree') {
+      {explorer.map(item => {
+        if ('children' in item) {
           return (
             <Directory
               depth={1}
-              name={item.path}
+              name={item.name}
               path={item.path}
-              tree={item.tree!}
-              key={item.sha}
+              children={item.children}
+              key={item.path}
             />
           );
         }
         return (
-          <File depth={1} name={item.path} path={item.path} key={item.sha} />
+          <File depth={1} name={item.name} path={item.path} key={item.path} />
         );
       })}
     </div>

@@ -15,8 +15,8 @@ export default function ContextMenu({ items }: ContextMenuProps) {
   } = useRepoContext();
   return (
     <div className="context-menu" style={{ left: mousePos.x, top: mousePos.y }}>
-      {items.map(({ label, onClick }) => (
-        <div className="context-menu__item" onClick={onClick}>
+      {items.map(({ label, onClick }, index) => (
+        <div className="context-menu__item" key={index} onClick={onClick}>
           {label}
         </div>
       ))}
