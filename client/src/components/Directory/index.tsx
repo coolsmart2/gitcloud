@@ -3,7 +3,7 @@ import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
 import { useState } from 'react';
 import File from '../File';
 import { DirectoryInfo, FileInfo } from '../../types/repo.type';
-import { useRepoValue } from '../../contexts/RepoContext';
+import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import './index.scss';
 
 interface DirectoryProps {
@@ -20,6 +20,7 @@ export default function Directory({
   children,
 }: DirectoryProps) {
   const { selectedPath, focusedPath, changedFiles } = useRepoValue();
+  const { showContextMenu } = useRepoActions();
   const [isDirOpened, setIsDirOpened] = useState(false);
 
   return (
@@ -32,6 +33,11 @@ export default function Directory({
         onClick={() => setIsDirOpened(prev => !prev)}
         onContextMenu={e => {
           e.preventDefault();
+          e.stopPropagation();
+          showContextMenu('dir', path, {
+            x: e.clientX || e.pageX,
+            y: e.clientY || e.pageY,
+          });
         }}
       >
         {isDirOpened ? (

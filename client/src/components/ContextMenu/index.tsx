@@ -1,5 +1,4 @@
 import { useContext, useLayoutEffect } from 'react';
-import { useRepoContext } from '../../contexts/RepoContext';
 import './index.scss';
 
 interface ContextMenuProps {
@@ -7,14 +6,15 @@ interface ContextMenuProps {
     label: string;
     onClick: () => void;
   }[];
+  pos: {
+    x: number;
+    y: number;
+  };
 }
 
-export default function ContextMenu({ items }: ContextMenuProps) {
-  const {
-    state: { mousePos },
-  } = useRepoContext();
+export default function ContextMenu({ items, pos }: ContextMenuProps) {
   return (
-    <div className="context-menu" style={{ left: mousePos.x, top: mousePos.y }}>
+    <div className="context-menu" style={{ left: pos.x, top: pos.y }}>
       {items.map(({ label, onClick }, index) => (
         <div className="context-menu__item" key={index} onClick={onClick}>
           {label}

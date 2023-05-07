@@ -11,10 +11,8 @@ interface FileProps {
 
 export default function File({ name, path, depth }: FileProps) {
   const { selectedPath, focusedPath, changedFiles } = useRepoValue();
-  const { selectFile, focusPath } = useRepoActions();
+  const { selectFile, showContextMenu } = useRepoActions();
   const isModified = path in changedFiles;
-
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
   return (
     <div
@@ -27,7 +25,11 @@ export default function File({ name, path, depth }: FileProps) {
       }}
       onContextMenu={e => {
         e.preventDefault();
-        focusPath(path);
+        e.stopPropagation();
+        showContextMenu('file', path, {
+          x: e.clientX || e.pageX,
+          y: e.clientY || e.pageY,
+        });
       }}
     >
       <GoFile className="file__icon" size={18} />

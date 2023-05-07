@@ -10,6 +10,7 @@ import {
   convertBase64ToString,
   convertTreeBlobResponseToExplorer,
 } from '../utils/repo.util';
+import ContextMenu from '../components/ContextMenu';
 
 interface RepoValue {
   reponame: string | null;
@@ -31,10 +32,15 @@ interface RepoActions {
   selectTab(path: string): void;
   removeTab(path: string): void;
   setExplorer(treeBlob: TreeBlobResponse[]): void;
-  removeFocusedPath(): void;
+  initDefault(): void;
   cacheFile(path: string, content: string): void;
   modifyFile(path: string, content: string): void;
   popFile(path: string): void;
+  showContextMenu(
+    type: string,
+    path: string,
+    pos: { x: number; y: number }
+  ): void;
 }
 
 const RepoValueContext = createContext<RepoValue>({
@@ -57,10 +63,11 @@ const RepoActionsContext = createContext<RepoActions>({
   selectTab: () => {},
   removeTab: () => {},
   setExplorer: () => {},
-  removeFocusedPath: () => {},
+  initDefault: () => {},
   cacheFile: () => {},
   modifyFile: () => {},
   popFile: () => {},
+  showContextMenu: () => {},
 });
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
@@ -79,29 +86,48 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
     null
   ); // 파일 탐색기
   const [contextMenu, setContextMenu] = useState<{
-    type: 'file' | 'dir' | null;
-  }>({
-    type: null,
-  });
+    type: 'file' | 'dir' | 'explorer' | null;
+    pos: { x: number; y: number };
+    target: string;
+  }>({ type: null, pos: { x: 0, y: 0 }, target: '' });
 
   const tabStack = useRef<string[]>([]); // 작업한 탭 순서
 
   const dirContextMenuItems = useMemo(
     () => [
-      { label: '새 파일', onClick: () => {} },
+      {
+        label: '새 파일',
+        onClick: () => {},
+      },
       { label: '새 폴더', onClick: () => {} },
       { label: '이름 바꾸기', onClick: () => {} },
       { label: '삭제', onClick: () => {} },
     ],
-    []
+    [contextMenu]
   );
 
   const fileContextMenuItems = useMemo(
     () => [
-      { label: '이름 바꾸기', onClick: () => {} },
+      {
+        label: '이름 바꾸기',
+        onClick: () => {
+          console.log(contextMenu.target);
+        },
+      },
       { label: '삭제', onClick: () => {} },
     ],
-    []
+    [contextMenu]
+  );
+
+  const explorerContextMenuItems = useMemo(
+    () => [
+      {
+        label: '새 파일',
+        onClick: () => {},
+      },
+      { label: '새 폴더', onClick: () => {} },
+    ],
+    [contextMenu]
   );
 
   const actions = useMemo(
@@ -149,8 +175,9 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         setTab(prev => prev.filter(_path => _path !== path));
       },
       // 탐색기 포커싱 해제
-      removeFocusedPath() {
+      initDefault() {
         setFocusedPath(null);
+        setContextMenu({ type: null, pos: { x: 0, y: 0 }, target: '' });
       },
       // 파일 내용 수정시
       modifyFile(path: string, content: string) {
@@ -191,6 +218,14 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           [path]: { content: convertBase64ToString(base64) },
         }));
       },
+      showContextMenu(
+        type: 'file' | 'dir',
+        path: string,
+        pos: { x: number; y: number }
+      ) {
+        setFocusedPath(path);
+        setContextMenu({ type, pos, target: path });
+      },
     }),
     []
   );
@@ -210,6 +245,15 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         }}
       >
         {children}
+        {contextMenu.type === 'dir' && (
+          <ContextMenu items={dirContextMenuItems} pos={contextMenu.pos} />
+        )}
+        {contextMenu.type === 'file' && (
+          <ContextMenu items={fileContextMenuItems} pos={contextMenu.pos} />
+        )}
+        {contextMenu.type === 'explorer' && (
+          <ContextMenu items={explorerContextMenuItems} pos={contextMenu.pos} />
+        )}
       </RepoValueContext.Provider>
     </RepoActionsContext.Provider>
   );

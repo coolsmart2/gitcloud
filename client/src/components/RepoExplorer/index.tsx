@@ -8,7 +8,7 @@ import './index.scss';
 
 export default function RepoExplorer() {
   const { reponame, branchname, explorer } = useRepoValue();
-  const { setExplorer } = useRepoActions();
+  const { setExplorer, showContextMenu } = useRepoActions();
 
   const fetchExplorer = async () => {
     if (reponame && branchname) {
@@ -28,7 +28,17 @@ export default function RepoExplorer() {
   }
 
   return (
-    <div className="repo-explorer-container">
+    <div
+      className="repo-explorer-container"
+      onContextMenu={e => {
+        e.preventDefault();
+        e.stopPropagation();
+        showContextMenu('explorer', '', {
+          x: e.clientX || e.pageX,
+          y: e.clientY || e.pageY,
+        });
+      }}
+    >
       {explorer.map(item => {
         if ('children' in item) {
           return (
