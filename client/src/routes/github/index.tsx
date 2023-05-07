@@ -1,5 +1,5 @@
 import { Outlet, useLoaderData, useNavigate } from 'react-router-dom';
-import { RepoInfoResponse } from '../../types/response';
+import { RepoInfoResponse } from '../../types/response.type';
 import RepoIcon from '../../components/RepoIcon';
 import React, { useState } from 'react';
 import './index.scss';

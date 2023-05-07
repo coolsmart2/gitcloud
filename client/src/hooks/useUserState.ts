@@ -1,12 +1,12 @@
 import { useRecoilState } from 'recoil';
-import { userState } from '../recoil/atoms';
 import { useCallback, useEffect } from 'react';
-import { User } from '../types';
+import { userState } from '../recoil/atoms';
+import { UserResponse } from '../types/response.type';
 
 export default function useUserState() {
-  const [user, setUser] = useRecoilState(userState);
+  const [user, setUser] = useRecoilState(userState); // todo: context api로 변환 생각
 
-  const setUserJson = useCallback((user: User) => {
+  const setUserJson = useCallback((user: UserResponse) => {
     sessionStorage.setItem('user', JSON.stringify(user));
     setUser(user);
   }, []);
@@ -22,5 +22,8 @@ export default function useUserState() {
     }
   }, []);
 
-  return [user, setUserJson] as [User | null, (user: User) => void];
+  return [user, setUserJson] as [
+    UserResponse | null,
+    (user: UserResponse) => void
+  ];
 }

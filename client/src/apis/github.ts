@@ -4,7 +4,7 @@ import {
   RepoInfoResponse,
   TreeBlobResponse,
   UserResponse,
-} from '../types/response';
+} from '../types/response.type';
 
 export const postGitHubOAuthAPI = async ({
   code,

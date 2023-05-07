@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { GoFile } from 'react-icons/go';
-import './index.scss';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
+import './index.scss';
 
 interface FileProps {
   depth: number;
@@ -9,10 +10,11 @@ interface FileProps {
 }
 
 export default function File({ name, path, depth }: FileProps) {
-  const { selectedPath, focusedPath, changedFiles, cachedFiles } =
-    useRepoValue();
-  const { selectFile } = useRepoActions();
+  const { selectedPath, focusedPath, changedFiles } = useRepoValue();
+  const { selectFile, focusPath } = useRepoActions();
   const isModified = path in changedFiles;
+
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
   return (
     <div
@@ -25,6 +27,7 @@ export default function File({ name, path, depth }: FileProps) {
       }}
       onContextMenu={e => {
         e.preventDefault();
+        focusPath(path);
       }}
     >
       <GoFile className="file__icon" size={18} />

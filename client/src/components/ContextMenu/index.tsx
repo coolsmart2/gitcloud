@@ -1,6 +1,6 @@
 import { useContext, useLayoutEffect } from 'react';
-import './index.scss';
 import { useRepoContext } from '../../contexts/RepoContext';
+import './index.scss';
 
 interface ContextMenuProps {
   items: {

@@ -8,7 +8,7 @@ import {
   FileResponse,
   TreeBlobResponse,
   UserResponse,
-} from '../types/response';
+} from '../types/response.type';
 
 export const userSelector = selectorFamily<UserResponse, string>({
   key: 'userSelector',

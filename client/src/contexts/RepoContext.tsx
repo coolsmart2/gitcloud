@@ -5,7 +5,7 @@ import {
   FileInfo,
   DirectoryInfo,
 } from '../types/repo.type';
-import { TreeBlobResponse } from '../types/response';
+import { TreeBlobResponse } from '../types/response.type';
 import {
   convertBase64ToString,
   convertTreeBlobResponseToExplorer,
@@ -78,8 +78,31 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
   const [explorer, setExplorer] = useState<(FileInfo | DirectoryInfo)[] | null>(
     null
   ); // 파일 탐색기
+  const [contextMenu, setContextMenu] = useState<{
+    type: 'file' | 'dir' | null;
+  }>({
+    type: null,
+  });
 
   const tabStack = useRef<string[]>([]); // 작업한 탭 순서
+
+  const dirContextMenuItems = useMemo(
+    () => [
+      { label: '새 파일', onClick: () => {} },
+      { label: '새 폴더', onClick: () => {} },
+      { label: '이름 바꾸기', onClick: () => {} },
+      { label: '삭제', onClick: () => {} },
+    ],
+    []
+  );
+
+  const fileContextMenuItems = useMemo(
+    () => [
+      { label: '이름 바꾸기', onClick: () => {} },
+      { label: '삭제', onClick: () => {} },
+    ],
+    []
+  );
 
   const actions = useMemo(
     () => ({

@@ -1,5 +1,5 @@
 import { CachedFileState, DirectoryInfo, FileInfo } from '../types/repo.type';
-import { FileResponse, TreeBlobResponse } from '../types/response';
+import { FileResponse, TreeBlobResponse } from '../types/response.type';
 
 export const convertTreeBlobResponseToExplorer = (
   treeBlob: TreeBlobResponse[],

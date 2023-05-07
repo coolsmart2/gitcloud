@@ -6,18 +6,7 @@ import RepoEditor from '../RepoEditor';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import RepoTab from '../RepoTab';
 import './index.scss';
-
-const VERTICAL_LINE_WIDTH = 5;
-const directoryItems = [
-  { label: '새 파일', onClick: () => {} },
-  { label: '새 폴더', onClick: () => {} },
-  { label: '이름 바꾸기', onClick: () => {} },
-  { label: '삭제', onClick: () => {} },
-];
-const fileItems = [
-  { label: '이름 바꾸기', onClick: () => {} },
-  { label: '삭제', onClick: () => {} },
-];
+import useExplorerResize from '../../hooks/useExplorerResize';
 
 export default function RepoWindow() {
   const { reponame } = useParams() as { reponame: string };
@@ -26,52 +15,13 @@ export default function RepoWindow() {
   const { tab } = useRepoValue();
   const { setReponame, setBranchname, removeFocusedPath } = useRepoActions();
 
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [verticalX, setVerticalX] = useState(300);
-  const [isResizing, setIsResizing] = useState(false);
-
-  const handleMouseDown = () => {
-    setIsResizing(true);
-    document.body.style.cursor = 'col-resize';
-  };
-
-  const handleMouseUp = () => {
-    setIsResizing(false);
-    document.body.style.cursor = 'auto';
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isResizing) {
-      setVerticalX(
-        Math.max(
-          0,
-          Math.min(e.clientX || e.pageX, windowWidth - VERTICAL_LINE_WIDTH)
-        )
-      );
-    }
-  };
+  const [explorerWidth, lineWidth, contentWidth, setExplorerWidth] =
+    useExplorerResize();
 
   useEffect(() => {
     setReponame(reponame);
     setBranchname(query.get('ref'));
-    window.addEventListener('resize', () => {
-      setWindowWidth(window.innerWidth);
-    });
-    return () => {
-      window.removeEventListener('resize', () => {
-        setWindowWidth(window.innerWidth);
-      });
-    };
   }, []);
-
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing]);
 
   return (
     <div
@@ -87,19 +37,19 @@ export default function RepoWindow() {
         </Link>
       </div>
       <div className="repo-window__body">
-        <div className="repo-window__sidebar" style={{ width: verticalX }}>
+        <div className="repo-window__sidebar" style={{ width: explorerWidth }}>
           <RepoExplorer />
         </div>
         <div
           className="repo-window__vertical"
-          style={{ left: verticalX }}
-          onMouseDown={handleMouseDown}
+          style={{ left: explorerWidth }}
+          onMouseDown={setExplorerWidth}
         />
         <div
           className="repo-window__content"
           style={{
-            width: windowWidth - verticalX - VERTICAL_LINE_WIDTH,
-            left: verticalX + VERTICAL_LINE_WIDTH,
+            width: contentWidth,
+            left: explorerWidth + lineWidth,
           }}
         >
           {tab.length > 0 && (
