@@ -1,52 +1,58 @@
 import { createContext, useContext, useMemo, useRef, useState } from 'react';
 import {
-  ChangedFileState,
+  ChangedFileDirectoryState,
   CachedFileState,
+  Explorer,
   FileInfo,
-  DirectoryInfo,
 } from '../types/repo.type';
 import { TreeBlobResponse } from '../types/response.type';
 import {
+  addFileToExplorer,
   convertBase64ToString,
   convertTreeBlobResponseToExplorer,
+  findFileDirectory,
+  initExplorer,
+  removeFileFromExplorer,
 } from '../utils/repo.util';
 import ContextMenu from '../components/ContextMenu';
 
 interface RepoValue {
   reponame: string | null;
-  selectedPath: string | null;
-  focusedPath: string | null;
+  selectedFile: FileInfo | null;
+  focusedFile: FileInfo | null;
   branchname: string | null;
-  tab: string[];
-  changedFiles: Record<string, ChangedFileState>;
+  tab: FileInfo[];
+  changedFiles: Record<string, ChangedFileDirectoryState>;
   cachedFiles: Record<string, CachedFileState>;
-  explorer: (FileInfo | DirectoryInfo)[] | null;
+  explorer: Explorer | null;
 }
 
 interface RepoActions {
   setReponame(reponame: string): void;
-  selectFile(path: string): void;
-  selectDir(path: string): void;
-  focusPath(path: string): void;
+  selectFile(info: FileInfo): void;
+  selectDir(info: FileInfo): void;
+  focusPath(info: FileInfo): void;
   setBranchname(branchname: string | null): void;
-  selectTab(path: string): void;
-  removeTab(path: string): void;
+  selectTab(info: FileInfo): void;
+  removeTab(info: FileInfo): void;
   setExplorer(treeBlob: TreeBlobResponse[]): void;
   initDefault(): void;
   cacheFile(path: string, content: string): void;
-  modifyFile(path: string, content: string): void;
-  popFile(path: string): void;
+  modifyFile(info: FileInfo, content: string): void;
+  removeChangedFile(info: FileInfo): void;
   showContextMenu(
-    type: string,
-    path: string,
+    type: 'file' | 'directory' | 'explorer' | null,
+    info: FileInfo | null,
     pos: { x: number; y: number }
   ): void;
+  escape(): void;
+  renameFile(oldInfo: FileInfo, newInfo: FileInfo): void;
 }
 
 const RepoValueContext = createContext<RepoValue>({
   reponame: null,
-  selectedPath: null,
-  focusedPath: null,
+  selectedFile: null,
+  focusedFile: null,
   branchname: null,
   tab: [],
   changedFiles: {},
@@ -66,39 +72,37 @@ const RepoActionsContext = createContext<RepoActions>({
   initDefault: () => {},
   cacheFile: () => {},
   modifyFile: () => {},
-  popFile: () => {},
+  removeChangedFile: () => {},
   showContextMenu: () => {},
+  escape: () => {},
+  renameFile: () => {},
 });
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedPath, setSelectedPath] = useState<string | null>(null); // 선택된 파일 경로 (ex. 파일-폴더 좌클릭, 탭 클릭)
-  const [focusedPath, setFocusedPath] = useState<string | null>(null); // 포커싱된 파일 경로 (ex. 파일-폴더 우클릭)
+  const [clickedFile, setClickedFile] = useState<FileInfo | null>(null); // 클릭된 파일 경로
+  const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null); // 선택된 파일 경로
+  const [focusedFile, setFocusedFile] = useState<FileInfo | null>(null); // 포커싱된 파일 경로 (ex. 파일-폴더 우클릭)
   const [reponame, setReponame] = useState<string | null>(null); // 현재 레포지토리 이름
   const [branchname, setBranchname] = useState<string | null>(null); // 현재 브랜치
-  const [tab, setTab] = useState<string[]>([]); // 열려있는 파일 경로 리스트 (ex. 탭, 탭 순서)
+  const [tab, setTab] = useState<FileInfo[]>([]); // 열려있는 파일 경로 리스트 (ex. 탭, 탭 순서)
   const [changedFiles, setChangedFiles] = useState<
-    Record<string, ChangedFileState>
+    Record<string, ChangedFileDirectoryState>
   >({}); // 추가, 변경, 삭제된 파일 경로, 파일 커밋시 사용됨
   const [cachedFiles, setCachedFiles] = useState<
     Record<string, CachedFileState>
   >({}); // api 요청한 파일 캐싱
-  const [explorer, setExplorer] = useState<(FileInfo | DirectoryInfo)[] | null>(
-    null
-  ); // 파일 탐색기
+  const [explorer, setExplorer] = useState<Explorer | null>(null); // 파일 탐색기
   const [contextMenu, setContextMenu] = useState<{
-    type: 'file' | 'dir' | 'explorer' | null;
+    type: 'file' | 'directory' | 'explorer' | null;
     pos: { x: number; y: number };
-    target: string;
-  }>({ type: null, pos: { x: 0, y: 0 }, target: '' });
+    target: FileInfo | null;
+  }>({ type: null, pos: { x: 0, y: 0 }, target: null });
 
-  const tabStack = useRef<string[]>([]); // 작업한 탭 순서
+  const tabStack = useRef<FileInfo[]>([]); // 작업한 탭 순서
 
   const dirContextMenuItems = useMemo(
     () => [
-      {
-        label: '새 파일',
-        onClick: () => {},
-      },
+      { label: '새 파일', onClick: () => {} },
       { label: '새 폴더', onClick: () => {} },
       { label: '이름 바꾸기', onClick: () => {} },
       { label: '삭제', onClick: () => {} },
@@ -111,7 +115,16 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       {
         label: '이름 바꾸기',
         onClick: () => {
-          console.log(contextMenu.target);
+          setContextMenu({ type: null, pos: { x: 0, y: 0 }, target: null });
+          setFocusedFile(null);
+          if (!explorer || !focusedFile) {
+            return;
+          }
+          const file = findFileDirectory(explorer, focusedFile.path);
+          if (!file) {
+            return;
+          }
+          file.state = 'rename';
         },
       },
       { label: '삭제', onClick: () => {} },
@@ -135,96 +148,181 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       // 레포지토리 이름 설정
       setReponame,
       // 탐색기에서 파일 좌클릭
-      selectFile(path: string) {
-        setSelectedPath(path);
-        setFocusedPath(path);
+      selectFile(info: FileInfo) {
+        console.log(info);
+        setSelectedFile(info);
+        setFocusedFile(info);
         setTab(prev => {
-          tabStack.current = tabStack.current.filter(_path => _path !== path);
-          tabStack.current.push(path);
-          return prev.includes(path) ? prev : [...prev, path];
+          for (const item of prev) {
+            if (item.originalPath === info.originalPath) {
+              return prev;
+            }
+          }
+          return [...prev, info];
         });
+        tabStack.current = tabStack.current.filter(
+          item => item.originalPath !== info.originalPath
+        );
+        tabStack.current.push(info);
       },
       // 탐색기에서 폴더 좌클릭
-      selectDir(path: string) {
-        setSelectedPath(path);
-        setFocusedPath(path);
+      selectDir(info: FileInfo) {
+        setSelectedFile(info);
+        setFocusedFile(info);
       },
       // 탐색기에서 파일, 폴더 우클릭
-      focusPath(path: string) {
-        setFocusedPath(path);
+      focusPath(info: FileInfo) {
+        setFocusedFile(info);
       },
       // todo: 미완성
       setBranchname(branchname: string) {
         setBranchname(branchname);
       },
       // 열려있는 탭 간 이동
-      selectTab(path: string) {
-        setFocusedPath(null);
-        setSelectedPath(path);
-        tabStack.current = tabStack.current.filter(_path => _path !== path);
-        tabStack.current.push(path);
+      selectTab(info: FileInfo) {
+        console.log(info);
+        setFocusedFile(null);
+        setSelectedFile(info);
+        tabStack.current = tabStack.current.filter(
+          file => file.originalPath !== info.originalPath
+        );
+        tabStack.current.push(info);
         console.log(tabStack.current);
       },
       // 열려있는 탭 삭제
-      removeTab(path: string) {
-        setFocusedPath(null);
-        setSelectedPath(prev => {
-          tabStack.current = tabStack.current.filter(_path => _path !== path);
-          return prev === path ? tabStack.current.at(-1) ?? null : prev;
+      removeTab(info: FileInfo) {
+        setFocusedFile(null);
+        setSelectedFile(prev => {
+          tabStack.current = tabStack.current.filter(file => file !== info);
+          return prev === info ? tabStack.current.at(-1) ?? null : prev;
         });
-        setTab(prev => prev.filter(_path => _path !== path));
+        setTab(prev => prev.filter(file => file !== info));
       },
       // 탐색기 포커싱 해제
       initDefault() {
-        setFocusedPath(null);
-        setContextMenu({ type: null, pos: { x: 0, y: 0 }, target: '' });
+        setFocusedFile(null);
+        setContextMenu({ type: null, pos: { x: 0, y: 0 }, target: null });
       },
       // 파일 내용 수정시
-      modifyFile(path: string, content: string) {
-        setChangedFiles({
-          ...changedFiles,
-          [path]: {
-            state: 'modified',
-            content,
-          },
-        });
-      },
-      // 파일 수정시 원본과 동일해질 경우
-      popFile(path: string) {
+      modifyFile(info: FileInfo, content: string) {
+        const { path } = info;
         setChangedFiles(prev => {
-          delete prev[path];
+          if (!prev[path]) {
+            prev[path] = {
+              state: 'modified',
+              content,
+            };
+            return { ...prev };
+          } else {
+            prev[path].content = content;
+          }
           return { ...prev };
         });
       },
-      // 탐색기에서 파일 추가
-      addFile(path: string) {
-        const pathList = path.split('/');
-        // explorer에 있다면 추가 안됨
-        // 없다면 추가
+      // 파일 수정시 원본과 동일해질 경우
+      removeChangedFile(info: FileInfo) {
+        setChangedFiles(prev => {
+          delete prev[info.path];
+          return { ...prev };
+        });
       },
       // 탐색기에서 파일 삭제
-      deleteFile(path: string) {},
+      removeFile(info: FileInfo) {
+        setExplorer(prev => {
+          if (!prev) {
+            return prev;
+          }
+          removeFileFromExplorer(prev, info);
+          return [...prev];
+        });
+      },
+      // 탐색기에서 파일 추가
+      addFile(info: FileInfo) {
+        setExplorer(prev => {
+          if (!prev) {
+            return prev;
+          }
+          addFileToExplorer(prev, info);
+          return [...prev];
+        });
+      },
+      // 탐색기에서 파일명 수정
+      renameFile(oldInfo: FileInfo, newInfo: FileInfo) {
+        setExplorer(prev => {
+          if (
+            !prev ||
+            !findFileDirectory(prev, oldInfo.path) ||
+            findFileDirectory(prev, newInfo.path)
+          ) {
+            return prev;
+          }
+          removeFileFromExplorer(prev, oldInfo);
+          addFileToExplorer(prev, newInfo);
+          console.log(prev);
+          return [...prev];
+        });
+        setChangedFiles(prev => {
+          prev[newInfo.originalPath] = {
+            ...prev[newInfo.originalPath],
+            state: 'deleted',
+          };
+          prev[newInfo.path] = {
+            ...prev[newInfo.path],
+            state: 'renamed',
+            originalPath: newInfo.originalPath,
+          };
+          return { ...prev };
+        });
+        setTab(prev =>
+          prev.map(item => {
+            console.log(item, newInfo);
+            if (item.originalPath === newInfo.originalPath) {
+              item = newInfo;
+            }
+            return item;
+          })
+        );
+        // tabStack.current.map(item => {
+        //   if (item.originalPath === newInfo.originalPath) {
+        //     item.path = newInfo.path;
+        //   }
+        //   return item;
+        // });
+      },
       // 탐색기에서 폴더 추가
       addDir(path: string) {},
       // 탐색기에서 폴더 삭제
       deleteDir(path: string) {},
+      // 파일 탐색기 초기화
       setExplorer(treeBlob: TreeBlobResponse[]) {
         setExplorer(convertTreeBlobResponseToExplorer(treeBlob));
       },
+      // 가져온 파일 캐싱
       cacheFile(path: string, base64: string) {
-        setSelectedPath(path);
         setCachedFiles(prev => ({
           ...prev,
           [path]: { content: convertBase64ToString(base64) },
         }));
       },
+      // 파일 탐색기 우클릭시 옵션 출력
       showContextMenu(
-        type: 'file' | 'dir',
-        path: string,
+        type: 'file' | 'directory' | 'explorer',
+        info: FileInfo | null,
         pos: { x: number; y: number }
       ) {
-        setFocusedPath(path);
-        setContextMenu({ type, pos, target: path });
+        setFocusedFile(info);
+        setContextMenu({ type, pos, target: info });
+      },
+      // esc 클릭시 초기화 (이름바꾸기시 esc, )
+      escape() {
+        setExplorer(prev => {
+          if (!prev) {
+            return prev;
+          }
+          initExplorer(prev);
+          return [...prev];
+        });
+        setFocusedFile(null);
       },
     }),
     []
@@ -235,8 +333,8 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       <RepoValueContext.Provider
         value={{
           reponame,
-          selectedPath,
-          focusedPath,
+          selectedFile,
+          focusedFile,
           branchname,
           tab,
           changedFiles,
@@ -245,7 +343,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         }}
       >
         {children}
-        {contextMenu.type === 'dir' && (
+        {contextMenu.type === 'directory' && (
           <ContextMenu items={dirContextMenuItems} pos={contextMenu.pos} />
         )}
         {contextMenu.type === 'file' && (

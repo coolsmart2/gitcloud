@@ -5,19 +5,31 @@ import RepoEditorSkeleton from './skeleton';
 import './index.scss';
 
 export default function RepoEditor() {
-  const { reponame, branchname, selectedPath, cachedFiles, changedFiles } =
+  const { reponame, branchname, selectedFile, cachedFiles, changedFiles } =
     useRepoValue();
-  const { cacheFile, modifyFile, popFile } = useRepoActions();
+  const { cacheFile, modifyFile, removeChangedFile } = useRepoActions();
 
   const content =
-    selectedPath &&
-    (changedFiles[selectedPath]?.content || cachedFiles[selectedPath]?.content);
+    selectedFile &&
+    (changedFiles[selectedFile.path]?.content ||
+      cachedFiles[selectedFile.originalPath]?.content);
 
   const fetchFile = async () => {
-    if (reponame && branchname && selectedPath && !cachedFiles[selectedPath]) {
+    for (const path in changedFiles) {
+      if (path === selectedFile?.path && changedFiles[path].state === 'added') {
+        return;
+      }
+    }
+
+    if (
+      reponame &&
+      branchname &&
+      selectedFile &&
+      !cachedFiles[selectedFile.originalPath]
+    ) {
       const { data } = await getGitHubFileAPI({
         reponame,
-        path: selectedPath,
+        path: selectedFile.originalPath,
         ref: branchname,
       });
       cacheFile(data.path, data.content);
@@ -25,21 +37,21 @@ export default function RepoEditor() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (selectedPath && selectedPath in cachedFiles) {
+    if (selectedFile && selectedFile.originalPath in cachedFiles) {
       const { value } = e.target;
-      if (cachedFiles[selectedPath].content !== value) {
-        modifyFile(selectedPath, value);
+      if (cachedFiles[selectedFile.originalPath].content !== value) {
+        modifyFile(selectedFile, value);
       } else {
-        popFile(selectedPath);
+        removeChangedFile(selectedFile);
       }
     }
   };
 
   useEffect(() => {
     fetchFile();
-  }, [selectedPath]);
+  }, [selectedFile]);
 
-  if (!reponame || !branchname || !selectedPath || !content) {
+  if (!reponame || !branchname || !selectedFile || !content) {
     return <RepoEditorSkeleton />;
   }
 

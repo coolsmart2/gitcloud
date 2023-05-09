@@ -33,7 +33,7 @@ export default function RepoExplorer() {
       onContextMenu={e => {
         e.preventDefault();
         e.stopPropagation();
-        showContextMenu('explorer', '', {
+        showContextMenu('explorer', null, {
           x: e.clientX || e.pageX,
           y: e.clientY || e.pageY,
         });
@@ -41,19 +41,11 @@ export default function RepoExplorer() {
     >
       {explorer.map(item => {
         if ('children' in item) {
-          return (
-            <Directory
-              depth={1}
-              name={item.name}
-              path={item.path}
-              children={item.children}
-              key={item.path}
-            />
-          );
+          return <Directory depth={1} info={item} key={item.path} />;
+        } else if ('type' in item) {
+        } else {
+          return <File depth={1} info={item} key={item.path} />;
         }
-        return (
-          <File depth={1} name={item.name} path={item.path} key={item.path} />
-        );
       })}
     </div>
   );

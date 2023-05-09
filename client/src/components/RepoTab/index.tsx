@@ -1,29 +1,30 @@
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import { RiCloseFill } from 'react-icons/ri';
 import './index.scss';
+import { FileInfo } from '../../types/repo.type';
 
 export default function RepoTab() {
-  const { selectedPath, tab } = useRepoValue();
+  const { selectedFile, tab } = useRepoValue();
   const { selectTab, removeTab } = useRepoActions();
 
-  const handleCloseMouseDown = (path: string) => {
+  const handleCloseMouseDown = (info: FileInfo) => {
     return (e: React.MouseEvent) => {
       e.stopPropagation();
-      removeTab(path);
+      removeTab(info);
     };
   };
 
-  const handleTabMouseDown = (path: string) => {
+  const handleTabMouseDown = (info: FileInfo) => {
     return (e: React.MouseEvent) => {
       // 마우스 좌클릭
       if (e.button === 0) {
         e.stopPropagation(); // 왜 버블링을 막아줘야 동작하는지 모름
-        selectTab(path);
+        selectTab(info);
       }
       // 마우스 휠클릭
       if (e.button === 1) {
         e.preventDefault();
-        removeTab(path);
+        removeTab(info);
       }
     };
   };
@@ -31,30 +32,33 @@ export default function RepoTab() {
   return (
     <div className="repo-tab-container">
       <div className="repo-tab">
-        {tab.map((path, index) => {
+        {tab.map((file, index) => {
+          const { path } = file;
           const name = path.split('/').pop();
           return (
             <div
               className={`repo-tab__item${
-                selectedPath === path ? ' active' : ''
+                selectedFile?.originalPath === file.originalPath
+                  ? ' active'
+                  : ''
               }`}
-              onMouseDown={handleTabMouseDown(path)}
+              onMouseDown={handleTabMouseDown(file)}
               draggable
-              key={path}
+              key={index}
             >
               {name}
               <RiCloseFill
                 size={20}
                 color="gray"
                 cursor={'pointer'}
-                onMouseDown={handleCloseMouseDown(path)}
+                onMouseDown={handleCloseMouseDown(file)}
               />
             </div>
           );
         })}
       </div>
       <div className="repo-tab__path">
-        {selectedPath?.split('/').join(' > ')}
+        {selectedFile?.path?.split('/').join(' > ')}
       </div>
     </div>
   );
