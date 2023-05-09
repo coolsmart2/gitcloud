@@ -282,12 +282,12 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
             return item;
           })
         );
-        // tabStack.current.map(item => {
-        //   if (item.originalPath === newInfo.originalPath) {
-        //     item.path = newInfo.path;
-        //   }
-        //   return item;
-        // });
+        tabStack.current.map(item => {
+          if (item.originalPath === newInfo.originalPath) {
+            item = newInfo;
+          }
+          return item;
+        });
       },
       // 탐색기에서 폴더 추가
       addDir(path: string) {},
