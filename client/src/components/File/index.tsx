@@ -11,8 +11,9 @@ interface FileProps {
 }
 
 export default function File({ depth, info, parent }: FileProps) {
-  const { name, path, originalPath, state } = info;
-  const { selectedFile, focusedFile, changedFiles } = useRepoValue();
+  const { name, path, originalPath } = info;
+  const { selectedPath, focusedPath, renamePath, changedFiles } =
+    useRepoValue();
   const { selectFile, showContextMenu, escape, renameFile } = useRepoActions();
   const [fileName, setFileName] = useState(name);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -25,13 +26,13 @@ export default function File({ depth, info, parent }: FileProps) {
       fileRef.current.select();
       fileRef.current.focus();
     }
-  }, [state]);
+  }, [renamePath]);
 
   return (
     <div
       className={`file-wrapper${isModified ? ' modified' : ''}${
-        path === selectedFile?.path ? ' selected' : ''
-      }${path === focusedFile?.path ? ' focused' : ''}`}
+        path === selectedPath.current ? ' selected' : ''
+      }${path === focusedPath.current ? ' focused' : ''}`}
       style={{ paddingLeft: `${10 * depth + 23}px` }}
       onClick={() => {
         selectFile(info);
@@ -46,8 +47,9 @@ export default function File({ depth, info, parent }: FileProps) {
       }}
     >
       <GoFile className="file__icon" size={18} />
-      {state === 'default' && <div className="file__name">{name}</div>}
-      {state === 'rename' && (
+      {path !== renamePath.current ? (
+        <div className="file__name">{name}</div>
+      ) : (
         <input
           value={fileName}
           className="file__input"
@@ -56,7 +58,6 @@ export default function File({ depth, info, parent }: FileProps) {
             if (e.key === 'Enter') {
               renameFile(info, {
                 ...info,
-                state: 'default',
                 path: path.replace(new RegExp(name + '$'), fileName),
                 name: fileName,
               });

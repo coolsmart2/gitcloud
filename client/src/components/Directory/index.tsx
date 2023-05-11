@@ -13,8 +13,9 @@ interface DirectoryProps {
 }
 
 export default function Directory({ depth, info, parent }: DirectoryProps) {
-  const { name, path, state, children } = info;
-  const { selectedFile, focusedFile, changedFiles } = useRepoValue();
+  const { name, path, children } = info;
+  const { selectedPath, focusedPath, renamePath, changedFiles } =
+    useRepoValue();
   const { showContextMenu } = useRepoActions();
   const [isDirOpened, setIsDirOpened] = useState(false);
 
@@ -22,8 +23,8 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
     <>
       <div
         className={`dir-wrapper${
-          path === selectedFile?.path ? ' selected' : ''
-        }${path === focusedFile?.path ? ' focused' : ''}`}
+          path === selectedPath.current ? ' selected' : ''
+        }${path === focusedPath.current ? ' focused' : ''}`}
         style={{ paddingLeft: `${10 * depth}px` }}
         onClick={() => setIsDirOpened(prev => !prev)}
         onContextMenu={e => {
@@ -41,7 +42,7 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
           <MdKeyboardArrowRight size={18} />
         )}
         <GoFileDirectory className="dir__icon" size={18} />
-        {state === 'default' && <div className="dir__name">{name}</div>}
+        {path !== renamePath.current && <div className="dir__name">{name}</div>}
       </div>
       {isDirOpened &&
         children.map(item => {
