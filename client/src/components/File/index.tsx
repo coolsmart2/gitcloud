@@ -19,7 +19,9 @@ export default function File({ depth, info, parent }: FileProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const isModified =
-    path in changedFiles && changedFiles[path].state === 'modified';
+    path in changedFiles &&
+    (changedFiles[path].state === 'modified' ||
+      changedFiles[path].state === 'renamed');
 
   useEffect(() => {
     if (fileRef.current) {

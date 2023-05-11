@@ -301,6 +301,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
             ...prev[newInfo.path],
             state: 'renamed',
             originalPath: newInfo.originalPath,
+            content: prev[newInfo.originalPath].content,
           };
           return { ...prev };
         });

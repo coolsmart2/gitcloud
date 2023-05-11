@@ -48,9 +48,9 @@ export default function RepoEditor() {
     ) {
       const { value } = e.target;
       if (cachedFiles[selectedPath.original].content !== value) {
-        modifyFile(selectedPath.original, value);
+        modifyFile(selectedPath.current, value);
       } else {
-        removeChangedFile(selectedPath.original);
+        removeChangedFile(selectedPath.current);
       }
     }
   };
