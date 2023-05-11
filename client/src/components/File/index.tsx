@@ -1,8 +1,8 @@
 import { GoFile } from 'react-icons/go';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import { DirectoryInfo, FileInfo } from '../../types/repo.type';
-import './index.scss';
 import { useEffect, useRef, useState } from 'react';
+import './index.scss';
 
 interface FileProps {
   depth: number;

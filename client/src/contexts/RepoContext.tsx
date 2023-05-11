@@ -258,7 +258,6 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           }
           removeFileFromExplorer(prev, oldInfo);
           addFileToExplorer(prev, newInfo);
-          console.log(prev);
           return [...prev];
         });
         setChangedFiles(prev => {
