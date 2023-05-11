@@ -16,7 +16,6 @@ export const convertTreeBlobResponseToExplorer = (
         path: `${basePath}${item.path}`,
         originalPath: `${basePath}${item.path}`,
         name: item.path,
-        state: 'default',
         children: convertTreeBlobResponseToExplorer(
           item.tree!,
           `${basePath}${item.path}/`
@@ -27,7 +26,6 @@ export const convertTreeBlobResponseToExplorer = (
       path: `${basePath}${item.path}`,
       originalPath: `${basePath}${item.path}`,
       name: item.path,
-      state: 'default',
     } as FileInfo;
   });
 };
@@ -53,8 +51,9 @@ export const convertBase64ToString = (base64: string) => {
 
 export const findFileDirectory = (
   explorer: Explorer,
-  path: string
+  path: string | null
 ): FileInfo | undefined => {
+  if (!path) return;
   for (const item of explorer) {
     if ('type' in item) {
       continue;
@@ -79,7 +78,6 @@ export const initExplorer = (explorer: Explorer) => {
     if ('children' in item) {
       initExplorer(item.children);
     }
-    item.state = 'default';
   }
 };
 
@@ -117,7 +115,6 @@ export const addFileToExplorer = (explorer: Explorer, info: FileInfo) => {
 
   currExplorer.push({
     ...info,
-    state: 'default',
   });
 
   // 폴더 우선순위로 정렬 후 파일 정렬 (이름 순)
