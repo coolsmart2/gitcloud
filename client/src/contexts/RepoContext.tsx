@@ -10,6 +10,7 @@ import {
   addFileToExplorer,
   convertBase64ToString,
   convertTreeBlobResponseToExplorer,
+  removeRenamingFile,
   findFileDirectory,
   initExplorer,
   removeFileFromExplorer,
@@ -154,7 +155,30 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
 
   const dirContextMenuItems = useMemo(
     () => [
-      { label: '새 파일', onClick: () => {} },
+      {
+        label: '새 파일',
+        onClick: () => {
+          if (!focusedPath) {
+            return;
+          }
+          setExplorer(prev => {
+            if (!prev) {
+              return prev;
+            }
+            addFileToExplorer(prev, {
+              path: focusedPath.current,
+              originalPath: focusedPath.current,
+              name: '',
+            });
+            return [...prev];
+          });
+          setContextMenu({
+            type: undefined,
+            pos: { x: 0, y: 0 },
+            target: undefined,
+          });
+        },
+      },
       { label: '새 폴더', onClick: () => {} },
       { label: '이름 바꾸기', onClick: () => {} },
       { label: '삭제', onClick: () => {} },
@@ -172,21 +196,49 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
             pos: { x: 0, y: 0 },
             target: undefined,
           });
-          setFocusedPath(undefined);
-          if (!explorer || !focusedPath) {
+          if (!focusedPath || !explorer) {
             return;
           }
           const file = findFileDirectory(explorer, focusedPath.current);
           if (!file) {
             return;
           }
+          setFocusedPath(undefined);
           setRenamePath({
             current: focusedPath.current,
             original: focusedPath.original,
           });
         },
       },
-      { label: '삭제', onClick: () => {} },
+      {
+        label: '삭제',
+        onClick: () => {
+          setContextMenu({
+            type: undefined,
+            pos: { x: 0, y: 0 },
+            target: undefined,
+          });
+          if (!focusedPath || !explorer) {
+            return;
+          }
+          const file = findFileDirectory(explorer, focusedPath.current);
+          if (!file) {
+            return;
+          }
+          setExplorer(prev => {
+            if (!prev) {
+              return prev;
+            }
+            removeFileFromExplorer(prev, {
+              path: focusedPath.current,
+              originalPath: focusedPath.current,
+              name: focusedPath.current.split('/').pop()!,
+            });
+            return [...prev];
+          });
+          setFocusedPath(undefined);
+        },
+      },
     ],
     [contextMenu]
   );
@@ -400,6 +452,18 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       escape() {
         setRenamePath(undefined);
         setFocusedPath(undefined);
+        setContextMenu({
+          type: undefined,
+          pos: { x: 0, y: 0 },
+          target: undefined,
+        });
+        setExplorer(prev => {
+          if (!prev) {
+            return prev;
+          }
+          removeRenamingFile(prev);
+          return [...prev];
+        });
       },
     }),
     []

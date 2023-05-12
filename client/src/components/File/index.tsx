@@ -66,8 +66,8 @@ export default function File({ depth, info, parent }: FileProps) {
             if (e.key === 'Enter') {
               if (name === '') {
                 renameFile(info, {
-                  path: path.replace(new RegExp(name + '$'), fileName),
-                  originalPath: path.replace(new RegExp(name + '$'), fileName),
+                  path: `${path}/${fileName}`,
+                  originalPath: `${path}/${fileName}`,
                   name: fileName,
                 });
               } else {

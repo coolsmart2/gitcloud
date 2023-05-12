@@ -13,21 +13,21 @@ export default function RepoWindow() {
   const query = new URLSearchParams(useLocation().search); // 이런식으로 컴포넌트에 변수를 선언해도 될까?
 
   const { tab } = useRepoValue();
-  const { setReponame, setBranchname, initDefault } = useRepoActions();
+  const { setReponame, setBranchname, escape } = useRepoActions();
 
   const [explorerWidth, lineWidth, contentWidth, setExplorerWidth] =
     useExplorerResize();
 
   useEffect(() => {
     setReponame(reponame);
-    setBranchname(query.get('ref'));
+    setBranchname(query.get('ref') ?? undefined);
   }, []);
 
   return (
     <div
       className="repo-window-container"
       onMouseDown={() => {
-        initDefault();
+        escape();
       }}
     >
       <div className="repo-window__header">

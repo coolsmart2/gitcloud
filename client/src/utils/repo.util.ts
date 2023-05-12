@@ -64,7 +64,7 @@ export const findFileDirectory = (
         return fileDir;
       }
     }
-    if (item.path === path) {
+    if (item.path === path && item.name !== '') {
       return item;
     }
   }
@@ -81,8 +81,22 @@ export const initExplorer = (explorer: Explorer) => {
   }
 };
 
+export const removeRenamingFile = (explorer: Explorer) => {
+  for (const item of explorer) {
+    if ('type' in item) {
+      continue;
+    } else if ('children' in item) {
+      removeRenamingFile(item.children);
+    } else {
+      if (item.name === '') {
+        removeFileFromExplorer(explorer, item);
+        return;
+      }
+    }
+  }
+};
+
 export const removeFileFromExplorer = (explorer: Explorer, info: FileInfo) => {
-  // console.log(explorer, info);
   for (let i = 0; i < explorer.length; i++) {
     const temp = explorer[i];
     if ('type' in temp) {
@@ -92,7 +106,6 @@ export const removeFileFromExplorer = (explorer: Explorer, info: FileInfo) => {
       removeFileFromExplorer(temp.children, info);
     }
     if (temp.path === info.path && temp.name === info.name) {
-      console.log('check');
       explorer.splice(i, 1);
       return;
     }
