@@ -17,20 +17,26 @@ import {
 import ContextMenu from '../components/ContextMenu';
 
 interface RepoValue {
-  reponame: string | null;
-  selectedPath: {
-    current: string | null;
-    original: string | null;
-  };
-  focusedPath: {
-    current: string | null;
-    original: string | null;
-  };
-  renamePath: {
-    current: string | null;
-    original: string | null;
-  };
-  branchname: string | null;
+  reponame: string | undefined;
+  selectedPath:
+    | {
+        current: string;
+        original: string;
+      }
+    | undefined;
+  focusedPath:
+    | {
+        current: string;
+        original: string;
+      }
+    | undefined;
+  renamePath:
+    | {
+        current: string;
+        original: string;
+      }
+    | undefined;
+  branchname: string | undefined;
   tab: {
     current: string;
     original: string;
@@ -41,7 +47,7 @@ interface RepoValue {
   }[];
   changedFiles: Record<string, ChangedFileDirectoryState>;
   cachedFiles: Record<string, CachedFileState>;
-  explorer: Explorer | null;
+  explorer: Explorer | undefined;
 }
 
 interface RepoActions {
@@ -49,17 +55,17 @@ interface RepoActions {
   selectFile(info: FileInfo): void;
   selectDir(info: FileInfo): void;
   focusPath(info: FileInfo): void;
-  setBranchname(branchname: string | null): void;
-  selectTab(path: { current: string; original: string }): void;
-  removeTab(path: { current: string; original: string }): void;
+  setBranchname(branchname: string | undefined): void;
+  selectTab(path: { current?: string; original?: string }): void;
+  removeTab(path: { current?: string; original?: string }): void;
   setExplorer(treeBlob: TreeBlobResponse[]): void;
   initDefault(): void;
   cacheFile(path: string, content: string): void;
   modifyFile(path: string, content: string): void;
   removeChangedFile(path: string): void;
   showContextMenu(
-    type: 'file' | 'directory' | 'explorer' | null,
-    info: FileInfo | null,
+    type: 'file' | 'directory' | 'explorer' | undefined,
+    info: FileInfo | undefined,
     pos: { x: number; y: number }
   ): void;
   escape(): void;
@@ -67,16 +73,16 @@ interface RepoActions {
 }
 
 const RepoValueContext = createContext<RepoValue>({
-  reponame: null,
-  selectedPath: { current: null, original: null },
-  focusedPath: { current: null, original: null },
-  renamePath: { current: null, original: null },
-  branchname: null,
+  reponame: undefined,
+  selectedPath: undefined,
+  focusedPath: undefined,
+  renamePath: undefined,
+  branchname: undefined,
   tab: [],
   tabStack: [],
   changedFiles: {},
   cachedFiles: {},
-  explorer: null,
+  explorer: undefined,
 });
 
 const RepoActionsContext = createContext<RepoActions>({
@@ -98,23 +104,40 @@ const RepoActionsContext = createContext<RepoActions>({
 });
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
-  const [selectedPath, setSelectedPath] = useState<{
-    current: string | null;
-    original: string | null;
-  }>({ current: null, original: null }); // 선택된 파일 경로
-  const [focusedPath, setFocusedPath] = useState<{
-    current: string | null;
-    original: string | null;
-  }>({ current: null, original: null }); // 포커싱된 파일 경로 (ex. 파일-폴더 우클릭)
-  const [renamePath, setRenamePath] = useState<{
-    current: string | null;
-    original: string | null;
-  }>({ current: null, original: null }); // 이름을 변경 중인 파일 경로
-  const [reponame, setReponame] = useState<string | null>(null); // 현재 레포지토리 이름
-  const [branchname, setBranchname] = useState<string | null>(null); // 현재 브랜치
-  const [tab, setTab] = useState<{ current: string; original: string }[]>([]); // 열려있는 파일 경로 리스트 (ex. 탭, 탭 순서)
+  const [selectedPath, setSelectedPath] = useState<
+    | {
+        current: string;
+        original: string;
+      }
+    | undefined
+  >(); // 선택된 파일 경로
+  const [focusedPath, setFocusedPath] = useState<
+    | {
+        current: string;
+        original: string;
+      }
+    | undefined
+  >(); // 포커싱된 파일 경로 (ex. 파일-폴더 우클릭)
+  const [renamePath, setRenamePath] = useState<
+    | {
+        current: string;
+        original: string;
+      }
+    | undefined
+  >(); // 이름을 변경 중인 파일 경로
+  const [reponame, setReponame] = useState<string | undefined>(undefined); // 현재 레포지토리 이름
+  const [branchname, setBranchname] = useState<string | undefined>(undefined); // 현재 브랜치
+  const [tab, setTab] = useState<
+    {
+      current: string;
+      original: string;
+    }[]
+  >([]); // 열려있는 파일 경로 리스트 (ex. 탭, 탭 순서)
   const [tabStack, setTabStack] = useState<
-    { current: string; original: string }[]
+    {
+      current: string;
+      original: string;
+    }[]
   >([]); // 작업한 탭 순서
   const [changedFiles, setChangedFiles] = useState<
     Record<string, ChangedFileDirectoryState>
@@ -122,12 +145,12 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
   const [cachedFiles, setCachedFiles] = useState<
     Record<string, CachedFileState>
   >({}); // api 요청한 파일 캐싱
-  const [explorer, setExplorer] = useState<Explorer | null>(null); // 파일 탐색기
+  const [explorer, setExplorer] = useState<Explorer | undefined>(undefined); // 파일 탐색기
   const [contextMenu, setContextMenu] = useState<{
-    type: 'file' | 'directory' | 'explorer' | null;
+    type: 'file' | 'directory' | 'explorer' | undefined;
     pos: { x: number; y: number };
-    target: FileInfo | null;
-  }>({ type: null, pos: { x: 0, y: 0 }, target: null });
+    target: FileInfo | undefined;
+  }>({ type: undefined, pos: { x: 0, y: 0 }, target: undefined });
 
   const dirContextMenuItems = useMemo(
     () => [
@@ -144,8 +167,12 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       {
         label: '이름 바꾸기',
         onClick: () => {
-          setContextMenu({ type: null, pos: { x: 0, y: 0 }, target: null });
-          setFocusedPath({ current: null, original: null });
+          setContextMenu({
+            type: undefined,
+            pos: { x: 0, y: 0 },
+            target: undefined,
+          });
+          setFocusedPath(undefined);
           if (!explorer || !focusedPath) {
             return;
           }
@@ -168,7 +195,20 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
     () => [
       {
         label: '새 파일',
-        onClick: () => {},
+        onClick: () => {
+          setExplorer(prev => {
+            if (!prev) {
+              return prev;
+            }
+            addFileToExplorer(prev, { path: '', originalPath: '', name: '' });
+            return [...prev];
+          });
+          setContextMenu({
+            type: undefined,
+            pos: { x: 0, y: 0 },
+            target: undefined,
+          });
+        },
       },
       { label: '새 폴더', onClick: () => {} },
     ],
@@ -208,7 +248,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       },
       // 열려있는 탭 간 이동
       selectTab(path: { current: string; original: string }) {
-        setFocusedPath({ current: null, original: null });
+        setFocusedPath(undefined);
         setSelectedPath({ ...path });
         setTabStack(prev => [
           ...prev.filter(item => item.current !== path.current),
@@ -217,25 +257,27 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       },
       // 열려있는 탭 삭제
       removeTab(path: { current: string; original: string }) {
-        setFocusedPath({ current: null, original: null });
+        setFocusedPath(undefined);
         setTab(prev => prev.filter(item => item.current !== path.current));
         setTabStack(prev => {
           const filteredTabStack = prev.filter(
             item => item.current !== path.current
           );
           setSelectedPath({
-            current:
-              filteredTabStack[filteredTabStack.length - 1].current ?? null,
-            original:
-              filteredTabStack[filteredTabStack.length - 1].original ?? null,
+            current: filteredTabStack[filteredTabStack.length - 1].current,
+            original: filteredTabStack[filteredTabStack.length - 1].original,
           });
           return filteredTabStack;
         });
       },
       // 탐색기 포커싱 해제
       initDefault() {
-        setFocusedPath({ current: null, original: null });
-        setContextMenu({ type: null, pos: { x: 0, y: 0 }, target: null });
+        setFocusedPath(undefined);
+        setContextMenu({
+          type: undefined,
+          pos: { x: 0, y: 0 },
+          target: undefined,
+        });
       },
       // 파일 내용 수정시
       modifyFile(path: string, content: string) {
@@ -275,17 +317,16 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         });
       },
       // 탐색기에서 파일명 수정
+      // todo: 이름 바꾼후 다시 원래 이름으로 바꾼 경우 예외처리
+      // todo: 파일명에 / 들어갈 경우 예외처리
       renameFile(oldInfo: FileInfo, newInfo: FileInfo) {
-        setSelectedPath({
-          current: newInfo.path,
-          original: newInfo.originalPath,
-        });
+        console.log(oldInfo, newInfo);
+        // setSelectedPath({
+        //   current: newInfo.path,
+        //   original: newInfo.originalPath,
+        // });
         setExplorer(prev => {
-          if (
-            !prev ||
-            !findFileDirectory(prev, oldInfo.path) ||
-            findFileDirectory(prev, newInfo.path)
-          ) {
+          if (!prev) {
             return prev;
           }
           removeFileFromExplorer(prev, oldInfo);
@@ -293,16 +334,24 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           return [...prev];
         });
         setChangedFiles(prev => {
-          prev[newInfo.originalPath] = {
-            ...prev[newInfo.originalPath],
-            state: 'deleted',
-          };
-          prev[newInfo.path] = {
-            ...prev[newInfo.path],
-            state: 'renamed',
-            originalPath: newInfo.originalPath,
-            content: prev[newInfo.originalPath].content,
-          };
+          if (oldInfo.name === '') {
+            prev[newInfo.path] = {
+              state: 'added',
+              originalPath: newInfo.originalPath,
+              content: '',
+            };
+          } else {
+            prev[oldInfo.path] = {
+              ...prev[oldInfo.path],
+              state: 'deleted',
+            };
+            prev[newInfo.path] = {
+              ...prev[newInfo.path],
+              state: 'renamed',
+              originalPath: newInfo.originalPath,
+              content: prev[newInfo.originalPath]?.content,
+            };
+          }
           return { ...prev };
         });
         setTab(prev =>
@@ -338,23 +387,19 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       // 파일 탐색기 우클릭시 옵션 출력
       showContextMenu(
         type: 'file' | 'directory' | 'explorer',
-        info: FileInfo | null,
+        info: FileInfo | undefined,
         pos: { x: number; y: number }
       ) {
-        if (!info) return;
-        setFocusedPath({ current: info.path, original: info.originalPath });
         setContextMenu({ type, pos, target: info });
+        if (!info) {
+          return;
+        }
+        setFocusedPath({ current: info.path, original: info.originalPath });
       },
       // esc 클릭시 초기화 (이름바꾸기시 esc, )
       escape() {
-        setExplorer(prev => {
-          if (!prev) {
-            return prev;
-          }
-          initExplorer(prev);
-          return [...prev];
-        });
-        setFocusedPath({ current: null, original: null });
+        setRenamePath(undefined);
+        setFocusedPath(undefined);
       },
     }),
     []

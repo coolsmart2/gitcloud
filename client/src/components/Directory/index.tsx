@@ -23,8 +23,8 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
     <>
       <div
         className={`dir-wrapper${
-          path === selectedPath.current ? ' selected' : ''
-        }${path === focusedPath.current ? ' focused' : ''}`}
+          selectedPath && path === selectedPath.current ? ' selected' : ''
+        }${focusedPath && path === focusedPath.current ? ' focused' : ''}`}
         style={{ paddingLeft: `${10 * depth}px` }}
         onClick={() => setIsDirOpened(prev => !prev)}
         onContextMenu={e => {
@@ -42,7 +42,9 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
           <MdKeyboardArrowRight size={18} />
         )}
         <GoFileDirectory className="dir__icon" size={18} />
-        {path !== renamePath.current && <div className="dir__name">{name}</div>}
+        {!renamePath || (renamePath && path !== renamePath.current) ? (
+          <div className="dir__name">{name}</div>
+        ) : null}
       </div>
       {isDirOpened &&
         children.map(item => {

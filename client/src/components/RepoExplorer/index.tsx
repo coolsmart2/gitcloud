@@ -33,7 +33,7 @@ export default function RepoExplorer() {
       onContextMenu={e => {
         e.preventDefault();
         e.stopPropagation();
-        showContextMenu('explorer', null, {
+        showContextMenu('explorer', undefined, {
           x: e.clientX || e.pageX,
           y: e.clientY || e.pageY,
         });

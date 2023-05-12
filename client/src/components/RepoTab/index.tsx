@@ -16,7 +16,10 @@ export default function RepoTab() {
     };
   };
 
-  const handleTabMouseDown = (path: { current: string; original: string }) => {
+  const handleTabMouseDown = (path: {
+    current?: string;
+    original?: string;
+  }) => {
     return (e: React.MouseEvent) => {
       // 마우스 좌클릭
       if (e.button === 0) {
@@ -39,7 +42,9 @@ export default function RepoTab() {
           return (
             <div
               className={`repo-tab__item${
-                selectedPath.current === path.current ? ' active' : ''
+                selectedPath && selectedPath.current === path.current
+                  ? ' active'
+                  : ''
               }`}
               onMouseDown={handleTabMouseDown(path)}
               draggable
@@ -57,7 +62,7 @@ export default function RepoTab() {
         })}
       </div>
       <div className="repo-tab__path">
-        {selectedPath.current?.split('/').join(' > ')}
+        {selectedPath && selectedPath.current.split('/').join(' > ')}
       </div>
     </div>
   );

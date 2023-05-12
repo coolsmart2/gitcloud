@@ -15,12 +15,7 @@ export interface FileInfo {
 }
 
 export interface DirectoryInfo extends FileInfo {
-  children: (DirectoryInfo | FileInfo | NewFileDirectoryInfo)[];
+  children: (DirectoryInfo | FileInfo)[];
 }
 
-export interface NewFileDirectoryInfo {
-  path: string;
-  type: 'file' | 'directory';
-}
-
-export type Explorer = (DirectoryInfo | FileInfo | NewFileDirectoryInfo)[];
+export type Explorer = (DirectoryInfo | FileInfo)[];

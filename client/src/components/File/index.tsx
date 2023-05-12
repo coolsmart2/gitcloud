@@ -18,10 +18,15 @@ export default function File({ depth, info, parent }: FileProps) {
   const [fileName, setFileName] = useState(name);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const isModified =
-    path in changedFiles &&
-    (changedFiles[path].state === 'modified' ||
-      changedFiles[path].state === 'renamed');
+  // const isModified =
+  //   path in changedFiles &&
+  //   (changedFiles[path].state === 'modified' ||
+  //     changedFiles[path].state === 'renamed');
+
+  const isModified = false;
+
+  const isRenaming =
+    name === '' || (renamePath && renamePath && path === renamePath.current);
 
   useEffect(() => {
     if (fileRef.current) {
@@ -33,10 +38,11 @@ export default function File({ depth, info, parent }: FileProps) {
   return (
     <div
       className={`file-wrapper${isModified ? ' modified' : ''}${
-        path === selectedPath.current ? ' selected' : ''
-      }${path === focusedPath.current ? ' focused' : ''}`}
+        selectedPath && path === selectedPath.current ? ' selected' : ''
+      }${focusedPath && path === focusedPath.current ? ' focused' : ''}`}
       style={{ paddingLeft: `${10 * depth + 23}px` }}
       onClick={() => {
+        if (path === '') return;
         selectFile(info);
       }}
       onContextMenu={e => {
@@ -49,7 +55,7 @@ export default function File({ depth, info, parent }: FileProps) {
       }}
     >
       <GoFile className="file__icon" size={18} />
-      {path !== renamePath.current ? (
+      {!isRenaming ? (
         <div className="file__name">{name}</div>
       ) : (
         <input
@@ -58,11 +64,19 @@ export default function File({ depth, info, parent }: FileProps) {
           ref={fileRef}
           onKeyDown={e => {
             if (e.key === 'Enter') {
-              renameFile(info, {
-                ...info,
-                path: path.replace(new RegExp(name + '$'), fileName),
-                name: fileName,
-              });
+              if (name === '') {
+                renameFile(info, {
+                  path: path.replace(new RegExp(name + '$'), fileName),
+                  originalPath: path.replace(new RegExp(name + '$'), fileName),
+                  name: fileName,
+                });
+              } else {
+                renameFile(info, {
+                  ...info,
+                  path: path.replace(new RegExp(name + '$'), fileName),
+                  name: fileName,
+                });
+              }
             }
             if (e.key === 'Escape') {
               setFileName(name);

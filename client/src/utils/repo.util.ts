@@ -51,7 +51,7 @@ export const convertBase64ToString = (base64: string) => {
 
 export const findFileDirectory = (
   explorer: Explorer,
-  path: string | null
+  path: string | undefined
 ): FileInfo | undefined => {
   if (!path) return;
   for (const item of explorer) {
@@ -82,6 +82,7 @@ export const initExplorer = (explorer: Explorer) => {
 };
 
 export const removeFileFromExplorer = (explorer: Explorer, info: FileInfo) => {
+  // console.log(explorer, info);
   for (let i = 0; i < explorer.length; i++) {
     const temp = explorer[i];
     if ('type' in temp) {
@@ -90,7 +91,8 @@ export const removeFileFromExplorer = (explorer: Explorer, info: FileInfo) => {
     if ('children' in temp) {
       removeFileFromExplorer(temp.children, info);
     }
-    if (temp.path === info.path) {
+    if (temp.path === info.path && temp.name === info.name) {
+      console.log('check');
       explorer.splice(i, 1);
       return;
     }
@@ -113,9 +115,7 @@ export const addFileToExplorer = (explorer: Explorer, info: FileInfo) => {
     }
   }
 
-  currExplorer.push({
-    ...info,
-  });
+  currExplorer.push(info);
 
   // 폴더 우선순위로 정렬 후 파일 정렬 (이름 순)
   currExplorer.sort((a, b) => {

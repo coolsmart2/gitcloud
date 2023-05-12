@@ -10,14 +10,14 @@ export default function RepoEditor() {
   const { cacheFile, modifyFile, removeChangedFile } = useRepoActions();
 
   const content =
-    selectedPath.current &&
-    selectedPath.original &&
-    (changedFiles[selectedPath.current]?.content ||
+    selectedPath &&
+    (changedFiles[selectedPath.current]?.content ??
       cachedFiles[selectedPath.original]?.content);
 
   const fetchFile = async () => {
     for (const path in changedFiles) {
       if (
+        selectedPath &&
         path === selectedPath.current &&
         changedFiles[path].state === 'added'
       ) {
@@ -28,7 +28,7 @@ export default function RepoEditor() {
     if (
       reponame &&
       branchname &&
-      selectedPath.original &&
+      selectedPath &&
       !cachedFiles[selectedPath.original]
     ) {
       const { data } = await getGitHubFileAPI({
@@ -42,15 +42,19 @@ export default function RepoEditor() {
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (
-      selectedPath.current &&
-      selectedPath.original &&
-      selectedPath.original in cachedFiles
+      selectedPath &&
+      (selectedPath.original in cachedFiles ||
+        selectedPath.current in changedFiles)
     ) {
       const { value } = e.target;
-      if (cachedFiles[selectedPath.original].content !== value) {
-        modifyFile(selectedPath.current, value);
+      if (selectedPath.original in cachedFiles) {
+        if (cachedFiles[selectedPath.original].content !== value) {
+          modifyFile(selectedPath.current, value);
+        } else {
+          removeChangedFile(selectedPath.current);
+        }
       } else {
-        removeChangedFile(selectedPath.current);
+        modifyFile(selectedPath.current, value);
       }
     }
   };
@@ -59,7 +63,7 @@ export default function RepoEditor() {
     fetchFile();
   }, [selectedPath]);
 
-  if (!reponame || !branchname || !selectedPath || !content) {
+  if (!reponame || !branchname || !selectedPath || content === undefined) {
     return <RepoEditorSkeleton />;
   }
 
