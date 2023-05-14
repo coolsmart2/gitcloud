@@ -4,6 +4,7 @@ import {
   CachedFileState,
   Explorer,
   FileInfo,
+  DirectoryInfo,
 } from '../types/repo.type';
 import { TreeBlobResponse } from '../types/response.type';
 import {
@@ -12,7 +13,6 @@ import {
   convertTreeBlobResponseToExplorer,
   removeRenamingFile,
   findFileDirectory,
-  initExplorer,
   removeFileFromExplorer,
 } from '../utils/repo.util';
 import ContextMenu from '../components/ContextMenu';
@@ -77,6 +77,7 @@ interface RepoActions {
   ): void;
   escape(): void;
   renameFile(oldInfo: FileInfo, newInfo: FileInfo): void;
+  renameDir(oldInfo: DirectoryInfo, newInfo: DirectoryInfo): void;
 }
 
 const RepoValueContext = createContext<RepoValue>({
@@ -108,6 +109,7 @@ const RepoActionsContext = createContext<RepoActions>({
   showContextMenu: () => {},
   escape: () => {},
   renameFile: () => {},
+  renameDir: () => {},
 });
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
@@ -186,7 +188,32 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           setFocusedPath(undefined);
         },
       },
-      { label: '새 폴더', onClick: () => {} },
+      {
+        label: '새 폴더',
+        onClick: () => {
+          setContextMenu({
+            type: undefined,
+            pos: { x: 0, y: 0 },
+            target: undefined,
+          });
+          if (!focusedPath) {
+            return;
+          }
+          setExplorer(prev => {
+            if (!prev) {
+              return prev;
+            }
+            addFileToExplorer(prev, {
+              path: focusedPath.current,
+              originalPath: focusedPath.current,
+              name: '',
+              children: [],
+            });
+            return [...prev];
+          });
+          setFocusedPath(undefined);
+        },
+      },
       {
         label: '이름 바꾸기',
         onClick: () => {
@@ -304,7 +331,28 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           });
         },
       },
-      { label: '새 폴더', onClick: () => {} },
+      {
+        label: '새 폴더',
+        onClick: () => {
+          setContextMenu({
+            type: undefined,
+            pos: { x: 0, y: 0 },
+            target: undefined,
+          });
+          setExplorer(prev => {
+            if (!prev) {
+              return prev;
+            }
+            addFileToExplorer(prev, {
+              path: '',
+              originalPath: '',
+              name: '',
+              children: [],
+            });
+            return [...prev];
+          });
+        },
+      },
     ],
     [contextMenu]
   );
@@ -473,6 +521,16 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         setSelectedPath({
           current: newInfo.path,
           original: newInfo.originalPath,
+        });
+      },
+      renameDir(oldInfo: DirectoryInfo, newInfo: DirectoryInfo) {
+        setExplorer(prev => {
+          if (!prev) {
+            return prev;
+          }
+          removeFileFromExplorer(prev, oldInfo);
+          addFileToExplorer(prev, newInfo);
+          return [...prev];
         });
       },
       // 탐색기에서 폴더 추가

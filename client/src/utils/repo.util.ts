@@ -88,6 +88,10 @@ export const removeRenamingFile = (explorer: Explorer) => {
     if ('type' in item) {
       continue;
     } else if ('children' in item) {
+      if (item.name === '') {
+        removeFileFromExplorer(explorer, item);
+        return;
+      }
       removeRenamingFile(item.children);
     } else {
       if (item.name === '') {
@@ -114,7 +118,10 @@ export const removeFileFromExplorer = (explorer: Explorer, info: FileInfo) => {
   }
 };
 
-export const addFileToExplorer = (explorer: Explorer, info: FileInfo) => {
+export const addFileToExplorer = (
+  explorer: Explorer,
+  info: FileInfo | DirectoryInfo
+) => {
   const pathArr = info.path.split('/');
 
   let currExplorer = explorer;
@@ -146,6 +153,23 @@ export const addFileToExplorer = (explorer: Explorer, info: FileInfo) => {
     return a.path.localeCompare(b.path);
   });
 };
+
+// export const addDirToExplorer = (explorer: Explorer, info: FileInfo) => {
+//   const pathArr = info.path.split('/');
+
+//   let currExplorer = explorer;
+//   for (let i = 0; i < pathArr.length; i++) {
+//     for (const item of currExplorer) {
+//       if ('type' in item) {
+//         continue;
+//       }
+//       if ('children' in item && item.name === pathArr[i]) {
+//         currExplorer = item.children;
+//         break;
+//       }
+//     }
+//   }
+// }
 
 export const convertChangedFilesToTree = (
   changedFiles: Record<string, ChangedFileDirectoryState>

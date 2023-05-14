@@ -14,12 +14,20 @@ interface DirectoryProps {
 
 export default function Directory({ depth, info, parent }: DirectoryProps) {
   const { name, path, children } = info;
-  const { selectedPath, focusedPath, renamePath, changedFiles } =
-    useRepoValue();
-  const { showContextMenu, renameFile, escape } = useRepoActions();
+  const { selectedPath, focusedPath, renamePath, explorer } = useRepoValue();
+  const { showContextMenu, renameDir, escape } = useRepoActions();
   const [isDirOpened, setIsDirOpened] = useState(false);
   const [dirName, setDirName] = useState(name);
   const dirRef = useRef<HTMLInputElement>(null);
+
+  const isRenaming =
+    name === '' || (renamePath && renamePath && path === renamePath.current);
+
+  useEffect(() => {
+    if (children.some(item => item.name === '')) {
+      setIsDirOpened(true);
+    }
+  }, [explorer]);
 
   useEffect(() => {
     if (dirRef.current) {
@@ -51,7 +59,7 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
           <MdKeyboardArrowRight size={18} />
         )}
         <GoFileDirectory className="dir__icon" size={18} />
-        {!renamePath || (renamePath && path !== renamePath.current) ? (
+        {!isRenaming ? (
           <div className="dir__name">{name}</div>
         ) : (
           <input
@@ -61,16 +69,18 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
             onKeyDown={e => {
               if (e.key === 'Enter') {
                 if (name === '') {
-                  renameFile(info, {
-                    path: `${path}/${dirName}`,
-                    originalPath: `${path}/${dirName}`,
+                  renameDir(info, {
+                    path: path ? `${path}/${dirName}` : dirName,
+                    originalPath: path ? `${path}/${dirName}` : dirName,
                     name: dirName,
+                    children: [],
                   });
                 } else {
-                  renameFile(info, {
+                  renameDir(info, {
                     ...info,
                     path: path.replace(new RegExp(name + '$'), dirName),
                     name: dirName,
+                    children: [],
                   });
                 }
               }
