@@ -1,5 +1,4 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { RiCloseCircleFill } from 'react-icons/ri';
 import { useEffect } from 'react';
 import RepoExplorer from '../RepoExplorer';
 import RepoEditor from '../RepoEditor';
@@ -7,6 +6,7 @@ import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import RepoTab from '../RepoTab';
 import useExplorerResize from '../../hooks/useExplorerResize';
 import './index.scss';
+import RepoHeader from '../RepoHeader';
 
 export default function RepoWindow() {
   const { reponame } = useParams() as { reponame: string };
@@ -20,7 +20,7 @@ export default function RepoWindow() {
 
   useEffect(() => {
     setReponame(reponame);
-    setBranchname(query.get('ref') ?? undefined);
+    setBranchname(query.get('ref') ?? 'main');
   }, []);
 
   return (
@@ -31,10 +31,10 @@ export default function RepoWindow() {
       }}
     >
       <div className="repo-window__header">
-        <h1 className="repo-window__title">{reponame}</h1>
-        <Link to="/github">
-          <RiCloseCircleFill size={35} color="red" cursor={'pointer'} />
-        </Link>
+        <RepoHeader
+          reponame={reponame}
+          branchname={query.get('ref') ?? 'main'}
+        />
       </div>
       <div className="repo-window__body">
         <div className="repo-window__sidebar" style={{ width: explorerWidth }}>

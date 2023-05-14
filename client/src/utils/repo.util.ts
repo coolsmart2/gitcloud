@@ -1,8 +1,10 @@
 import {
   CachedFileState,
+  ChangedFileDirectoryState,
   DirectoryInfo,
   Explorer,
   FileInfo,
+  Tree,
 } from '../types/repo.type';
 import { FileResponse, TreeBlobResponse } from '../types/response.type';
 
@@ -144,3 +146,15 @@ export const addFileToExplorer = (explorer: Explorer, info: FileInfo) => {
     return a.path.localeCompare(b.path);
   });
 };
+
+export const convertChangedFilesToTree = (
+  changedFiles: Record<string, ChangedFileDirectoryState>
+): Tree =>
+  Object.keys(changedFiles).map(key => ({
+    name: key.split('/').pop() ?? key,
+    type: 'file',
+    path: key,
+    originalPath: changedFiles[key].originalPath,
+    state: changedFiles[key].state,
+    content: changedFiles[key].content,
+  }));

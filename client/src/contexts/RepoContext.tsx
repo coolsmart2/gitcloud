@@ -62,8 +62,14 @@ interface RepoActions {
   setExplorer(treeBlob: TreeBlobResponse[]): void;
   initDefault(): void;
   cacheFile(path: string, content: string): void;
-  modifyFile(path: string, content: string): void;
-  removeChangedFile(path: string): void;
+  modifyFile(
+    path: {
+      current: string;
+      original: string;
+    },
+    content: string
+  ): void;
+  removeChangedFile(path: { current: string; original: string }): void;
   showContextMenu(
     type: 'file' | 'directory' | 'explorer' | undefined,
     info: FileInfo | undefined,
@@ -158,6 +164,11 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       {
         label: '새 파일',
         onClick: () => {
+          setContextMenu({
+            type: undefined,
+            pos: { x: 0, y: 0 },
+            target: undefined,
+          });
           if (!focusedPath) {
             return;
           }
@@ -172,15 +183,32 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
             });
             return [...prev];
           });
-          setContextMenu({
-            type: undefined,
-            pos: { x: 0, y: 0 },
-            target: undefined,
-          });
+          setFocusedPath(undefined);
         },
       },
       { label: '새 폴더', onClick: () => {} },
-      { label: '이름 바꾸기', onClick: () => {} },
+      {
+        label: '이름 바꾸기',
+        onClick: () => {
+          // setContextMenu({
+          //   type: undefined,
+          //   pos: { x: 0, y: 0 },
+          //   target: undefined,
+          // });
+          // if (!focusedPath || !explorer) {
+          //   return;
+          // }
+          // const file = findFileDirectory(explorer, focusedPath.current);
+          // if (!file) {
+          //   return;
+          // }
+          // setFocusedPath(undefined);
+          // setRenamePath({
+          //   current: focusedPath.current,
+          //   original: focusedPath.original,
+          // });
+        },
+      },
       { label: '삭제', onClick: () => {} },
     ],
     [contextMenu]
@@ -225,6 +253,20 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           if (!file) {
             return;
           }
+
+          setChangedFiles(prev => {
+            if (!prev) {
+              return prev;
+            }
+            prev[focusedPath.current] = {
+              ...prev[focusedPath.current],
+              state: 'deleted',
+              originalPath: focusedPath.original,
+            };
+            console.log(prev);
+            return { ...prev };
+          });
+
           setExplorer(prev => {
             if (!prev) {
               return prev;
@@ -316,8 +358,8 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
             item => item.current !== path.current
           );
           setSelectedPath({
-            current: filteredTabStack[filteredTabStack.length - 1].current,
-            original: filteredTabStack[filteredTabStack.length - 1].original,
+            current: filteredTabStack[filteredTabStack.length - 1]?.current,
+            original: filteredTabStack[filteredTabStack.length - 1]?.original,
           });
           return filteredTabStack;
         });
@@ -332,19 +374,28 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         });
       },
       // 파일 내용 수정시
-      modifyFile(path: string, content: string) {
+      modifyFile(
+        path: {
+          current: string;
+          original: string;
+        },
+        content: string
+      ) {
         setChangedFiles(prev => {
-          if (!prev[path]) {
-            prev[path] = { state: 'modified' };
+          if (!prev[path.current]) {
+            prev[path.current] = {
+              originalPath: path.original,
+              state: 'modified',
+            };
           }
-          prev[path].content = content;
+          prev[path.current].content = content;
           return { ...prev };
         });
       },
       // 파일 수정시 원본과 동일해질 경우
-      removeChangedFile(path: string) {
+      removeChangedFile(path: { current: string; original: string }) {
         setChangedFiles(prev => {
-          delete prev[path];
+          delete prev[path.current];
           return { ...prev };
         });
       },
@@ -372,11 +423,6 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
       // todo: 이름 바꾼후 다시 원래 이름으로 바꾼 경우 예외처리
       // todo: 파일명에 / 들어갈 경우 예외처리
       renameFile(oldInfo: FileInfo, newInfo: FileInfo) {
-        console.log(oldInfo, newInfo);
-        // setSelectedPath({
-        //   current: newInfo.path,
-        //   original: newInfo.originalPath,
-        // });
         setExplorer(prev => {
           if (!prev) {
             return prev;
@@ -396,30 +442,38 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
             prev[oldInfo.path] = {
               ...prev[oldInfo.path],
               state: 'deleted',
+              originalPath: oldInfo.originalPath,
             };
             prev[newInfo.path] = {
               ...prev[newInfo.path],
               state: 'renamed',
               originalPath: newInfo.originalPath,
-              content: prev[newInfo.originalPath]?.content,
+              content: prev[oldInfo.path]?.content,
             };
           }
           return { ...prev };
         });
-        setTab(prev =>
-          prev.map(item =>
-            item.current === oldInfo.path
-              ? { current: newInfo.path, original: newInfo.originalPath }
-              : item
-          )
-        );
-        setTabStack(prev =>
-          prev.map(item =>
-            item.current === oldInfo.path
-              ? { current: newInfo.path, original: newInfo.originalPath }
-              : item
-          )
-        );
+        setTab(prev => {
+          if (prev.some(item => item.current === oldInfo.path)) {
+            return prev.map(item =>
+              item.current === oldInfo.path
+                ? { current: newInfo.path, original: newInfo.originalPath }
+                : item
+            );
+          }
+          return [
+            ...prev,
+            { current: newInfo.path, original: newInfo.originalPath },
+          ];
+        });
+        setTabStack(prev => [
+          ...prev.filter(item => item.current !== oldInfo.path),
+          { current: newInfo.path, original: newInfo.originalPath },
+        ]);
+        setSelectedPath({
+          current: newInfo.path,
+          original: newInfo.originalPath,
+        });
       },
       // 탐색기에서 폴더 추가
       addDir(path: string) {},

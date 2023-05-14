@@ -70,8 +70,6 @@ export const githubFileContent = async (req: Request, res: Response) => {
   if (!username || !token)
     return res.status(404).send({ message: 'token error' });
 
-  console.log(reponame, path, ref);
-
   try {
     const content = await githubService.findFileContent({
       token,
@@ -213,36 +211,40 @@ export const githubFileContent = async (req: Request, res: Response) => {
 //   }
 // };
 
-// /**
-//  * 커밋 생성
-//  */
-// export const githubCommitCreate = async (req: Request, res: Response) => {
-//   const { repo: reponame, branch: branchname } = req.params;
-//   let { message, tree } = req.body;
-//   const { username, token } = userService.findOneById(1);
+/**
+ * 커밋 생성
+ */
+export const githubCommitCreate = async (req: Request, res: Response) => {
+  const { repo: reponame, branch: branchname } = req.params;
+  let { message, tree } = req.body;
+  const userId = req.session.userId as number;
+  const { username, personal_access_token: token } =
+    await userService.findOneById(userId);
 
-//   if (!username || !token)
-//     return res.status(404).send({ message: 'token error' });
+  if (!username || !token)
+    return res.status(404).send({ message: 'token error' });
 
-//   try {
-//     await githubService.addCommit({
-//       token,
-//       username,
-//       reponame,
-//       branchname,
-//       tree,
-//       message,
-//     });
+  console.log(tree);
 
-//     return res.send({ message: 'success' });
-//   } catch (error) {
-//     console.log(error);
-//     if (error instanceof GithubError) {
-//       return res.status(422).send({ message: 'github api error' });
-//     }
-//     return res.status(500).send({ message: 'server error' });
-//   }
-// };
+  try {
+    await githubService.addCommit({
+      token,
+      username,
+      reponame,
+      branchname,
+      tree,
+      message,
+    });
+
+    return res.send({ message: 'success' });
+  } catch (error) {
+    console.log(error);
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
 
 // export const githubUser = async (req: Request, res: Response) => {
 //   const { token } = req.body;

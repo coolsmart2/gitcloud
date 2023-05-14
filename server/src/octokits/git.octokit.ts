@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { FileRequest, TreeBlob } from '../types/tree.type';
+import { mergeNewTreeToPrevTree } from '../utils/github.util';
 
 /**
  * 브랜치 (마지막 커밋) 조회
@@ -108,20 +109,12 @@ export const insertTree = async ({
     baseTreeSHA: baseTreeSHA!,
   });
 
-  console.log(prevTree);
-
   const {
     data: { sha },
   } = await octokit.git.createTree({
     owner: username,
     repo: reponame,
-    base_tree: baseTreeSHA,
-    tree: tree.map(file => ({
-      path: file.path,
-      mode: '100644',
-      type: 'blob',
-      content: file.content,
-    })),
+    tree: mergeNewTreeToPrevTree(prevTree, tree),
   });
   return sha;
 };

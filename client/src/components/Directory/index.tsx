@@ -1,6 +1,6 @@
 import { GoFileDirectory } from 'react-icons/go';
 import { MdKeyboardArrowDown, MdKeyboardArrowRight } from 'react-icons/md';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import File from '../File';
 import { DirectoryInfo } from '../../types/repo.type';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
@@ -16,8 +16,17 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
   const { name, path, children } = info;
   const { selectedPath, focusedPath, renamePath, changedFiles } =
     useRepoValue();
-  const { showContextMenu } = useRepoActions();
+  const { showContextMenu, renameFile, escape } = useRepoActions();
   const [isDirOpened, setIsDirOpened] = useState(false);
+  const [dirName, setDirName] = useState(name);
+  const dirRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (dirRef.current) {
+      dirRef.current.select();
+      dirRef.current.focus();
+    }
+  }, [renamePath]);
 
   return (
     <>
@@ -44,7 +53,40 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
         <GoFileDirectory className="dir__icon" size={18} />
         {!renamePath || (renamePath && path !== renamePath.current) ? (
           <div className="dir__name">{name}</div>
-        ) : null}
+        ) : (
+          <input
+            value={dirName}
+            className="file__input"
+            ref={dirRef}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                if (name === '') {
+                  renameFile(info, {
+                    path: `${path}/${dirName}`,
+                    originalPath: `${path}/${dirName}`,
+                    name: dirName,
+                  });
+                } else {
+                  renameFile(info, {
+                    ...info,
+                    path: path.replace(new RegExp(name + '$'), dirName),
+                    name: dirName,
+                  });
+                }
+              }
+              if (e.key === 'Escape') {
+                setDirName(name);
+                escape();
+              }
+            }}
+            onClick={e => {
+              e.stopPropagation();
+            }}
+            onChange={e => {
+              setDirName(e.target.value);
+            }}
+          />
+        )}
       </div>
       {isDirOpened &&
         children.map(item => {
@@ -57,7 +99,6 @@ export default function Directory({ depth, info, parent }: DirectoryProps) {
                 key={item.path}
               />
             );
-          } else if ('type' in item) {
           } else {
             return (
               <File

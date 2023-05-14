@@ -1,8 +1,8 @@
 export interface FileRequest {
   path: string;
-  status: 'added' | 'modified' | 'removed';
+  originalPath: string;
+  state: 'added' | 'deleted' | 'renamed' | 'modified';
   content?: string;
-  url?: string;
 }
 
 export interface FileResponse {

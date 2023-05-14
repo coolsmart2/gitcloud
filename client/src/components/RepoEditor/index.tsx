@@ -49,12 +49,12 @@ export default function RepoEditor() {
       const { value } = e.target;
       if (selectedPath.original in cachedFiles) {
         if (cachedFiles[selectedPath.original].content !== value) {
-          modifyFile(selectedPath.current, value);
+          modifyFile(selectedPath, value);
         } else {
-          removeChangedFile(selectedPath.current);
+          removeChangedFile(selectedPath);
         }
       } else {
-        modifyFile(selectedPath.current, value);
+        modifyFile(selectedPath, value);
       }
     }
   };

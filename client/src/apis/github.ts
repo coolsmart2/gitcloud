@@ -1,4 +1,5 @@
 import { defaultAxios } from '.';
+import { Tree } from '../types/repo.type';
 import {
   FileResponse,
   RepoInfoResponse,
@@ -47,6 +48,22 @@ export const getGitHubFileAPI = async ({
 }): Promise<{ message: string; data: FileResponse }> => {
   const { data } = await defaultAxios.get(
     `/github/repos/${reponame}/contents/${path}${ref ? `?ref=${ref}` : ''}`
+  );
+  return data;
+};
+
+export const postGitHubCommitAPI = async ({
+  reponame,
+  ref,
+  tree,
+}: {
+  reponame: string;
+  ref: string;
+  tree: Tree;
+}) => {
+  const { data } = await defaultAxios.post(
+    `/github/repos/${reponame}/branchs/${ref}/commits`,
+    { tree }
   );
   return data;
 };

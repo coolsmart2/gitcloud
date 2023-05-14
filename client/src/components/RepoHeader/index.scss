@@ -1,0 +1,42 @@
+.repo-header {
+  height: 60px;
+  display: flex;
+  padding: 10px;
+  box-sizing: border-box;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+
+  .repo-header__title {
+    margin: 0 20px;
+    line-height: 40px;
+
+    .repo-title__reponame {
+      font-weight: bold;
+      font-size: 28px;
+    }
+
+    .repo-title__branchname {
+      margin-left: 20px;
+      font-size: 18px;
+      color: gray;
+    }
+  }
+
+  .repo-header__options {
+    margin: 0 30px;
+    flex: 1 0 auto;
+    display: flex;
+    justify-content: right;
+    gap: 20px;
+
+    .repo-options__save {
+      width: 100px;
+      height: 40px;
+      font-weight: bold;
+      border-radius: 10px;
+      background-color: black;
+      color: white;
+      cursor: pointer;
+    }
+  }
+}

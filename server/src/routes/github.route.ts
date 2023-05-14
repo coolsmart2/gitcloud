@@ -58,13 +58,13 @@ router.get('/repos/:repo/contents/*', githubController.githubFileContent);
 //  */
 // router.get('/repos/:repo/commits', githubController.githubCommitList);
 
-// /**
-//  * 커밋 생성
-//  */
-// router.post(
-//   '/repos/:repo/branchs/:branch/commits',
-//   githubController.githubCommitCreate
-// );
+/**
+ * 커밋 생성
+ */
+router.post(
+  '/repos/:repo/branchs/:branch/commits',
+  githubController.githubCommitCreate
+);
 
 // router.post('/users', githubController.githubUser);
 

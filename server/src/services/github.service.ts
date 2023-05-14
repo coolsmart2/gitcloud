@@ -328,6 +328,7 @@ export const addCommit = async ({
       commitSHA,
     });
   } catch (error) {
+    console.log(error);
     if (error instanceof RequestError) {
       console.log(error);
       throw new GithubError();

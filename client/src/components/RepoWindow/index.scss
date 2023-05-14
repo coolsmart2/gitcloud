@@ -9,19 +9,19 @@
   z-index: 10;
 }
 
-.repo-window__header {
-  height: 60px;
-  display: flex;
-  padding: 10px;
-  box-sizing: border-box;
-  justify-content: space-between;
-  border-bottom: 1px solid #eee;
+// .repo-window__header {
+//   height: 60px;
+//   display: flex;
+//   padding: 10px;
+//   box-sizing: border-box;
+//   justify-content: space-between;
+//   border-bottom: 1px solid #eee;
 
-  .repo-window__title {
-    margin: 0 20px;
-    line-height: 40px;
-  }
-}
+//   .repo-window__title {
+//     margin: 0 20px;
+//     line-height: 40px;
+//   }
+// }
 
 .repo-window__body {
   height: calc(100% - 60px);

@@ -19,3 +19,14 @@ export interface DirectoryInfo extends FileInfo {
 }
 
 export type Explorer = (DirectoryInfo | FileInfo)[];
+
+export interface Blob {
+  name: string;
+  type: 'file' | 'directory';
+  path: string;
+  state: 'added' | 'modified' | 'deleted' | 'renamed';
+  originalPath?: string;
+  content?: string;
+}
+
+export type Tree = Blob[];

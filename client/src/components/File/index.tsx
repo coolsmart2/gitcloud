@@ -66,8 +66,8 @@ export default function File({ depth, info, parent }: FileProps) {
             if (e.key === 'Enter') {
               if (name === '') {
                 renameFile(info, {
-                  path: `${path}/${fileName}`,
-                  originalPath: `${path}/${fileName}`,
+                  path: path ? `${path}/${fileName}` : fileName,
+                  originalPath: path ? `${path}/${fileName}` : fileName,
                   name: fileName,
                 });
               } else {
