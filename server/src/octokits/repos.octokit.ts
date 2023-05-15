@@ -15,12 +15,21 @@ export const insertRepo = async ({
   const octokit = new Octokit({
     auth: token,
   });
-  await octokit.repos.createForAuthenticatedUser({
+  const { data } = await octokit.repos.createForAuthenticatedUser({
     name: reponame,
     private: isPrivate,
     auto_init: true,
     description: new Date().toString(),
   });
+
+  return {
+    id: data.id,
+    name: data.name,
+    private: data.private,
+    defaultBranch: data.default_branch,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
 };
 
 /**

@@ -24,11 +24,13 @@ export const addRepo = async ({
   isPrivate: boolean;
 }) => {
   try {
-    await ReposOctokit.insertRepo({
+    const repo = await ReposOctokit.insertRepo({
       token,
       reponame,
       isPrivate,
     });
+
+    return repo;
   } catch (error) {
     if (error instanceof RequestError) {
       throw new GithubError();

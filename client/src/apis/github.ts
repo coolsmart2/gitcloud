@@ -67,3 +67,16 @@ export const postGitHubCommitAPI = async ({
   );
   return data;
 };
+
+export const postGitHubCreateRepoAPI = async ({
+  reponame,
+  isPrivate,
+}: {
+  reponame: string;
+  isPrivate: boolean;
+}): Promise<{ message: string; data: RepoInfoResponse }> => {
+  const { data } = await defaultAxios.post(`/github/repos/${reponame}`, {
+    isPrivate,
+  });
+  return data;
+};

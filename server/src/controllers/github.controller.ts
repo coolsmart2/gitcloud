@@ -102,9 +102,9 @@ export const githubRepoCreate = async (req: Request, res: Response) => {
   if (!token) return res.status(404).send({ message: 'token error' });
 
   try {
-    await githubService.addRepo({ token, reponame, isPrivate });
+    const repo = await githubService.addRepo({ token, reponame, isPrivate });
 
-    return res.send({ message: 'success' });
+    return res.send({ message: 'success', data: repo });
   } catch (error) {
     if (error instanceof GithubError) {
       return res.status(422).send({ message: 'github api error' });

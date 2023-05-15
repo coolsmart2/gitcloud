@@ -1,12 +1,12 @@
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import RepoExplorer from '../RepoExplorer';
 import RepoEditor from '../RepoEditor';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import RepoTab from '../RepoTab';
 import useExplorerResize from '../../hooks/useExplorerResize';
-import './index.scss';
 import RepoHeader from '../RepoHeader';
+import './index.scss';
 
 export default function RepoWindow() {
   const { reponame } = useParams() as { reponame?: string };

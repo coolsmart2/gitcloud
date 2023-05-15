@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
+import { useCallback } from 'react';
 import { RiCloseCircleFill } from 'react-icons/ri';
-import './index.scss';
 import { useRepoValue } from '../../contexts/RepoContext';
 import { postGitHubCommitAPI } from '../../apis/github';
 import { convertChangedFilesToTree } from '../../utils/repo.util';
-import { useCallback } from 'react';
+import './index.scss';
 
 export default function RepoHeader() {
   const { reponame, branchname, changedFiles } = useRepoValue();
@@ -24,7 +24,7 @@ export default function RepoHeader() {
     } catch (err) {
       console.log(err);
     }
-  }, []);
+  }, [reponame, branchname]);
 
   return (
     <div className="repo-header">
