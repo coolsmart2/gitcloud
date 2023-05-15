@@ -13,10 +13,10 @@ router.get(
   githubController.githubRepoList
 );
 
-// /**
-//  * 레포지토리 생성
-//  */
-// router.post('/repos/:repo', githubController.githubRepoCreate);
+/**
+ * 레포지토리 생성
+ */
+router.post('/repos/:repo', githubController.githubRepoCreate);
 
 // /**
 //  * 레포지토리 삭제 (github token 생성시 delete_repo 체크박스 체크해줘야함)

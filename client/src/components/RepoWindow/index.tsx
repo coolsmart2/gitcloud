@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import RepoExplorer from '../RepoExplorer';
 import RepoEditor from '../RepoEditor';
@@ -9,8 +9,9 @@ import './index.scss';
 import RepoHeader from '../RepoHeader';
 
 export default function RepoWindow() {
-  const { reponame } = useParams() as { reponame: string };
+  const { reponame } = useParams() as { reponame?: string };
   const query = new URLSearchParams(useLocation().search); // 이런식으로 컴포넌트에 변수를 선언해도 될까?
+  const navigate = useNavigate();
 
   const { tab } = useRepoValue();
   const { setReponame, setBranchname, escape } = useRepoActions();
@@ -19,9 +20,15 @@ export default function RepoWindow() {
     useExplorerResize();
 
   useEffect(() => {
+    const branchname = query.get('ref');
+
+    if (!branchname || !reponame) {
+      navigate('/github');
+      return;
+    }
     setReponame(reponame);
     setBranchname(query.get('ref') ?? 'main');
-  }, []);
+  }, [reponame, query]);
 
   return (
     <div
@@ -31,10 +38,7 @@ export default function RepoWindow() {
       }}
     >
       <div className="repo-window__header">
-        <RepoHeader
-          reponame={reponame}
-          branchname={query.get('ref') ?? 'main'}
-        />
+        <RepoHeader />
       </div>
       <div className="repo-window__body">
         <div className="repo-window__sidebar" style={{ width: explorerWidth }}>

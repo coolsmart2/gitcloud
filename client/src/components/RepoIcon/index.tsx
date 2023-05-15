@@ -11,6 +11,7 @@ interface RepoIconProps {
   updatedAt: string;
   checked: boolean;
   onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onContextMenu: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 export default function RepoIcon({
   name,
@@ -19,11 +20,14 @@ export default function RepoIcon({
   updatedAt,
   checked,
   onClick,
+  onContextMenu,
 }: RepoIconProps) {
   return (
     <div
       className={'repo-container' + (checked ? ' checked' : '')}
       onClick={onClick}
+      onContextMenu={onContextMenu}
+      title={`생성일: ${createdAt}\n수정일: ${updatedAt}`}
     >
       <div className="repo-image">
         {_private ? (

@@ -88,27 +88,30 @@ export const githubFileContent = async (req: Request, res: Response) => {
   }
 };
 
-// /**
-//  * 레포지토리 생성
-//  */
-// export const githubRepoCreate = async (req: Request, res: Response) => {
-//   const { repo: reponame } = req.params;
-//   const { isPrivate } = req.body as { isPrivate: boolean };
-//   const { token } = userService.findOneById(1);
+/**
+ * 레포지토리 생성
+ */
+export const githubRepoCreate = async (req: Request, res: Response) => {
+  const { repo: reponame } = req.params;
+  const { isPrivate } = req.body as { isPrivate: boolean };
+  const userId = req.session.userId as number;
+  const { personal_access_token: token } = await userService.findOneById(
+    userId
+  );
 
-//   if (!token) return res.status(404).send({ message: 'token error' });
+  if (!token) return res.status(404).send({ message: 'token error' });
 
-//   try {
-//     await githubService.addRepo({ token, reponame, isPrivate });
+  try {
+    await githubService.addRepo({ token, reponame, isPrivate });
 
-//     return res.send({ message: 'success' });
-//   } catch (error) {
-//     if (error instanceof GithubError) {
-//       return res.status(422).send({ message: 'github api error' });
-//     }
-//     return res.status(500).send({ message: 'server error' });
-//   }
-// };
+    return res.send({ message: 'success' });
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
 
 // /**
 //  * 레포지토리 삭제

@@ -4,14 +4,27 @@ import './index.scss';
 import { useRepoValue } from '../../contexts/RepoContext';
 import { postGitHubCommitAPI } from '../../apis/github';
 import { convertChangedFilesToTree } from '../../utils/repo.util';
+import { useCallback } from 'react';
 
-interface RephHeaderProps {
-  reponame: string;
-  branchname: string;
-}
+export default function RepoHeader() {
+  const { reponame, branchname, changedFiles } = useRepoValue();
 
-export default function RepoHeader({ reponame, branchname }: RephHeaderProps) {
-  const { changedFiles } = useRepoValue();
+  const handleSave = useCallback(async () => {
+    if (!reponame || !branchname) {
+      return;
+    }
+    console.log(changedFiles);
+    try {
+      const data = await postGitHubCommitAPI({
+        reponame,
+        ref: branchname,
+        tree: convertChangedFilesToTree(changedFiles),
+      });
+      console.log(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
 
   return (
     <div className="repo-header">
@@ -22,22 +35,7 @@ export default function RepoHeader({ reponame, branchname }: RephHeaderProps) {
       <div className="repo-header__options">
         <button className="repo-options__branch">브랜치 이동</button>
         <button className="repo-options__list">저장기록</button>
-        <button
-          className="repo-options__save"
-          onClick={async () => {
-            console.log(changedFiles);
-            try {
-              const data = await postGitHubCommitAPI({
-                reponame,
-                ref: branchname,
-                tree: convertChangedFilesToTree(changedFiles),
-              });
-              console.log(data);
-            } catch (err) {
-              console.log(err);
-            }
-          }}
-        >
+        <button className="repo-options__save" onClick={handleSave}>
           저장하기
         </button>
       </div>

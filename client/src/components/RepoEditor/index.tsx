@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { getGitHubFileAPI } from '../../apis/github';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import RepoEditorSkeleton from './skeleton';
@@ -40,24 +40,27 @@ export default function RepoEditor() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    if (
-      selectedPath &&
-      (selectedPath.original in cachedFiles ||
-        selectedPath.current in changedFiles)
-    ) {
-      const { value } = e.target;
-      if (selectedPath.original in cachedFiles) {
-        if (cachedFiles[selectedPath.original].content !== value) {
-          modifyFile(selectedPath, value);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (
+        selectedPath &&
+        (selectedPath.original in cachedFiles ||
+          selectedPath.current in changedFiles)
+      ) {
+        const { value } = e.target;
+        if (selectedPath.original in cachedFiles) {
+          if (cachedFiles[selectedPath.original].content !== value) {
+            modifyFile(selectedPath, value);
+          } else {
+            removeChangedFile(selectedPath);
+          }
         } else {
-          removeChangedFile(selectedPath);
+          modifyFile(selectedPath, value);
         }
-      } else {
-        modifyFile(selectedPath, value);
       }
-    }
-  };
+    },
+    [selectedPath, cachedFiles, changedFiles]
+  );
 
   useEffect(() => {
     fetchFile();

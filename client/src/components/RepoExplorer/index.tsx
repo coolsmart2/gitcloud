@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import Directory from '../Directory';
 import File from '../File';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
@@ -23,6 +23,18 @@ export default function RepoExplorer() {
     }
   }, [explorer, reponame, branchname]);
 
+  const handleExplorerContextMenu = useCallback(
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      showContextMenu('explorer', undefined, {
+        x: e.clientX || e.pageX,
+        y: e.clientY || e.pageY,
+      });
+    },
+    []
+  );
+
   if (!reponame || !branchname || !explorer) {
     return <RepoExplorerSkeleton />;
   }
@@ -30,14 +42,7 @@ export default function RepoExplorer() {
   return (
     <div
       className="repo-explorer-container"
-      onContextMenu={e => {
-        e.preventDefault();
-        e.stopPropagation();
-        showContextMenu('explorer', undefined, {
-          x: e.clientX || e.pageX,
-          y: e.clientY || e.pageY,
-        });
-      }}
+      onContextMenu={handleExplorerContextMenu}
     >
       {explorer.map(item => {
         if ('children' in item) {
