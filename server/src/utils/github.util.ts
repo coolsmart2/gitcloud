@@ -41,7 +41,8 @@ export const mergeNewTreeToPrevTree = (
                 | '160000'
                 | '120000',
               type: item.type as 'tree' | 'commit' | 'blob',
-              content: file.content ?? item.sha,
+              content: file.content,
+              sha: item.sha,
             });
           } else if (file.state === 'renamed') {
             console.log(file);
@@ -54,7 +55,8 @@ export const mergeNewTreeToPrevTree = (
                 | '160000'
                 | '120000',
               type: item.type as 'tree' | 'commit' | 'blob',
-              content: file.content ?? item.sha,
+              content: file.content,
+              sha: item.sha,
             });
           }
         });

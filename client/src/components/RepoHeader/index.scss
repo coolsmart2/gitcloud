@@ -29,11 +29,22 @@
     justify-content: right;
     gap: 20px;
 
+    .repo-options__new-version {
+      width: 100px;
+      height: 40px;
+      font-weight: bold;
+      border: 1px solid black;
+      border-radius: 5px;
+      background-color: white;
+      color: black;
+      cursor: pointer;
+    }
+
     .repo-options__save {
       width: 100px;
       height: 40px;
       font-weight: bold;
-      border-radius: 10px;
+      border-radius: 5px;
       background-color: black;
       color: white;
       cursor: pointer;

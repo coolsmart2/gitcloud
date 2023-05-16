@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect } from 'react';
 import { RiCloseCircleFill } from 'react-icons/ri';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
@@ -11,48 +11,10 @@ import { convertChangedFilesToTree } from '../../utils/repo.util';
 import './index.scss';
 
 export default function RepoHeader() {
+  const navigate = useNavigate();
+
   const { reponame, branchname, changedFiles, commitList } = useRepoValue();
   const { setCommitList, setExplorer } = useRepoActions();
-
-  const handleSave = useCallback(async () => {
-    if (!reponame || !branchname) {
-      return;
-    }
-    console.log(changedFiles);
-    try {
-      const data = await postGitHubCommitAPI({
-        reponame,
-        ref: branchname,
-        tree: convertChangedFilesToTree(changedFiles),
-      });
-      console.log(data);
-    } catch (err) {
-      console.log(err);
-    }
-  }, [reponame, branchname, changedFiles]);
-
-  const handleOnChangeCommit = useCallback(
-    async (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if (!reponame || !branchname) {
-        return;
-      }
-      setCommitList({
-        ...commitList,
-        currCommit: e.target.value,
-      });
-      try {
-        const { data } = await getGitHubRepoAPI({
-          reponame,
-          branchname,
-          ref: e.target.value,
-        });
-        setExplorer(data);
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    [commitList]
-  );
 
   const fetchCommitList = useCallback(async () => {
     if (!reponame || !branchname) {
@@ -72,6 +34,77 @@ export default function RepoHeader() {
     }
   }, [reponame, branchname]);
 
+  const handleSave = useCallback(async () => {
+    if (!reponame || !branchname) {
+      return;
+    }
+    console.log(changedFiles);
+    try {
+      const data = await postGitHubCommitAPI({
+        reponame,
+        ref: branchname,
+        tree: convertChangedFilesToTree(changedFiles),
+      });
+      await fetchCommitList();
+      console.log(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }, [reponame, branchname, changedFiles]);
+
+  const handleOnChangeBranch = useCallback(
+    async (e: React.ChangeEvent<HTMLSelectElement>) => {
+      if (!reponame || !branchname) {
+        return;
+      }
+      const changedBranch = e.target.value;
+      if (branchname === changedBranch) {
+        return;
+      }
+      setCommitList({
+        ...commitList,
+        currBranch: changedBranch,
+        currCommit: commitList.list[changedBranch][0].sha,
+      });
+      try {
+        setExplorer(undefined);
+        const { data } = await getGitHubRepoAPI({
+          reponame,
+          branchname: changedBranch,
+        });
+        setExplorer(data);
+        navigate(`/github/${reponame}?ref=${changedBranch}`);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [commitList]
+  );
+
+  const handleOnChangeCommit = useCallback(
+    async (e: React.ChangeEvent<HTMLSelectElement>) => {
+      if (!reponame || !branchname) {
+        return;
+      }
+      setCommitList({
+        ...commitList,
+        currCommit: e.target.value,
+      });
+      try {
+        setExplorer(undefined);
+        const { data } = await getGitHubRepoAPI({
+          reponame,
+          branchname,
+          ref: e.target.value,
+        });
+        setExplorer(data);
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [commitList]
+  );
+
   useEffect(() => {
     if (!reponame || !branchname) {
       return;
@@ -87,9 +120,13 @@ export default function RepoHeader() {
       </div>
       <div className="repo-header__options">
         <button className="repo-options__branch">
-          <form>
-            <select defaultValue={commitList.currBranch ?? undefined}>
-              {branchname &&
+          <form className="repo-options__branch__form">
+            <select
+              className="repo-options__branch__form__select"
+              value={commitList.currBranch ?? undefined}
+              onChange={handleOnChangeBranch}
+            >
+              {commitList.currBranch &&
                 Object.keys(commitList.list).map(branch => (
                   <option key={branch} value={branch}>
                     {branch}
@@ -99,20 +136,24 @@ export default function RepoHeader() {
           </form>
         </button>
         <button className="repo-options__list">
-          <form>
+          <form className="repo-options__list__form">
             <select
-              defaultValue={commitList.currCommit ?? undefined}
+              className="repo-options__list__form__select"
+              value={commitList.currCommit ?? undefined}
               onChange={handleOnChangeCommit}
             >
-              {branchname &&
-                commitList.list[branchname] &&
-                commitList.list[branchname].map(commit => (
+              {commitList.currBranch &&
+                commitList.list[commitList.currBranch] &&
+                commitList.list[commitList.currBranch].map(commit => (
                   <option key={commit.sha} value={commit.sha}>
                     {commit.name}
                   </option>
                 ))}
             </select>
           </form>
+        </button>
+        <button className="repo-options__new-version" onClick={() => {}}>
+          새 버전
         </button>
         <button className="repo-options__save" onClick={handleSave}>
           저장하기

@@ -7,7 +7,7 @@ import { getGitHubRepoAPI } from '../../apis/github';
 import './index.scss';
 
 export default function RepoExplorer() {
-  const { reponame, branchname, explorer } = useRepoValue();
+  const { reponame, branchname, explorer, commitList } = useRepoValue();
   const { setExplorer, showContextMenu } = useRepoActions();
 
   const fetchExplorer = async () => {
@@ -18,6 +18,12 @@ export default function RepoExplorer() {
   };
 
   useEffect(() => {
+    if (!reponame || !branchname) {
+      return;
+    }
+    if (commitList.currBranch === branchname) {
+      return;
+    }
     if (!explorer) {
       fetchExplorer();
     }

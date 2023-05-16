@@ -69,7 +69,7 @@ interface RepoActions {
   setBranchname(branchname: string | undefined): void;
   selectTab(path: { current?: string; original?: string }): void;
   removeTab(path: { current?: string; original?: string }): void;
-  setExplorer(treeBlob: TreeBlobResponse[]): void;
+  setExplorer(treeBlob: TreeBlobResponse[] | undefined): void;
   initDefault(): void;
   cacheFile(path: string, content: string): void;
   modifyFile(
@@ -577,8 +577,12 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         });
       },
       // 파일 탐색기 초기화
-      setExplorer(treeBlob: TreeBlobResponse[]) {
-        setExplorer(convertTreeBlobResponseToExplorer(treeBlob));
+      setExplorer(treeBlob: TreeBlobResponse[] | undefined) {
+        if (!treeBlob) {
+          setExplorer(undefined);
+        } else {
+          setExplorer(convertTreeBlobResponseToExplorer(treeBlob));
+        }
         setTab([]);
         setTabStack([]);
         setSelectedPath(undefined);
