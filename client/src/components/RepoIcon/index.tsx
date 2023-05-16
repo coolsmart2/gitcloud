@@ -10,7 +10,7 @@ interface RepoIconProps {
   createdAt: string;
   updatedAt: string;
   checked: boolean;
-  onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onMouseDown: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onContextMenu: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 export default function RepoIcon({
@@ -19,13 +19,13 @@ export default function RepoIcon({
   createdAt,
   updatedAt,
   checked,
-  onClick,
+  onMouseDown,
   onContextMenu,
 }: RepoIconProps) {
   return (
     <div
       className={'repo-container' + (checked ? ' checked' : '')}
-      onClick={onClick}
+      onMouseDown={onMouseDown}
       onContextMenu={onContextMenu}
       title={`생성일: ${createdAt}\n수정일: ${updatedAt}`}
     >

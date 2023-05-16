@@ -113,26 +113,28 @@ export const githubRepoCreate = async (req: Request, res: Response) => {
   }
 };
 
-// /**
-//  * 레포지토리 삭제
-//  */
-// export const githubRepoDelete = async (req: Request, res: Response) => {
-//   const { repo: reponame } = req.params;
-//   const { username, token } = userService.findOneById(1);
+/**
+ * 레포지토리 삭제
+ */
+export const githubRepoDelete = async (req: Request, res: Response) => {
+  const { repo: reponame } = req.params;
+  const userId = req.session.userId as number;
+  const { username, personal_access_token: token } =
+    await userService.findOneById(userId);
 
-//   if (!username || !token)
-//     return res.status(404).send({ message: 'token error' });
+  if (!username || !token)
+    return res.status(404).send({ message: 'token error' });
 
-//   try {
-//     await githubService.deleteRepo({ username, token, reponame });
-//     return res.send({ message: 'success' });
-//   } catch (error) {
-//     if (error instanceof GithubError) {
-//       return res.status(422).send({ message: 'github api error' });
-//     }
-//     return res.status(500).send({ message: 'server error' });
-//   }
-// };
+  try {
+    await githubService.deleteRepo({ username, token, reponame });
+    return res.send({ message: 'success' });
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
 
 // /**
 //  * 브랜치 커밋 리스트 조회

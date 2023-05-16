@@ -18,10 +18,10 @@ router.get(
  */
 router.post('/repos/:repo', githubController.githubRepoCreate);
 
-// /**
-//  * 레포지토리 삭제 (github token 생성시 delete_repo 체크박스 체크해줘야함)
-//  */
-// router.delete('/repos/:repo', githubController.githubRepoDelete);
+/**
+ * 레포지토리 삭제 (github token 생성시 delete_repo 체크박스 체크해줘야함)
+ */
+router.delete('/repos/:repo', githubController.githubRepoDelete);
 
 /**
  * 레포지토리 조회 (디렉토리 구조)

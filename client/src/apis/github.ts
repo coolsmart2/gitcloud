@@ -68,7 +68,7 @@ export const postGitHubCommitAPI = async ({
   return data;
 };
 
-export const postGitHubCreateRepoAPI = async ({
+export const postGitHubRepoAPI = async ({
   reponame,
   isPrivate,
 }: {
@@ -78,5 +78,15 @@ export const postGitHubCreateRepoAPI = async ({
   const { data } = await defaultAxios.post(`/github/repos/${reponame}`, {
     isPrivate,
   });
+  return data;
+};
+
+export const deleteGitHubRepoAPI = async ({
+  reponame,
+}: {
+  reponame: string;
+}) => {
+  const { data } = await defaultAxios.delete(`/github/repos/${reponame}`);
+
   return data;
 };
