@@ -27,12 +27,14 @@ export const getGitHubReposAPI = async (): Promise<{
 export const getGitHubRepoAPI = async ({
   reponame,
   branchname,
+  ref,
 }: {
   reponame: string;
-  branchname?: string;
+  branchname: string;
+  ref?: string;
 }): Promise<{ message: string; data: TreeBlobResponse[] }> => {
   const { data } = await defaultAxios.get(
-    `/github/repos/${reponame}${branchname ? `?ref=${branchname}` : ''}`
+    `/github/repos/${reponame}/branchs/${branchname}${ref ? `?ref=${ref}` : ''}`
   );
   return data;
 };
@@ -87,6 +89,16 @@ export const deleteGitHubRepoAPI = async ({
   reponame: string;
 }) => {
   const { data } = await defaultAxios.delete(`/github/repos/${reponame}`);
+
+  return data;
+};
+
+export const getGitHubCommitListAPI = async ({
+  reponame,
+}: {
+  reponame: string;
+}) => {
+  const { data } = await defaultAxios.get(`/github/repos/${reponame}/commits`);
 
   return data;
 };

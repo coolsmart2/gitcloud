@@ -88,20 +88,25 @@ export const findRepoTree = async ({
   token,
   username,
   reponame,
+  branchname,
   ref,
 }: {
   token: string;
   username: string;
   reponame: string;
-  ref: string;
+  branchname: string;
+  ref?: string;
 }) => {
   try {
-    const commitSHA = await GithubOctokit.selectCommitSHA({
-      token,
-      username,
-      reponame,
-      branchname: ref,
-    });
+    let commitSHA = ref;
+    if (!commitSHA) {
+      commitSHA = await GithubOctokit.selectCommitSHA({
+        token,
+        username,
+        reponame,
+        branchname,
+      });
+    }
 
     const baseTreeSHA = await GithubOctokit.selectBaseTreeSHA({
       token,
@@ -119,6 +124,7 @@ export const findRepoTree = async ({
 
     return recursiveTree;
   } catch (error) {
+    console.log(error);
     if (error instanceof RequestError) {
       if (error.message === 'Git Repository is empty.') {
         // "This repository is empty." 에서 메시지 바뀜

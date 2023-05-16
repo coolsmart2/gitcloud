@@ -27,7 +27,7 @@ router.delete('/repos/:repo', githubController.githubRepoDelete);
  * 레포지토리 조회 (디렉토리 구조)
  */
 router.get(
-  '/repos/:repo',
+  '/repos/:repo/branchs/:branch',
   authMiddleware.checkSession,
   githubController.githubRepoTree
 );
@@ -53,10 +53,10 @@ router.get('/repos/:repo/contents/*', githubController.githubFileContent);
 //   githubController.githubBranchDelete
 // );
 
-// /**
-//  * 브랜치 커밋 리스트 조회
-//  */
-// router.get('/repos/:repo/commits', githubController.githubCommitList);
+/**
+ * 브랜치 커밋 리스트 조회
+ */
+router.get('/repos/:repo/commits', githubController.githubCommitList);
 
 /**
  * 커밋 생성

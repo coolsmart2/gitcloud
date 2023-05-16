@@ -29,6 +29,7 @@ export const selectCommitSHA = async ({
     repo: reponame,
     ref: `heads/${branchname}`,
   });
+
   return commitSHA;
 };
 

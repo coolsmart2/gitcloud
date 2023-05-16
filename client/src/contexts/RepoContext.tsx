@@ -49,6 +49,16 @@ interface RepoValue {
   changedFiles: Record<string, ChangedFileDirectoryState>;
   cachedFiles: Record<string, CachedFileState>;
   explorer: Explorer | undefined;
+  commitList: {
+    currBranch: string | null;
+    currCommit: string | null;
+    list: {
+      [branch: string]: {
+        sha: string;
+        name: string;
+      }[];
+    };
+  };
 }
 
 interface RepoActions {
@@ -78,6 +88,16 @@ interface RepoActions {
   escape(): void;
   renameFile(oldInfo: FileInfo, newInfo: FileInfo): void;
   renameDir(oldInfo: DirectoryInfo, newInfo: DirectoryInfo): void;
+  setCommitList(commitList: {
+    currBranch: string | null;
+    currCommit: string | null;
+    list: {
+      [branch: string]: {
+        sha: string;
+        name: string;
+      }[];
+    };
+  }): void;
 }
 
 const RepoValueContext = createContext<RepoValue>({
@@ -91,6 +111,11 @@ const RepoValueContext = createContext<RepoValue>({
   changedFiles: {},
   cachedFiles: {},
   explorer: undefined,
+  commitList: {
+    currBranch: null,
+    currCommit: null,
+    list: {},
+  },
 });
 
 const RepoActionsContext = createContext<RepoActions>({
@@ -110,6 +135,7 @@ const RepoActionsContext = createContext<RepoActions>({
   escape: () => {},
   renameFile: () => {},
   renameDir: () => {},
+  setCommitList: () => {},
 });
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
@@ -160,6 +186,21 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
     pos: { x: number; y: number };
     target: FileInfo | undefined;
   }>({ type: undefined, pos: { x: 0, y: 0 }, target: undefined });
+
+  const [commitList, setCommitList] = useState<{
+    currBranch: string | null;
+    currCommit: string | null;
+    list: {
+      [branch: string]: {
+        sha: string;
+        name: string;
+      }[];
+    };
+  }>({
+    currBranch: null,
+    currCommit: null,
+    list: {},
+  });
 
   const dirContextMenuItems = useMemo(
     () => [
@@ -214,6 +255,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           setFocusedPath(undefined);
         },
       },
+      // todl: 폴더 이름 바꾸기
       {
         label: '이름 바꾸기',
         onClick: () => {
@@ -236,6 +278,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           // });
         },
       },
+      // todo: 폴더 삭제하기
       { label: '삭제', onClick: () => {} },
     ],
     [contextMenu]
@@ -533,13 +576,20 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           return [...prev];
         });
       },
-      // 탐색기에서 폴더 추가
-      addDir(path: string) {},
-      // 탐색기에서 폴더 삭제
-      deleteDir(path: string) {},
       // 파일 탐색기 초기화
       setExplorer(treeBlob: TreeBlobResponse[]) {
         setExplorer(convertTreeBlobResponseToExplorer(treeBlob));
+        setTab([]);
+        setTabStack([]);
+        setSelectedPath(undefined);
+        setFocusedPath(undefined);
+        setContextMenu({
+          type: undefined,
+          pos: { x: 0, y: 0 },
+          target: undefined,
+        });
+        setChangedFiles({});
+        setCachedFiles({});
       },
       // 가져온 파일 캐싱
       cacheFile(path: string, base64: string) {
@@ -577,6 +627,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           return [...prev];
         });
       },
+      setCommitList,
     }),
     []
   );
@@ -595,6 +646,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           changedFiles,
           cachedFiles,
           explorer,
+          commitList,
         }}
       >
         {children}

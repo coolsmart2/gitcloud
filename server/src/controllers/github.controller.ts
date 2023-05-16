@@ -31,7 +31,7 @@ export const githubRepoList = async (req: Request, res: Response) => {
  * 레포지토리 조회
  */
 export const githubRepoTree = async (req: Request, res: Response) => {
-  const { repo: reponame } = req.params;
+  const { repo: reponame, branch: branchname } = req.params;
   const { ref } = req.query as { ref: string };
   const userId = req.session.userId as number;
   const { username, personal_access_token: token } =
@@ -45,6 +45,7 @@ export const githubRepoTree = async (req: Request, res: Response) => {
       token,
       username,
       reponame,
+      branchname,
       ref,
     });
     return res.send({ message: 'success', data: repoTree });
@@ -136,31 +137,33 @@ export const githubRepoDelete = async (req: Request, res: Response) => {
   }
 };
 
-// /**
-//  * 브랜치 커밋 리스트 조회
-//  */
-// export const githubCommitList = async (req: Request, res: Response) => {
-//   const { repo: reponame } = req.params;
-//   const { username, token } = userService.findOneById(1);
+/**
+ * 브랜치 커밋 리스트 조회
+ */
+export const githubCommitList = async (req: Request, res: Response) => {
+  const { repo: reponame } = req.params;
+  const userId = req.session.userId as number;
+  const { username, personal_access_token: token } =
+    await userService.findOneById(userId);
 
-//   if (!username || !token)
-//     return res.status(404).send({ message: 'token error' });
+  if (!username || !token)
+    return res.status(404).send({ message: 'token error' });
 
-//   try {
-//     const commits = await githubService.findListCommits({
-//       token,
-//       username,
-//       reponame,
-//     });
+  try {
+    const commits = await githubService.findListCommits({
+      token,
+      username,
+      reponame,
+    });
 
-//     return res.send({ message: 'success', data: commits });
-//   } catch (error) {
-//     if (error instanceof GithubError) {
-//       return res.status(422).send({ message: 'github api error' });
-//     }
-//     return res.status(500).send({ message: 'server error' });
-//   }
-// };
+    return res.send({ message: 'success', data: commits });
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
 
 // /**
 //  * 브랜치 생성

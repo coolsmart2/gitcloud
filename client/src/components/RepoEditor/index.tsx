@@ -5,8 +5,14 @@ import RepoEditorSkeleton from './skeleton';
 import './index.scss';
 
 export default function RepoEditor() {
-  const { reponame, branchname, selectedPath, cachedFiles, changedFiles } =
-    useRepoValue();
+  const {
+    reponame,
+    branchname,
+    selectedPath,
+    cachedFiles,
+    changedFiles,
+    commitList,
+  } = useRepoValue();
   const { cacheFile, modifyFile, removeChangedFile } = useRepoActions();
 
   const content =
@@ -34,7 +40,7 @@ export default function RepoEditor() {
       const { data } = await getGitHubFileAPI({
         reponame,
         path: selectedPath.original,
-        ref: branchname,
+        ref: commitList.currCommit ?? undefined,
       });
       cacheFile(data.path, data.content);
     }
