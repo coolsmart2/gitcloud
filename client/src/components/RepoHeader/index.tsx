@@ -2,11 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect } from 'react';
 import { RiCloseCircleFill } from 'react-icons/ri';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
-import {
-  getGitHubCommitListAPI,
-  getGitHubRepoAPI,
-  postGitHubCommitAPI,
-} from '../../apis/github';
+import { getGitHubCommitListAPI, postGitHubCommitAPI } from '../../apis/github';
 import { convertChangedFilesToTree } from '../../utils/repo.util';
 import './index.scss';
 
@@ -66,17 +62,8 @@ export default function RepoHeader() {
         currBranch: changedBranch,
         currCommit: commitList.list[changedBranch][0].sha,
       });
-      try {
-        setExplorer(undefined);
-        const { data } = await getGitHubRepoAPI({
-          reponame,
-          branchname: changedBranch,
-        });
-        setExplorer(data);
-        navigate(`/github/${reponame}?ref=${changedBranch}`);
-      } catch (err) {
-        console.log(err);
-      }
+      setExplorer(undefined);
+      navigate(`/github/${reponame}?ref=${changedBranch}`);
     },
     [commitList]
   );
@@ -90,17 +77,7 @@ export default function RepoHeader() {
         ...commitList,
         currCommit: e.target.value,
       });
-      try {
-        setExplorer(undefined);
-        const { data } = await getGitHubRepoAPI({
-          reponame,
-          branchname,
-          ref: e.target.value,
-        });
-        setExplorer(data);
-      } catch (err) {
-        console.log(err);
-      }
+      setExplorer(undefined);
     },
     [commitList]
   );

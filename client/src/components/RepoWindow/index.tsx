@@ -9,26 +9,32 @@ import RepoHeader from '../RepoHeader';
 import './index.scss';
 
 export default function RepoWindow() {
-  const { reponame } = useParams() as { reponame?: string };
+  const { reponame: reponameParam } = useParams() as { reponame?: string };
   const query = new URLSearchParams(useLocation().search); // 이런식으로 컴포넌트에 변수를 선언해도 될까?
   const navigate = useNavigate();
 
-  const { tab } = useRepoValue();
+  const { reponame, branchname, tab } = useRepoValue();
   const { setReponame, setBranchname, escape } = useRepoActions();
 
   const [explorerWidth, lineWidth, contentWidth, setExplorerWidth] =
     useExplorerResize();
 
   useEffect(() => {
-    const branchname = query.get('ref');
+    const branchnameQuery = query.get('ref');
 
-    if (!branchname || !reponame) {
+    if (!branchnameQuery || !reponameParam) {
       navigate('/github');
       return;
     }
-    setReponame(reponame);
-    setBranchname(query.get('ref') ?? 'main');
-  }, [reponame, query]);
+
+    if (reponameParam !== reponame) {
+      setReponame(reponameParam);
+    }
+
+    if (branchnameQuery !== branchname) {
+      setBranchname(branchnameQuery);
+    }
+  }, [reponameParam, query]);
 
   return (
     <div

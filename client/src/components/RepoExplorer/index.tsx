@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import Directory from '../Directory';
 import File from '../File';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
@@ -12,22 +12,28 @@ export default function RepoExplorer() {
 
   const fetchExplorer = async () => {
     if (reponame && branchname) {
-      const { data } = await getGitHubRepoAPI({ reponame, branchname });
+      console.log('fetchExplorer:', branchname);
+      const { data } = await getGitHubRepoAPI({
+        reponame,
+        branchname,
+        ref: commitList.currCommit ?? undefined,
+      });
       setExplorer(data);
     }
   };
 
   useEffect(() => {
-    if (!reponame || !branchname) {
+    if (!reponame || !branchname || !commitList.currBranch) {
       return;
     }
-    if (commitList.currBranch === branchname) {
+    if (commitList.currBranch !== branchname) {
       return;
     }
-    if (!explorer) {
-      fetchExplorer();
+    if (explorer) {
+      return;
     }
-  }, [explorer, reponame, branchname]);
+    fetchExplorer();
+  }, [reponame, branchname, explorer]);
 
   const handleExplorerContextMenu = useCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -41,8 +47,10 @@ export default function RepoExplorer() {
     []
   );
 
+  const memoRepoExplorerSkeleton = useMemo(() => <RepoExplorerSkeleton />, []);
+
   if (!reponame || !branchname || !explorer) {
-    return <RepoExplorerSkeleton />;
+    return memoRepoExplorerSkeleton;
   }
 
   return (

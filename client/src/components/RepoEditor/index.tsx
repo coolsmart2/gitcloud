@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { getGitHubFileAPI } from '../../apis/github';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import RepoEditorSkeleton from './skeleton';
@@ -72,8 +72,10 @@ export default function RepoEditor() {
     fetchFile();
   }, [selectedPath]);
 
+  const memoRepoEditorSkeleton = useMemo(() => <RepoEditorSkeleton />, []);
+
   if (!reponame || !branchname || !selectedPath || content === undefined) {
-    return <RepoEditorSkeleton />;
+    return memoRepoEditorSkeleton;
   }
 
   return (
