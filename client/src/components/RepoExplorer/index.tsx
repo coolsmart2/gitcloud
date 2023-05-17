@@ -29,11 +29,12 @@ export default function RepoExplorer() {
     if (commitList.currBranch !== branchname) {
       return;
     }
+    console.log(commitList);
     if (explorer) {
       return;
     }
     fetchExplorer();
-  }, [reponame, branchname, explorer]);
+  }, [commitList]);
 
   const handleExplorerContextMenu = useCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
