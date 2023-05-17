@@ -182,3 +182,26 @@ export const convertChangedFilesToTree = (
     state: changedFiles[key].state,
     content: changedFiles[key].content,
   }));
+
+export const mergeChangedFilesToCachedFiles = (
+  cachedFiles: Record<string, CachedFileState>,
+  changedFiles: Record<string, ChangedFileDirectoryState>
+) => {
+  Object.keys(changedFiles).forEach(path => {
+    switch (changedFiles[path].state) {
+      case 'renamed':
+      case 'modified':
+      case 'added':
+        if (changedFiles[path].originalPath && changedFiles[path].content) {
+          cachedFiles[changedFiles[path].originalPath!] = {
+            content: changedFiles[path].content!,
+          };
+        }
+        break;
+      case 'deleted':
+        if (changedFiles[path].originalPath) {
+          delete cachedFiles[changedFiles[path].originalPath!];
+        }
+    }
+  });
+};

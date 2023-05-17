@@ -29,6 +29,24 @@
     justify-content: right;
     gap: 20px;
 
+    .repo-options__branch__form {
+      line-height: 40px;
+      &__select {
+        width: 100px;
+        height: 30px;
+        border-radius: 5px;
+      }
+    }
+
+    .repo-options__list__form {
+      line-height: 40px;
+      &__select {
+        width: 200px;
+        height: 30px;
+        border-radius: 5px;
+      }
+    }
+
     .repo-options__new-version {
       width: 100px;
       height: 40px;
@@ -48,6 +66,54 @@
       background-color: black;
       color: white;
       cursor: pointer;
+
+      &:disabled {
+        background-color: gray;
+      }
     }
+  }
+}
+
+.save-commit-form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+
+  &__input {
+    width: 100%;
+    height: 40px;
+    font-size: 15px;
+    box-sizing: border-box;
+  }
+
+  &__submit {
+    width: 100%;
+    height: 40px;
+
+    border: none; // 왜 전역에 생성한 스타일이 적용이 안될까
+    outline: 0;
+
+    color: white;
+    background-color: black;
+    border-radius: 5px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .save__spinner {
+    animation: spin infinite 1s linear;
   }
 }

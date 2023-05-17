@@ -98,6 +98,9 @@ interface RepoActions {
       }[];
     };
   }): void;
+  setChangedFiles(
+    changedFiles: Record<string, ChangedFileDirectoryState>
+  ): void;
 }
 
 const RepoValueContext = createContext<RepoValue>({
@@ -136,6 +139,7 @@ const RepoActionsContext = createContext<RepoActions>({
   renameFile: () => {},
   renameDir: () => {},
   setCommitList: () => {},
+  setChangedFiles: () => {},
 });
 
 export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
@@ -595,6 +599,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
         setChangedFiles({});
         setCachedFiles({});
       },
+      setChangedFiles,
       // 가져온 파일 캐싱
       cacheFile(path: string, base64: string) {
         setCachedFiles(prev => ({

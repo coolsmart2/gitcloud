@@ -58,14 +58,16 @@ export const postGitHubCommitAPI = async ({
   reponame,
   ref,
   tree,
+  message,
 }: {
   reponame: string;
   ref: string;
   tree: Tree;
+  message?: string;
 }) => {
   const { data } = await defaultAxios.post(
     `/github/repos/${reponame}/branchs/${ref}/commits`,
-    { tree }
+    { message, tree }
   );
   return data;
 };

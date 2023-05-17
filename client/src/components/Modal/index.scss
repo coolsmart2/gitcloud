@@ -9,6 +9,7 @@ $modal-height: 200px;
   height: 100%;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  z-index: 99;
 }
 
 .modal {
@@ -21,7 +22,7 @@ $modal-height: 200px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10;
+  z-index: 100;
 
   &__body {
     display: flex;

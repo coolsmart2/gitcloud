@@ -29,7 +29,6 @@ export default function RepoExplorer() {
     if (commitList.currBranch !== branchname) {
       return;
     }
-    console.log(commitList);
     if (explorer) {
       return;
     }
