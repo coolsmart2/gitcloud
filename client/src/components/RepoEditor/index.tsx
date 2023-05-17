@@ -85,6 +85,11 @@ export default function RepoEditor() {
         wrap="off"
         value={content}
         onChange={handleChange}
+        readOnly={
+          commitList.currBranch !== null &&
+          commitList.currCommit !==
+            commitList.list[commitList.currBranch][0].sha
+        }
       />
     </div>
   );
