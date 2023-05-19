@@ -82,5 +82,7 @@ export const mergeNewTreeToPrevTree = (
     }
   });
 
+  console.log('newTree :', newTree);
+
   return newTree;
 };

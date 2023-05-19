@@ -175,6 +175,7 @@ export default function RepoHeader() {
             if (!reponame || !branchname) {
               return;
             }
+            console.log(changedFiles);
             setIsSaveLoading(true);
             try {
               const data = await postGitHubCommitAPI({

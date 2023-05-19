@@ -234,8 +234,6 @@ export const githubCommitCreate = async (req: Request, res: Response) => {
   if (!username || !token)
     return res.status(404).send({ message: 'token error' });
 
-  console.log(tree);
-
   try {
     await githubService.addCommit({
       token,

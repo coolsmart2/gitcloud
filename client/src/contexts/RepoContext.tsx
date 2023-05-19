@@ -259,7 +259,7 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
           setFocusedPath(undefined);
         },
       },
-      // todl: 폴더 이름 바꾸기
+      // todo: 폴더 이름 바꾸기
       {
         label: '이름 바꾸기',
         onClick: () => {
@@ -534,16 +534,16 @@ export const RepoProvider = ({ children }: { children: React.ReactNode }) => {
               content: '',
             };
           } else {
+            prev[newInfo.path] = {
+              ...prev[newInfo.path],
+              state: prev[oldInfo.path].state === 'added' ? 'added' : 'renamed',
+              originalPath: newInfo.originalPath,
+              content: prev[oldInfo.path]?.content,
+            };
             prev[oldInfo.path] = {
               ...prev[oldInfo.path],
               state: 'deleted',
               originalPath: oldInfo.originalPath,
-            };
-            prev[newInfo.path] = {
-              ...prev[newInfo.path],
-              state: 'renamed',
-              originalPath: newInfo.originalPath,
-              content: prev[oldInfo.path]?.content,
             };
           }
           return { ...prev };

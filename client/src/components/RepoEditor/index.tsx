@@ -27,7 +27,8 @@ export default function RepoEditor() {
       if (
         selectedPath &&
         path === selectedPath.current &&
-        changedFiles[path].state === 'added'
+        (changedFiles[path].state === 'added' ||
+          changedFiles[path].state === 'renamed')
       ) {
         return;
       }
@@ -105,6 +106,11 @@ export default function RepoEditor() {
         theme="snow"
         modules={modules}
         value={content}
+        readOnly={
+          commitList.currBranch !== null &&
+          commitList.currCommit !==
+            commitList.list[commitList.currBranch][0].sha
+        }
         onChange={(content, delta, source, editor) =>
           handleChange(editor.getHTML())
         }
