@@ -2,7 +2,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { RiCloseCircleFill } from 'react-icons/ri';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
-import { getGitHubCommitListAPI, postGitHubCommitAPI } from '../../apis/github';
+import {
+  getGitHubCommitListAPI,
+  postGitHubCommitAPI,
+  postGitHubNewBranchAPI,
+} from '../../apis/github';
 import {
   convertChangedFilesToTree,
   mergeChangedFilesToCachedFiles,
@@ -19,32 +23,48 @@ export default function RepoHeader() {
   const { setCommitList, setExplorer, setChangedFiles } = useRepoActions();
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [saveMessage, setSaveMessage] = useState(Date().toString());
+  const [saveMessage, setSaveMessage] = useState('');
   const [isSaveLoading, setIsSaveLoading] = useState(false);
 
-  const fetchCommitList = useCallback(async () => {
+  const [isNewBranchModalOpen, setIsNewBranchModalOpen] = useState(false);
+  const [newBranchName, setNewBranchName] = useState('');
+  const [isNewBranchLoading, setIsNewBranchLoading] = useState(false);
+
+  const fetchCommitList = useCallback(
+    async (branchname: string) => {
+      if (!reponame) {
+        return;
+      }
+      try {
+        const { data } = await getGitHubCommitListAPI({
+          reponame,
+        });
+        setCommitList({
+          currBranch: branchname,
+          currCommit: data[branchname][0].sha,
+          list: data,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [reponame, branchname]
+  );
+
+  const handleSave = useCallback(() => {
     if (!reponame || !branchname) {
       return;
     }
-    try {
-      const { data } = await getGitHubCommitListAPI({
-        reponame,
-      });
-      setCommitList({
-        currBranch: branchname,
-        currCommit: data[branchname][0].sha,
-        list: data,
-      });
-    } catch (err) {
-      console.log(err);
-    }
+    setSaveMessage(Date().toString());
+    setIsSaveModalOpen(true);
   }, [reponame, branchname]);
 
-  const handleSave = useCallback(async () => {
+  const handleNewBranch = useCallback(() => {
     if (!reponame || !branchname) {
       return;
     }
-    setIsSaveModalOpen(true);
+    setNewBranchName('');
+    setIsNewBranchModalOpen(true);
   }, [reponame, branchname]);
 
   const handleOnChangeBranch = useCallback(
@@ -85,7 +105,7 @@ export default function RepoHeader() {
     if (!reponame || !branchname) {
       return;
     }
-    fetchCommitList();
+    fetchCommitList(branchname);
   }, [reponame, branchname]);
 
   return (
@@ -125,7 +145,10 @@ export default function RepoHeader() {
                 ))}
             </select>
           </form>
-          <button className="repo-options__new-version" onClick={() => {}}>
+          <button
+            className="repo-options__new-version"
+            onClick={handleNewBranch}
+          >
             새 버전
           </button>
           <button
@@ -152,7 +175,6 @@ export default function RepoHeader() {
             if (!reponame || !branchname) {
               return;
             }
-            console.log(changedFiles);
             setIsSaveLoading(true);
             try {
               const data = await postGitHubCommitAPI({
@@ -161,7 +183,7 @@ export default function RepoHeader() {
                 tree: convertChangedFilesToTree(changedFiles),
                 message: saveMessage,
               });
-              await fetchCommitList();
+              await fetchCommitList(branchname);
               console.log(data);
             } catch (err) {
               console.log(err);
@@ -182,6 +204,50 @@ export default function RepoHeader() {
               <AiOutlineLoading3Quarters className="save__spinner" />
             ) : (
               '저장'
+            )}
+          </button>
+        </form>
+      </Modal>
+      <Modal
+        title="새 버전 생성"
+        isOpen={isNewBranchModalOpen}
+        onClose={() => setIsNewBranchModalOpen(false)}
+      >
+        <form
+          className="new-branch-form"
+          onSubmit={async e => {
+            e.preventDefault();
+            if (!reponame || !branchname || !commitList.currCommit) {
+              return;
+            }
+            setIsNewBranchLoading(true);
+            try {
+              const { data } = await postGitHubNewBranchAPI({
+                reponame,
+                branchname: newBranchName,
+                commitSHA: commitList.currCommit,
+              });
+              await fetchCommitList(newBranchName);
+              setExplorer(undefined);
+              navigate(`/github/${reponame}?ref=${newBranchName}`);
+              console.log(data);
+            } catch (err) {
+              console.log(err);
+            }
+            setIsNewBranchLoading(false);
+            setIsNewBranchModalOpen(false);
+          }}
+        >
+          <input
+            className="new-branch-form__input"
+            value={newBranchName}
+            onChange={e => setNewBranchName(e.target.value)}
+          />
+          <button className="new-branch-form__submit" type="submit">
+            {isNewBranchLoading ? (
+              <AiOutlineLoading3Quarters className="save__spinner" />
+            ) : (
+              '생성'
             )}
           </button>
         </form>

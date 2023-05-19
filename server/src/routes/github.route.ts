@@ -37,13 +37,13 @@ router.get(
  */
 router.get('/repos/:repo/contents/*', githubController.githubFileContent);
 
-// /**
-//  * 브랜치 생성
-//  */
-// router.post(
-//   '/repos/:repo/branchs/:branch',
-//   githubController.githubBranchCreate
-// );
+/**
+ * 브랜치 생성
+ */
+router.post(
+  '/repos/:repo/branchs/:branch',
+  githubController.githubBranchCreate
+);
 
 // /**
 //  * 브랜치 삭제

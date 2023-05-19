@@ -210,19 +210,31 @@ export const selectListCommits = async ({
     auth: token,
   });
 
-  const { data } = await octokit.repos.listCommits({
-    owner: username,
-    repo: reponame,
-    sha: commitSHA,
-  });
+  let page = 1;
 
-  const commits = data.map(commit => ({
+  let response: any = [];
+  let commits: any = [];
+
+  do {
+    response = await octokit.repos.listCommits({
+      owner: username,
+      repo: reponame,
+      sha: commitSHA,
+      per_page: 100,
+      page,
+    });
+
+    commits = commits.concat(response.data);
+    page++;
+  } while (response.data.length === 100);
+
+  const totalCommits = commits.map((commit: any) => ({
     sha: commit.sha,
     name: commit.commit.message,
-    parents: commit.parents.map(parent => ({
+    parents: commit.parents.map((parent: any) => ({
       sha: parent.sha,
     })),
   }));
 
-  return commits;
+  return totalCommits;
 };

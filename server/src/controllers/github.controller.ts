@@ -165,33 +165,35 @@ export const githubCommitList = async (req: Request, res: Response) => {
   }
 };
 
-// /**
-//  * 브랜치 생성
-//  */
-// export const githubBranchCreate = async (req: Request, res: Response) => {
-//   const { repo: reponame, branch: branchname } = req.params;
-//   const { ref: commitSHA } = req.query as { ref: string };
-//   const { username, token } = userService.findOneById(1);
+/**
+ * 브랜치 생성
+ */
+export const githubBranchCreate = async (req: Request, res: Response) => {
+  const { repo: reponame, branch: branchname } = req.params;
+  const { commitSHA } = req.body as { commitSHA: string };
+  const userId = req.session.userId as number;
+  const { username, personal_access_token: token } =
+    await userService.findOneById(userId);
 
-//   if (!username || !token)
-//     return res.status(404).send({ message: 'token error' });
+  if (!username || !token)
+    return res.status(404).send({ message: 'token error' });
 
-//   try {
-//     await githubService.addBranch({
-//       token,
-//       username,
-//       reponame,
-//       branchname,
-//       commitSHA,
-//     });
-//     return res.send({ message: 'success' });
-//   } catch (error) {
-//     if (error instanceof GithubError) {
-//       return res.status(422).send({ message: 'github api error' });
-//     }
-//     return res.status(500).send({ message: 'server error' });
-//   }
-// };
+  try {
+    await githubService.addBranch({
+      token,
+      username,
+      reponame,
+      branchname,
+      commitSHA,
+    });
+    return res.send({ message: 'success' });
+  } catch (error) {
+    if (error instanceof GithubError) {
+      return res.status(422).send({ message: 'github api error' });
+    }
+    return res.status(500).send({ message: 'server error' });
+  }
+};
 
 // /**
 //  * 브랜치 삭제

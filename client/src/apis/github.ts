@@ -104,3 +104,20 @@ export const getGitHubCommitListAPI = async ({
 
   return data;
 };
+
+export const postGitHubNewBranchAPI = async ({
+  reponame,
+  branchname,
+  commitSHA,
+}: {
+  reponame: string;
+  branchname: string;
+  commitSHA: string;
+}) => {
+  const { data } = await defaultAxios.post(
+    `/github/repos/${reponame}/branchs/${branchname}`,
+    { commitSHA }
+  );
+
+  return data;
+};
