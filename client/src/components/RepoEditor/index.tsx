@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { getGitHubFileAPI } from '../../apis/github';
 import { useRepoActions, useRepoValue } from '../../contexts/RepoContext';
 import RepoEditorSkeleton from './skeleton';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import './index.scss';
 
 export default function RepoEditor() {
@@ -47,25 +49,44 @@ export default function RepoEditor() {
   };
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    (content: string) => {
       if (
         selectedPath &&
         (selectedPath.original in cachedFiles ||
           selectedPath.current in changedFiles)
       ) {
-        const { value } = e.target;
         if (selectedPath.original in cachedFiles) {
-          if (cachedFiles[selectedPath.original].content !== value) {
-            modifyFile(selectedPath, value);
+          if (cachedFiles[selectedPath.original].content !== content) {
+            modifyFile(selectedPath, content);
           } else {
             removeChangedFile(selectedPath);
           }
         } else {
-          modifyFile(selectedPath, value);
+          modifyFile(selectedPath, content);
         }
       }
     },
     [selectedPath, cachedFiles, changedFiles]
+  );
+
+  const modules = useMemo(
+    () => ({
+      toolbar: {
+        // 툴바에 넣을 기능
+        container: [
+          ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+          [{ size: ['small', false, 'large', 'huge'] }, { color: [] }],
+          [
+            { list: 'ordered' },
+            { list: 'bullet' },
+            { indent: '-1' },
+            { indent: '+1' },
+            { align: [] },
+          ],
+        ],
+      },
+    }),
+    []
   );
 
   useEffect(() => {
@@ -80,15 +101,12 @@ export default function RepoEditor() {
 
   return (
     <div className="repo-editor-container">
-      <textarea
-        className="repo-editor__textarea"
-        wrap="off"
+      <ReactQuill
+        theme="snow"
+        modules={modules}
         value={content}
-        onChange={handleChange}
-        readOnly={
-          commitList.currBranch !== null &&
-          commitList.currCommit !==
-            commitList.list[commitList.currBranch][0].sha
+        onChange={(content, delta, source, editor) =>
+          handleChange(editor.getHTML())
         }
       />
     </div>
