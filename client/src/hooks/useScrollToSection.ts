@@ -16,20 +16,27 @@ export default function useScrollToSection() {
   const [scroll, setScroll] = useState(window.scrollY);
 
   // todo: 이 코드 이해가 잘 안된다.
-  const ref = useCallback((node: HTMLElement) => {
-    if (node !== null) {
-      sectionPos[node.id] = {
-        minHeight:
-          window.pageYOffset + node.getBoundingClientRect().top - HEADER_HEIGHT,
-        maxHeight:
-          window.pageYOffset +
-          node.getBoundingClientRect().top -
-          HEADER_HEIGHT +
-          node.getBoundingClientRect().height,
-      };
-      setSectionPos(sectionPos);
-    }
-  }, []);
+  const ref = useCallback(
+    (node: HTMLElement) => {
+      if (node !== null) {
+        sectionPos[node.id] = {
+          minHeight: Math.round(
+            window.pageYOffset +
+              node.getBoundingClientRect().top -
+              HEADER_HEIGHT
+          ),
+          maxHeight: Math.round(
+            window.pageYOffset +
+              node.getBoundingClientRect().top -
+              HEADER_HEIGHT +
+              node.getBoundingClientRect().height
+          ),
+        };
+        setSectionPos(sectionPos);
+      }
+    },
+    [section]
+  );
 
   const handleSectionScroll = useCallback(() => {
     setScroll(window.scrollY);

@@ -50,10 +50,10 @@
 .list__item--active::after {
   content: ' ';
   position: absolute;
-  bottom: -2px;
-  height: 2px;
+  bottom: 0;
+  height: 3px;
   width: calc(100% - 40px);
-  background-color: black;
+  background-color: #0d98ba;
 }
 
 .header__token-wrapper {

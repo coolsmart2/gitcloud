@@ -4,6 +4,21 @@ import useUserState from '../../hooks/useUserState';
 import { postTokenAPI } from '../../apis/user';
 import './index.scss';
 
+const NAV_LIST = [
+  {
+    label: '개요',
+    id: 'overview',
+  },
+  {
+    label: '토큰 발급',
+    id: 'get-token',
+  },
+  {
+    label: '토큰 등록',
+    id: 'register-token',
+  },
+];
+
 interface HeaderProps {
   section: string;
   setSection: (section: string) => void;
@@ -45,32 +60,22 @@ export default function Header({
         </div>
         <nav className="header__navbar navbar">
           <ul className="navbar__list list">
-            <li
-              className={
-                section === 'overview'
-                  ? 'list__item  list__item--active'
-                  : 'list__item'
-              }
-              onClick={() => {
-                navigate('/#overview');
-                setSection('overview');
-              }}
-            >
-              개요
-            </li>
-            <li
-              className={
-                section === 'how-to-use'
-                  ? 'list__item  list__item--active'
-                  : 'list__item'
-              }
-              onClick={() => {
-                navigate('/#how-to-use');
-                setSection('how-to-use');
-              }}
-            >
-              사용방법
-            </li>
+            {NAV_LIST.map(({ label, id }) => (
+              <li
+                key={id}
+                className={
+                  section === id
+                    ? 'list__item  list__item--active'
+                    : 'list__item'
+                }
+                onClick={() => {
+                  navigate(`/#${id}`);
+                  setSection(id);
+                }}
+              >
+                {label}
+              </li>
+            ))}
           </ul>
         </nav>
         {isLogin ? (
