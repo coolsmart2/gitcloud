@@ -10,6 +10,9 @@ import * as UsersOctokit from '../octokits/users.octokit';
 import { Commit } from '../types/commit.type';
 import axios from 'axios';
 import { FileRequest } from '../types/tree.type';
+import dotonv from 'dotenv';
+
+dotonv.config();
 
 /**
  * 레포지토리 생성
