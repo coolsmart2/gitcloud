@@ -22,7 +22,7 @@ export const userSelector = selectorFamily<UserResponse, string>({
 
 export const repoExplorerSelector = selectorFamily<
   TreeBlobResponse[],
-  { reponame: string; branchname?: string }
+  { reponame: string; branchname: string }
 >({
   key: 'repoExplorerSelector',
   get:
