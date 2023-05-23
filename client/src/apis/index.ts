@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosOptions = {
-  baseURL: 'http://127.0.0.1:8080',
+  baseURL: 'http://ec2-13-49-67-157.eu-north-1.compute.amazonaws.com/api',
   withCredentials: true,
 };
 
