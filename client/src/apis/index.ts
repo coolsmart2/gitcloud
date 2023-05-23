@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosOptions = {
-  baseURL: 'http://13.49.67.157:8080',
+  baseURL: 'http://127.0.0.1:8080',
   withCredentials: true,
 };
 
