@@ -19,7 +19,11 @@ dotonv.config();
 const app = express();
 
 const corsOptions = {
-  origin: ['http://127.0.0.1:4173', 'http://127.0.0.1:5173'],
+  origin: [
+    'http://ec2-13-49-67-157.eu-north-1.compute.amazonaws.com:4173',
+    'http://ec2-13-49-67-157.eu-north-1.compute.amazonaws.com:5173',
+    'http://ec2-13-49-67-157.eu-north-1.compute.amazonaws.com',
+  ],
   credentials: true,
 };
 
