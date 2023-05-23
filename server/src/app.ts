@@ -8,6 +8,12 @@ import cookieParser from 'cookie-parser';
 import githubRouter from './routes/github.route';
 import userRouter from './routes/user.route';
 
+declare module 'express-session' {
+  interface SessionData {
+    userId: number;
+  }
+}
+
 dotonv.config();
 
 const app = express();
