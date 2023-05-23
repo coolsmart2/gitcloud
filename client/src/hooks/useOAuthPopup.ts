@@ -4,7 +4,7 @@ import { postGitHubOAuthAPI } from '../apis/github';
 import { useNavigate } from 'react-router-dom';
 
 const GITHUB_OAUTH_URL = 'https://github.com/login/oauth/authorize';
-const GITHUB_OAUTH_CLIENT_ID = 'aa35721dd67709b79ce2';
+const GITHUB_OAUTH_CLIENT_ID = '73e4b0842f158c3a3261';
 const POPUP_WIDTH = 500;
 const POPUP_HEIGHT = 600;
 
